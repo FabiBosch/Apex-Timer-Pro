@@ -29,14 +29,42 @@ function isPrivateAddress(addr) {
   return o1 === 10 || (o1 === 172 && o2 >= 16 && o2 <= 31) || (o1 === 192 && o2 === 168) || o1 === 127;
 }
 
-function getLanIp() {
+// Namen typischer VPN-/virtueller Adapter, die zwar eine private IPv4-Adresse
+// haben, aber vom iPad im selben WLAN NICHT erreichbar sind (eigenes
+// Tunnel-/virtuelles Subnetz) — z.B. NordVPN/NordLynx, WireGuard, Hyper-V,
+// WSL, Docker. Solche Adapter dürfen als Sync-Adresse nie bevorzugt werden.
+var VIRTUAL_ADAPTER_PATTERN = /nordlynx|nordvpn|wireguard|openvpn|\bvpn\b|\btap\b|\btun\b|virtual|vethernet|hyper-v|docker|wsl|loopback|\bppp\b|zerotier|tailscale|vmware|virtualbox|hamachi|radmin|bluetooth/i;
+// Namen typischer physischer Adapter (WLAN/Ethernet) — werden bevorzugt.
+var PHYSICAL_ADAPTER_PATTERN = /wlan|wi-?fi|ethernet|\blan\b/i;
+
+// Liefert alle privaten, nicht-internen IPv4-Adressen, sortiert danach, wie
+// wahrscheinlich sie vom iPad im selben WLAN erreichbar sind: echte WLAN-/
+// Ethernet-Adapter zuerst, bekannte VPN-/virtuelle Adapter zuletzt.
+function listLanCandidates() {
   var ifaces = os.networkInterfaces();
+  var candidates = [];
   for (var name in ifaces) {
     for (var i = 0; i < ifaces[name].length; i++) {
       var iface = ifaces[name][i];
-      if (iface.family === 'IPv4' && !iface.internal) return iface.address;
+      if (iface.family === 'IPv4' && !iface.internal) {
+        candidates.push({ name: name, address: iface.address });
+      }
     }
   }
+  candidates.sort(function (a, b) {
+    return _adapterRank(a.name) - _adapterRank(b.name);
+  });
+  return candidates;
+}
+function _adapterRank(name) {
+  if (PHYSICAL_ADAPTER_PATTERN.test(name)) return 0;
+  if (VIRTUAL_ADAPTER_PATTERN.test(name)) return 2;
+  return 1;
+}
+
+function getLanIp() {
+  var candidates = listLanCandidates();
+  if (candidates.length) return candidates[0].address;
   return '127.0.0.1';
 }
 
@@ -165,11 +193,11 @@ function startLocalServer(win, preferredPort) {
         }
       });
       server.listen(port, '0.0.0.0', function () {
-        resolve({ port: port, ip: getLanIp(), server: server });
+        resolve({ port: port, ip: getLanIp(), candidates: listLanCandidates(), server: server });
       });
     }
     tryListen();
   });
 }
 
-module.exports = { startLocalServer: startLocalServer, getLanIp: getLanIp };
+module.exports = { startLocalServer: startLocalServer, getLanIp: getLanIp, listLanCandidates: listLanCandidates };
