@@ -4,6 +4,15 @@ const path = require('path');
 const fs = require('fs');
 const { startLocalServer } = require('./local-server');
 
+// Umgeht ERR_HTTP2_SERVER_REFUSED_STREAM beim Auto-Update-Check — tritt bei
+// manchen VPN-Tunneln/Netzwerkadaptern (z.B. NordLynx/WireGuard) auf, wenn
+// Chromiums HTTP/2-Verbindung zu GitHub durch den Tunnel läuft. Erzwingt
+// HTTP/1.1 für alle Electron-Netzwerkanfragen — muss vor app.whenReady()
+// gesetzt werden. Betrifft nur ausgehende Internet-Verbindungen (Updater),
+// nicht die lokale Sync (die läuft separat über Node's http/https-Module
+// in local-server.js).
+app.commandLine.appendSwitch('disable-http2');
+
 // Der Update-Check läuft komplett unsichtbar im Hintergrund (kein Fenster,
 // keine Konsole in der installierten App) — ohne Log lässt sich ein
 // Fehlschlag nicht diagnostizieren. Einfache Textdatei statt zusätzlicher
