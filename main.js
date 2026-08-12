@@ -1,11 +1,12 @@
 const { app, BrowserWindow } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 
 function createWindow() {
   const win = new BrowserWindow({
     width: 1280,
     height: 800,
-    autoHideMenuBar: true, // blendet die Standard-Menüleiste aus (File/Edit/View...)
+    autoHideMenuBar: true,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false
@@ -13,10 +14,14 @@ function createWindow() {
   });
 
   win.loadFile(path.join(__dirname, 'app', 'index.html'));
+  return win;
 }
 
 app.whenReady().then(() => {
   createWindow();
+
+  // Nach Updates suchen, sobald die App gestartet ist
+  autoUpdater.checkForUpdatesAndNotify();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

@@ -5,13 +5,17 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder"
+    "build": "electron-builder",
+    "publish": "electron-builder --publish always"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "electron": "^32.0.0",
     "electron-builder": "^25.0.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
   },
   "build": {
     "appId": "com.fabi.apextimerpro",
@@ -29,6 +33,12 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "FabiBosch",
+      "repo": "Apex-Timer-Pro",
+      "private": true
     }
   }
 }
