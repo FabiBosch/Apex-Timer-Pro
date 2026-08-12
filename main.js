@@ -13,7 +13,7 @@ function createWindow() {
     }
   });
 
-  win.loadFile(path.join(__dirname, 'app', 'index.html'));
+  win.loadFile(path.join(__dirname, 'docs', 'index.html'));
   return win;
 }
 
