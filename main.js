@@ -1,7 +1,25 @@
 const { app, BrowserWindow } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
+const fs = require('fs');
 const { startLocalServer } = require('./local-server');
+
+// Der Update-Check läuft komplett unsichtbar im Hintergrund (kein Fenster,
+// keine Konsole in der installierten App) — ohne Log lässt sich ein
+// Fehlschlag nicht diagnostizieren. Einfache Textdatei statt zusätzlicher
+// Logging-Dependency, reicht für dieses Ein-Nutzer-Projekt völlig aus.
+var updateLogPath = path.join(app.getPath('userData'), 'update-log.txt');
+function logUpdate(line) {
+  try {
+    fs.appendFileSync(updateLogPath, '[' + new Date().toISOString() + '] ' + line + '\n');
+  } catch (e) {}
+}
+autoUpdater.on('checking-for-update', () => logUpdate('Suche nach Updates… (aktuelle Version: ' + app.getVersion() + ')'));
+autoUpdater.on('update-available', (info) => logUpdate('Update verfügbar: ' + info.version));
+autoUpdater.on('update-not-available', (info) => logUpdate('Kein Update verfügbar, neueste Version: ' + info.version));
+autoUpdater.on('error', (err) => logUpdate('FEHLER: ' + (err && (err.stack || err.message) || err)));
+autoUpdater.on('download-progress', (p) => logUpdate('Download läuft: ' + Math.round(p.percent) + '%'));
+autoUpdater.on('update-downloaded', (info) => logUpdate('Update heruntergeladen (' + info.version + ') — wird beim nächsten Neustart installiert.'));
 
 function createWindow() {
   const win = new BrowserWindow({
