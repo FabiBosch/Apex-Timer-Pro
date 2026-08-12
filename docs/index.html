@@ -124,10 +124,10 @@ canvas.hc{display:none;}
    Sperre) folgt exakt demselben Muster wie die Messfenster — bewusst OHNE
    Rotation, da ein Kreis keine sinnvolle Ausrichtung hat. */
 .pit-btn-wrap{position:absolute;touch-action:none;z-index:12;}
-.pit-btn{width:100%;height:100%;border-radius:50%;background:rgba(33,150,243,.15);border:3px solid #2196f3;color:#2196f3;cursor:pointer;touch-action:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:28px;line-height:1;-webkit-tap-highlight-color:transparent;transition:background .15s,transform .1s;}
+.pit-btn{width:100%;height:100%;border-radius:50%;background:rgba(255,214,0,.15);border:3px solid var(--yellow);color:var(--yellow);cursor:pointer;touch-action:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:28px;line-height:1;-webkit-tap-highlight-color:transparent;transition:background .15s,transform .1s;}
 .pit-btn:active{transform:scale(.94);}
-.pit-btn.active{background:#2196f3;color:#000;animation:pitBtnPulse 1s ease-in-out infinite;}
-@keyframes pitBtnPulse{0%,100%{box-shadow:0 0 0 0 rgba(33,150,243,.5);}50%{box-shadow:0 0 0 10px rgba(33,150,243,0);}}
+.pit-btn.active{background:var(--yellow);color:#000;animation:pitBtnPulse 1s ease-in-out infinite;}
+@keyframes pitBtnPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,214,0,.5);}50%{box-shadow:0 0 0 10px rgba(255,214,0,0);}}
 .pit-btn-lbl{font-family:'Orbitron',monospace;font-size:22px;font-weight:900;letter-spacing:2px;}
 /* Boxenstopp-Pflicht aktiv: die normale Beschriftung (Symbol + "BOX") bleibt
    IMMER sichtbar — darunter erscheint zusätzlich die Anzahl noch
@@ -146,6 +146,9 @@ canvas.hc{display:none;}
    (offen/geschlossen-Symbol + Rot bei gesperrt), oben rechts am Button. */
 .pit-lock-handle{position:absolute;top:-10px;right:-10px;width:26px;height:26px;background:var(--accent);border:2px solid #fff;border-radius:50%;cursor:pointer;touch-action:none;z-index:14;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;user-select:none;}
 .pit-lock-handle.locked{background:var(--red);}
+/* Fahrer-Beschriftung links neben dem Vorhängeschloss — rein informativ,
+   daher pointer-events:none, damit sie weder Klicks noch Drag/Resize stört. */
+.pit-driver-label{position:absolute;top:-10px;right:40px;background:rgba(8,12,16,.9);border:2px solid #fff;border-radius:4px;padding:2px 7px;font-family:'Orbitron',monospace;font-size:11px;font-weight:900;letter-spacing:1px;color:var(--yellow);z-index:14;pointer-events:none;user-select:none;}
 .dz-dir{position:absolute;bottom:-24px;right:0;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;background:rgba(8,12,16,.95);border:1px solid var(--border);color:var(--accent);padding:4px 10px;cursor:pointer;white-space:nowrap;touch-action:none;min-height:28px;display:flex;align-items:center;gap:4px;z-index:3;}
 .dz-dir-arrow{font-size:16px;line-height:1;}
 
@@ -478,8 +481,8 @@ select.minput option{background:var(--bg2);}
       <button class="mode-btn" id="btnTimed" onclick="setSessionMode('timed')">ZEITRENNEN</button>
     </div>
     <div class="status-bar"><span class="sdot" id="sdot"></span><span id="stext">BEREIT</span></div>
-    <button class="hdr-btn" onclick="openModal('dataModal')">☰ DATEN</button>
     <button class="hdr-btn" onclick="openModal('recordsModal')">📋 AUFZEICHNUNGEN</button>
+    <button class="hdr-btn" onclick="openModal('dataModal')">☰ MENÜ</button>
     <button class="hdr-btn" onclick="openModal('settingsModal')">⚙ EINSTELLUNGEN</button>
   </div>
 </header>
@@ -520,6 +523,7 @@ select.minput option{background:var(--bg2);}
         <span class="pit-btn-required-num" id="pitBtnRequiredNum1" style="display:none;">0</span>
       </button>
       <div class="pit-handle-resize" data-pit="1" title="Größe ändern"></div>
+      <div class="pit-driver-label" data-pit="1">F1</div>
       <div class="pit-lock-handle" data-pit="1" title="Boxenstopp-Button sperren/entsperren">🔓</div>
     </div>
 
@@ -574,6 +578,7 @@ select.minput option{background:var(--bg2);}
         <span class="pit-btn-required-num" id="pitBtnRequiredNum2" style="display:none;">0</span>
       </button>
       <div class="pit-handle-resize" data-pit="2" title="Größe ändern"></div>
+      <div class="pit-driver-label" data-pit="2">F2</div>
       <div class="pit-lock-handle" data-pit="2" title="Boxenstopp-Button sperren/entsperren">🔓</div>
     </div>
 
@@ -1066,6 +1071,30 @@ select.minput option{background:var(--bg2);}
               <option value="thou" selected>Tausendstel</option>
             </select>
           </div>
+        </div>
+      </div>
+      <div class="msec" style="margin-top:14px;">
+        <div class="msec-title">LOKALE SYNCHRONISIERUNG (PC ↔ iPad, selbes WLAN)</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);margin-bottom:8px;line-height:1.5;">
+          Aufzeichnungen, Profile, Fotos und Instant-Replay-Videos werden automatisch im Hintergrund abgeglichen, solange beide Geräte im selben WLAN sind — ohne Cloud.
+        </div>
+        <div id="localSyncPcInfo" style="display:none;">
+          <div class="mgrid">
+            <div class="mitem full"><label class="mlabel">DIESE PC-ADRESSE AUFS iPAD EINGEBEN</label>
+              <input class="minput" id="localSyncPcAddr" readonly onclick="this.select()">
+            </div>
+          </div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);margin-top:4px;">
+            Auf dem iPad im Safari-Browser aufrufen, dann "Zum Home-Bildschirm" hinzufügen.
+          </div>
+        </div>
+        <div id="localSyncClientInput">
+          <div class="mgrid">
+            <div class="mitem full"><label class="mlabel">PC-ADRESSE (z.B. 192.168.1.23:4123)</label>
+              <input class="minput" id="localSyncAddrInput" placeholder="192.168.1.23:4123" oninput="_localSyncOnAddrChange()">
+            </div>
+          </div>
+          <div id="localSyncStatus" style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);margin-top:4px;">— nicht konfiguriert</div>
         </div>
       </div>
     </div>
@@ -1781,7 +1810,6 @@ select.minput option{background:var(--bg2);}
   </div>
   <div class="modal-footer" style="justify-content:space-between;">
     <div style="display:flex;gap:8px;">
-      <button class="btn-cancel" onclick="saveCurrentSessionToRecords()" style="border-color:var(--green);color:var(--green);">💾 AKTUELLE SESSION SPEICHERN</button>
       <button class="btn-cancel" onclick="exportAllFilteredSessions()" style="border-color:var(--accent);color:var(--accent);">📄 ALLE EXPORTIEREN (PDF)</button>
       <button class="btn-cancel" onclick="ttsSpeakSummary()" style="border-color:var(--yellow);color:var(--yellow);">🔊 ZUSAMMENFASSUNG</button>
     </div>
@@ -1843,6 +1871,18 @@ select.minput option{background:var(--bg2);}
     <div style="display:flex;gap:10px;justify-content:flex-end;">
       <button id="apexConfirmCancel" style="padding:8px 18px;background:var(--bg3);border:1px solid var(--border);color:var(--text-dim);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;">ABBRECHEN</button>
       <button id="apexConfirmOk" style="padding:8px 18px;background:rgba(255,23,68,.12);border:1px solid var(--red);color:var(--red);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;">LÖSCHEN</button>
+    </div>
+  </div>
+</div>
+
+<!-- Video-Speichern-Abfrage beim Sichern einer Session: zwei echte Aktionen
+     statt OK/Abbrechen, da apexConfirm kein onCancel-Callback unterstützt. -->
+<div id="apexVideoSaveOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.75);align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-top:3px solid var(--accent);padding:24px 28px;max-width:380px;width:90%;font-family:'Share Tech Mono',monospace;">
+    <div id="apexVideoSaveText" style="font-size:11px;color:var(--text);line-height:1.7;margin-bottom:18px;">Instant-Replay-Video(s) dieser Session ebenfalls speichern?</div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button id="apexVideoSaveDiscard" style="padding:8px 18px;background:rgba(255,23,68,.12);border:1px solid var(--red);color:var(--red);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;">NICHT SPEICHERN</button>
+      <button id="apexVideoSaveKeep" style="padding:8px 18px;background:rgba(0,229,255,.1);border:1px solid var(--accent);color:var(--accent);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;">VIDEO BEHALTEN</button>
     </div>
   </div>
 </div>
@@ -8083,6 +8123,7 @@ function exportVS() {
 function saveToLS(){
   try{
     _pitStopSyncToDb(); // aktuelle Boxenstopp-Einstellungen (cfg) vor dem Speichern übernehmen
+    db.updatedAt = Date.now(); // für Last-Write-Wins der Settings-Felder im lokalen Sync (_localSyncApply)
     var payload = { db: db, records: loadRecords() };
     localStorage.setItem('apexdb', JSON.stringify(db));
     // records already saved separately via saveRecords() — no change needed
@@ -8308,27 +8349,57 @@ function _apexShallowEqual(a, b, fields) {
   return fields.every(function(f){ return (a[f]||'') === (b[f]||''); });
 }
 
+// Array-Merge OHNE Nutzerentscheidung — für Datentypen, die laut Vorgabe nie
+// kollidieren können (Aufzeichnungen, Carrera-/Zeichnungs-Layouts): neueres
+// gewinnt per Zeitstempel. Top-Level, damit sie auch von _localSyncApply()
+// (automatischer Hintergrund-Sync) genutzt werden kann, nicht nur von
+// _apexMerge() (manueller Datei-Import).
+function mergeArrAuto(existArr, incArr, keyFn, tsFn) {
+  var map = {};
+  (existArr||[]).forEach(function(x){ map[keyFn(x)] = x; });
+  var added=0, updated=0;
+  (incArr||[]).forEach(function(x){
+    var k = keyFn(x);
+    if(!map[k]) { map[k]=x; added++; }
+    else {
+      var te = map[k][tsFn]||'', ti = x[tsFn]||'';
+      if(ti >= te && JSON.stringify(map[k])!==JSON.stringify(x)) { map[k]=x; updated++; }
+    }
+  });
+  return {arr:Object.values(map), added:added, updated:updated};
+}
+
+// Automatischer Merge für Fahrer/Autos/Strecken im lokalen Hintergrund-Sync
+// (_localSyncApply) — anders als collectEntityConflicts() weiter unten
+// (manueller Datei-Import, zeigt bei Konflikt einen Dialog) läuft dies ohne
+// jede Nutzerinteraktion: neuer Key wird übernommen, inhaltlich gleicher Key
+// bleibt unverändert, inhaltlich ABWEICHENDER Key wird NICHT überschrieben,
+// sondern der eingehende Eintrag unter angehängtem Namen zusätzlich
+// aufgenommen — kein Datenverlust, gelegentliche Duplikate statt stillem
+// Überschreiben.
+function _mergeEntityArrAuto(existArr, incArr, keyField, fields, sourceLabel) {
+  existArr = existArr || [];
+  var byKey = {};
+  existArr.forEach(function(x){ byKey[x[keyField]] = x; });
+  var added = 0, renamed = 0;
+  (incArr||[]).forEach(function(inc){
+    var k = inc[keyField];
+    var loc = byKey[k];
+    if(!loc) { existArr.push(inc); byKey[k] = inc; added++; return; }
+    if(_apexShallowEqual(loc, inc, fields)) return; // identisch, nichts zu tun
+    var base = k + ' (' + (sourceLabel||'Sync') + ')';
+    var newKey = base, n = 2;
+    while(byKey[newKey]) { newKey = base + ' ' + n; n++; }
+    var renamedEntry = JSON.parse(JSON.stringify(inc));
+    renamedEntry[keyField] = newKey;
+    existArr.push(renamedEntry); byKey[newKey] = renamedEntry;
+    renamed++;
+  });
+  return { arr: existArr, added: added, renamed: renamed };
+}
+
 function _apexMerge(incoming) {
   var report = [];
-
-  // ── Hilfsfunktionen ─────────────────────────────────────────────────────
-  // Array-Merge OHNE Nutzerentscheidung — für Datentypen, die laut Vorgabe
-  // nie kollidieren können (Aufzeichnungen, Carrera-/Zeichnungs-Layouts):
-  // neueres gewinnt per Zeitstempel, wie bisher.
-  function mergeArrAuto(existArr, incArr, keyFn, tsFn) {
-    var map = {};
-    (existArr||[]).forEach(function(x){ map[keyFn(x)] = x; });
-    var added=0, updated=0;
-    (incArr||[]).forEach(function(x){
-      var k = keyFn(x);
-      if(!map[k]) { map[k]=x; added++; }
-      else {
-        var te = map[k][tsFn]||'', ti = x[tsFn]||'';
-        if(ti >= te && JSON.stringify(map[k])!==JSON.stringify(x)) { map[k]=x; updated++; }
-      }
-    });
-    return {arr:Object.values(map), added:added, updated:updated};
-  }
 
   // ── Aufzeichnungen (Sessions) — können laut Definition nicht kollidieren,
   //    da jede Session ihre eigene, eindeutige ID hat ─────────────────────
@@ -8425,6 +8496,185 @@ function _apexMerge(incoming) {
   } else {
     apexAlert('✓ ZUSAMMENFÜHRUNG ABGESCHLOSSEN\n\n' + report.join('\n') + '\n\nKeine Konflikte, keine Daten wurden gelöscht.');
   }
+}
+
+// ═══════════════════════════════════════════════════════
+// LOKALE PC↔iPad-SYNC (automatischer Hintergrund-Sync im selben WLAN)
+// ═══════════════════════════════════════════════════════
+// Wendet ein vom jeweils anderen Gerät empfangenes Payload an (gleiche Form
+// wie _buildSavePayloadFull(), zusätzlich optional ein `clips`-Manifest) und
+// gibt den eigenen, jetzt aktuellen Stand (inkl. eigenem Clip-Manifest) als
+// Promise zurück. Läuft komplett ohne Dialoge, symmetrisch auf PC
+// (angestoßen vom lokalen HTTP-Server über IPC, siehe preload.js) UND auf
+// dem iPad (beim Verarbeiten der Server-Antwort) — _apexMerge() (manueller
+// Datei-Import mit Konflikt-Dialog) bleibt davon komplett unberührt.
+function _localSyncApply(incoming) {
+  incoming = incoming || {};
+  var changed = false;
+  var sourceLabel = (typeof window!=='undefined' && window.apexSyncBridge) ? 'iPad' : 'PC';
+
+  if(Array.isArray(incoming.records)) {
+    var re = mergeArrAuto(loadRecords(), incoming.records, function(r){return r.id;}, 'savedAt');
+    if(re.added || re.updated) { saveRecords(re.arr); changed = true; }
+  }
+  [['carreraLayouts','apexCarreraLayouts'], ['drawLayouts','apexDrawLayouts']].forEach(function(pair){
+    var key = pair[0], lsKey = pair[1];
+    if(!Array.isArray(incoming[key])) return;
+    var local = []; try{ local = JSON.parse(localStorage.getItem(lsKey)||'[]'); }catch(e){}
+    var r = mergeArrAuto(local, incoming[key], function(x){return x.name;}, 'saved');
+    if(r.added || r.updated) { localStorage.setItem(lsKey, JSON.stringify(r.arr)); changed = true; }
+  });
+
+  if(incoming.db) {
+    if(Array.isArray(incoming.db.drivers)) {
+      var rd = _mergeEntityArrAuto(db.drivers, incoming.db.drivers, 'name', ['name','short','team','nation'], sourceLabel);
+      db.drivers = rd.arr; if(rd.added || rd.renamed) changed = true;
+    }
+    if(Array.isArray(incoming.db.cars)) {
+      var rc = _mergeEntityArrAuto(db.cars, incoming.db.cars, 'model', ['model','num','class','color','notes'], sourceLabel);
+      db.cars = rc.arr; if(rc.added || rc.renamed) changed = true;
+    }
+    if(Array.isArray(incoming.db.tracks)) {
+      var rt = _mergeEntityArrAuto(db.tracks, incoming.db.tracks, 'name', ['name','location','length','type','direction'], sourceLabel);
+      db.tracks = rt.arr; if(rt.added || rt.renamed) changed = true;
+    }
+    if(incoming.db.assignments) {
+      ['p1Driver','p1Car','p2Driver','p2Car'].forEach(function(f){
+        if(!db.assignments[f] && incoming.db.assignments[f]) { db.assignments[f] = incoming.db.assignments[f]; changed = true; }
+      });
+    }
+    if((incoming.db.updatedAt||0) > (db.updatedAt||0)) {
+      ['sessionMeta','shortcuts','pitStopSettings'].forEach(function(f){
+        if(incoming.db[f]) db[f] = incoming.db[f];
+      });
+      changed = true;
+    }
+  }
+
+  if(incoming.photos) {
+    Object.keys(incoming.photos).forEach(function(k){
+      if(localStorage.getItem(k) !== incoming.photos[k]) {
+        try{ localStorage.setItem(k, incoming.photos[k]); changed = true; }catch(e){}
+      }
+    });
+  }
+
+  if(changed) {
+    saveToLS();
+    if(typeof renderTables==='function') renderTables();
+    if(typeof updateDriverPreview==='function') updateDriverPreview();
+    if(typeof updateCarPreview==='function') updateCarPreview();
+  }
+
+  return _replayListClips().then(function(clips){
+    var payload = JSON.parse(_buildSavePayloadFull());
+    payload.clips = clips;
+    return payload;
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// LOKALE SYNC — iPad-/Browser-seitiger Poll-Loop. Läuft NUR, wenn kein
+// apexSyncBridge existiert (= nicht die PC/Electron-Instanz selbst — die ist
+// reiner Server und antwortet nur auf eingehende Anfragen) und eine
+// PC-Adresse konfiguriert ist. Ein Sync-Durchlauf ist ein einziger
+// POST /api/sync-Austausch (beide Seiten schicken UND empfangen ihren
+// Stand in einem Request), gefolgt vom Abgleich fehlender Video-Clips.
+// ═══════════════════════════════════════════════════════
+var _localSyncInFlight = false;
+
+function _localSyncGetAddr() {
+  return (localStorage.getItem('apexLocalSyncAddr')||'').trim();
+}
+
+function _localSyncStatus(msg, color) {
+  var el = document.getElementById('localSyncStatus');
+  if(el) { el.textContent = msg; el.style.color = color || 'var(--text-dim)'; }
+}
+
+function _localSyncOnAddrChange() {
+  var input = document.getElementById('localSyncAddrInput');
+  if(!input) return;
+  localStorage.setItem('apexLocalSyncAddr', input.value.trim());
+  _localSyncStatus('— gespeichert, nächster Sync in Kürze', 'var(--text-dim)');
+  _localSyncTick();
+}
+
+// PC-Variante (window.__apexServerInfo per IPC gesetzt) zeigt die eigene
+// Adresse zum Ablesen; Browser/iPad-Variante zeigt das Eingabefeld.
+function _localSyncRenderSettingsUI() {
+  var pcInfo = document.getElementById('localSyncPcInfo');
+  var clientInput = document.getElementById('localSyncClientInput');
+  var addrInput = document.getElementById('localSyncAddrInput');
+  if(addrInput && !addrInput.value) addrInput.value = _localSyncGetAddr();
+  if(window.__apexServerInfo) {
+    if(pcInfo) pcInfo.style.display = 'block';
+    if(clientInput) clientInput.style.display = 'none';
+    var pcAddr = document.getElementById('localSyncPcAddr');
+    if(pcAddr) pcAddr.value = 'http://'+window.__apexServerInfo.ip+':'+window.__apexServerInfo.port;
+  }
+}
+
+function _localSyncSyncClips(url, remoteManifest, localManifest) {
+  remoteManifest = remoteManifest || {}; localManifest = localManifest || {};
+  var toFetch = Object.keys(remoteManifest).filter(function(id){ return !localManifest[id]; });
+  var toPush  = Object.keys(localManifest).filter(function(id){ return !remoteManifest[id]; });
+  var fetches = toFetch.map(function(id){
+    return fetch(url+'/api/clip/'+encodeURIComponent(id)).then(function(r){
+      if(!r.ok) return;
+      return r.blob().then(function(blob){ return _replaySaveClip(id, blob, {}); });
+    }).catch(function(){});
+  });
+  var pushes = toPush.map(function(id){
+    return _replayLoadClip(id).then(function(rec){
+      if(!rec) return;
+      return fetch(url+'/api/clip/'+encodeURIComponent(id), {
+        method:'POST',
+        headers:{'Content-Type': rec.blob.type||'video/webm', 'X-Apex-Meta': JSON.stringify(rec.meta||{})},
+        body: rec.blob
+      });
+    }).catch(function(){});
+  });
+  return Promise.all(fetches.concat(pushes));
+}
+
+function _localSyncTick() {
+  if (window.apexSyncBridge) return; // PC selbst pollt nicht, nur passiver Server
+  var addr = _localSyncGetAddr();
+  if (!addr || _localSyncInFlight) return;
+  var url = (addr.indexOf('http')===0 ? addr : 'http://'+addr).replace(/\/$/,'');
+  _localSyncInFlight = true;
+  _localSyncStatus('SYNCHRONISIERE…', 'var(--yellow)');
+
+  var localClipManifest = null;
+  Promise.all([
+    Promise.resolve(_buildSavePayloadFull()).then(JSON.parse),
+    _replayListClips()
+  ]).then(function(res){
+    var outgoing = res[0]; outgoing.clips = res[1]; localClipManifest = res[1];
+    var ctrl = (typeof AbortController!=='undefined') ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 5000) : null;
+    return fetch(url+'/api/sync', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(outgoing),
+      signal: ctrl ? ctrl.signal : undefined
+    }).then(function(r){
+      if(timer) clearTimeout(timer);
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    }).then(function(incoming){
+      return Promise.resolve(_localSyncApply(incoming)).then(function(){
+        return _localSyncSyncClips(url, incoming.clips, localClipManifest);
+      });
+    });
+  }).then(function(){
+    _localSyncStatus('VERBUNDEN — zuletzt: '+new Date().toLocaleTimeString(), 'var(--green)');
+  }).catch(function(e){
+    _localSyncStatus('NICHT ERREICHBAR ('+((e && e.message) || e)+')', 'var(--red)');
+  }).finally(function(){
+    _localSyncInFlight = false;
+  });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -11126,20 +11376,25 @@ async function saveCurrentSessionToRecords() {
   // (anders als vorher, wo diese Funktion komplett synchron lief) ein
   // kurzes Zeitfenster, in dem ein zweiter Aufruf mit denselben (noch
   // nicht gespeicherten) Daten starten und den ersten überschreiben könnte.
+  // WICHTIG: wird jetzt auch von der Video-Speichern-Abfrage (unten) offen
+  // gehalten, solange der Nutzer die Ja/Nein-Frage noch nicht beantwortet
+  // hat — das Zurücksetzen passiert in beiden Zweigen von _finishSaveRecords.
   if(_savingSessionInProgress) return;
   _savingSessionInProgress = true;
+  var saved = 0;
+  var alreadySaved = 0;
+  var players = appMode==='vs' ? [1,2] : [1];
   try {
-    var saved = 0;
-    var alreadySaved = 0;
-    var players = appMode==='vs' ? [1,2] : [1];
     // Falls für die letzte(n) Runde(n) gerade noch ein Replay-Clip im
     // Hintergrund fertiggestellt wird, kurz abwarten — sonst fehlt in der
     // gerade gespeicherten Aufzeichnung die Referenz-ID zum Clip, obwohl
     // dieser kurz danach trotzdem (verwaist) in IndexedDB landet.
     await Promise.all(players.map(function(p){ return _replayAwaitPending(p); }));
-    var records = loadRecords();
-    var savedTrack = '';
-    var existingFps = new Set(records.map(function(r){ return r.fp||''; }).filter(Boolean));
+  } catch(e) { _savingSessionInProgress = false; return; }
+  var records = loadRecords();
+  var savedTrack = '';
+  var newRecs = [];
+  var existingFps = new Set(records.map(function(r){ return r.fp||''; }).filter(Boolean));
 
   players.forEach(function(p) {
     var rec = buildSessionRecord(p);
@@ -11154,6 +11409,7 @@ async function saveCurrentSessionToRecords() {
       return;
     }
     records.unshift(rec);
+    newRecs.push(rec);
     existingFps.add(rec.fp);
     savedTrack = rec.track;
     saved++;
@@ -11161,10 +11417,32 @@ async function saveCurrentSessionToRecords() {
 
   if(alreadySaved > 0 && saved === 0) {
     apexAlert('Session bereits gespeichert.');
+    _savingSessionInProgress = false;
     return;
   }
 
-  if(saved > 0) {
+  if(saved === 0) { _savingSessionInProgress = false; return; }
+
+  var recsWithClips = newRecs.filter(function(r){ return r.replayClips && Object.keys(r.replayClips).length; });
+  if(recsWithClips.length) {
+    apexVideoSavePrompt(
+      function onKeep() { _finishSaveRecords(records, savedTrack); },
+      function onDiscard() {
+        var ids = [];
+        recsWithClips.forEach(function(r){ ids.push.apply(ids, Object.values(r.replayClips)); delete r.replayClips; });
+        _replayDeleteClips(ids).then(function(){ _finishSaveRecords(records, savedTrack); });
+      }
+    );
+  } else {
+    _finishSaveRecords(records, savedTrack);
+  }
+}
+
+// Tail-Teil von saveCurrentSessionToRecords() — ausgelagert, damit die
+// Video-Speichern-Abfrage (callback-basiert, siehe oben) dazwischen laufen
+// kann, bevor tatsächlich gespeichert wird.
+function _finishSaveRecords(records, savedTrack) {
+  try {
     saveRecords(records);
     if(savedTrack) _recActiveTrack = savedTrack;
     // iPad/Edge: restart camera loop before opening modal
@@ -11184,7 +11462,9 @@ async function saveCurrentSessionToRecords() {
     } else {
       openModal('recordsModal');
     }
-  }
+    // Neue Session sofort synchronisieren statt bis zum nächsten Poll-Tick
+    // zu warten (auf dem PC selbst wirkungslos, siehe _localSyncTick).
+    if(typeof _localSyncTick==='function') _localSyncTick();
   } finally {
     _savingSessionInProgress = false;
   }
@@ -11769,7 +12049,20 @@ function renderShortcutsTable() {
       + '<td><span class="shortcut-key-badge" id="shortcutKey_'+action+'">'+_shortcutCodeLabel(entry.code, entry.ctrl)+'</span></td>'
       + '<td><button class="tbl-btn" onclick="_shortcutStartCapture(\''+action+'\')" id="shortcutBtn_'+action+'">ÄNDERN</button></td>'
       + '</tr>';
-  }).join('');
+  }).join('')
+  // Fest codierter, nicht änderbarer Shortcut — läuft im Electron-Main-
+  // Prozess (main.js, before-input-event) statt über db.shortcuts, daher
+  // hier nur zur Dokumentation gelistet, ohne ÄNDERN-Button.
+  + '<tr>'
+    + '<td style="font-size:10px;color:var(--text-dim);">Vollbild ohne Fensteransicht</td>'
+    + '<td><span class="shortcut-key-badge">F11</span></td>'
+    + '<td style="font-size:8px;color:var(--text-dim);text-align:center;">FEST</td>'
+  + '</tr>'
+  + '<tr>'
+    + '<td style="font-size:10px;color:var(--text-dim);">Cast-Fenster: Vollbild umschalten</td>'
+    + '<td><span class="shortcut-key-badge">F12</span></td>'
+    + '<td style="font-size:8px;color:var(--text-dim);text-align:center;">FEST</td>'
+  + '</tr>';
 }
 
 // Startet die Tastenaufnahme für eine Aktion: der nächste Tastendruck wird
@@ -11848,7 +12141,7 @@ document.addEventListener('keydown',e=>{
   if(window._shortcutCaptureActive) return;
   // Leertaste blockieren wenn ein Overlay oder Modal offen ist
   if(_shortcutMatch(e,'startOrLap')) {
-    var overlayOpen = ['apexConfirmOverlay','apexPromptOverlay','apexAlertOverlay'].some(function(id){
+    var overlayOpen = ['apexConfirmOverlay','apexPromptOverlay','apexAlertOverlay','apexVideoSaveOverlay'].some(function(id){
       var el=document.getElementById(id); return el && el.style.display!=='none' && el.style.display!=='';
     });
     var modalOpen = document.querySelector('.modal-backdrop.open');
@@ -11980,6 +12273,22 @@ function apexPrompt(msg, defaultVal, onOk) {
   };
   can.onclick = function(e){ e.stopPropagation(); cleanup(); };
   ov.onclick = function(e){ if(e.target===ov) cleanup(); };
+}
+
+// Video-Speichern-Abfrage beim Sichern einer Session — im Unterschied zu
+// apexConfirm() braucht hier JEDE Antwort (nicht nur "OK") eine echte
+// Aktion (Behalten vs. Löschen), daher kein Wiederverwenden von apexConfirm.
+// Ein Klick außerhalb/Escape schließt bewusst NICHT (keine versehentliche
+// Löschung durch Wegklicken) — es muss aktiv eine der beiden Optionen gewählt werden.
+function apexVideoSavePrompt(onKeep, onDiscard) {
+  var ov = document.getElementById('apexVideoSaveOverlay');
+  if(!ov){ onKeep(); return; }
+  ov.style.display = 'flex';
+  var keep = document.getElementById('apexVideoSaveKeep');
+  var discard = document.getElementById('apexVideoSaveDiscard');
+  function cleanup(){ ov.style.display='none'; keep.onclick=null; discard.onclick=null; }
+  keep.onclick = function(e){ e.stopPropagation(); cleanup(); onKeep(); };
+  discard.onclick = function(e){ e.stopPropagation(); cleanup(); onDiscard(); };
 }
 
 // ── Sortierbare Tabellen ──
@@ -12480,6 +12789,25 @@ function _replayDeleteClips(ids) {
   });
 }
 
+// Manifest {id: savedAt} ALLER lokal vorhandenen Clips, ohne die Blobs selbst
+// zu laden — für den Abgleich beim lokalen Sync (_localSyncTick), um zu
+// erkennen, welche Clips vom jeweils anderen Gerät noch fehlen.
+function _replayListClips() {
+  return _replayOpenDB().then(function(db){
+    return new Promise(function(resolve){
+      var manifest = {};
+      var tx = db.transaction(REPLAY_STORE, 'readonly');
+      var req = tx.objectStore(REPLAY_STORE).openCursor();
+      req.onsuccess = function(e){
+        var cursor = e.target.result;
+        if(cursor) { manifest[cursor.value.id] = cursor.value.savedAt||0; cursor.continue(); }
+      };
+      tx.oncomplete = function(){ resolve(manifest); };
+      tx.onerror = function(){ resolve(manifest); };
+    });
+  });
+}
+
 // Startet die Segment-Aufnahme für Spieler p (Kamera-Stream muss bereits
 // verbunden sein). Statt EINES endlos laufenden MediaRecorders (dessen
 // interne Zeitstempel über die ganze Sitzung fortlaufen und sich daher
@@ -12720,6 +13048,41 @@ function setReplaySpeed(speed) {
 // INIT
 // ═══════════════════════════════════════════════════════
 loadFromLS();
+
+// ═══════════════════════════════════════════════════════
+// LOKALE SYNC — Bridge-Registrierung. window.apexSyncBridge existiert nur im
+// Electron/PC-Fenster (via preload.js); im iPad-/Browser-Kontext ist es
+// undefined — das dient zugleich als Unterscheidung PC-Host vs. Client.
+// ═══════════════════════════════════════════════════════
+if (window.apexSyncBridge) {
+  window.apexSyncBridge.onRequest('apex:apply-sync', function(incoming) {
+    return _localSyncApply(incoming);
+  });
+  window.apexSyncBridge.onRequest('apex:get-clip', function(msg) {
+    return _replayLoadClip(msg.id).then(function(rec) {
+      if (!rec) return null;
+      return rec.blob.arrayBuffer().then(function(buffer) {
+        return { buffer: buffer, mime: rec.blob.type || 'video/webm' };
+      });
+    });
+  });
+  window.apexSyncBridge.onRequest('apex:save-clip', function(msg) {
+    var blob = new Blob([msg.buffer], { type: msg.mime || 'video/webm' });
+    return _replaySaveClip(msg.id, blob, msg.meta || {});
+  });
+  window.apexSyncBridge.onServerInfo(function(info) {
+    window.__apexServerInfo = info; // {ip, port} — von der Settings-UI gelesen
+    if (typeof _localSyncRenderSettingsUI === 'function') _localSyncRenderSettingsUI();
+  });
+}
+// Poll-Loop-Trigger (auf dem PC selbst wirkungslos, siehe _localSyncTick).
+setInterval(_localSyncTick, 15000);
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'visible') _localSyncTick();
+});
+setTimeout(_localSyncTick, 2000); // kurz nach dem Start einmal sofort versuchen
+_localSyncRenderSettingsUI();
+
 renderTables();
 setSessionMode('training');
 _restoreSessionMetaUI();
