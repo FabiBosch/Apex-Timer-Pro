@@ -1,6 +1,6 @@
 {
   "name": "apextimerpro",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Apex Timer Pro - Carrera-Bahn Zeitmessung",
   "main": "main.js",
   "scripts": {
@@ -39,8 +39,7 @@
     "publish": {
       "provider": "github",
       "owner": "FabiBosch",
-      "repo": "Apex-Timer-Pro",
-      "private": true
+      "repo": "Apex-Timer-Pro"
     }
   }
 }
