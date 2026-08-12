@@ -8,6 +8,7 @@ function createWindow() {
     width: 1280,
     height: 800,
     autoHideMenuBar: true,
+    icon: path.join(__dirname, 'docs', 'icon-512.png'),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -66,10 +67,11 @@ function createWindow() {
 
   // Lokaler Sync-Server fürs iPad im selben WLAN — läuft unabhängig vom
   // GitHub-Pages/Dropbox-Pfad, siehe local-server.js.
-  startLocalServer(win).then(({ ip, port, candidates }) => {
-    win.webContents.send('apex:server-info', { ip, port, candidates });
+  startLocalServer(win).then((info) => {
+    var payload = { ip: info.ip, port: info.port, candidates: info.candidates, protocol: info.protocol, certPort: info.certPort, caReinstallNeeded: info.caReinstallNeeded };
+    win.webContents.send('apex:server-info', payload);
     win.webContents.once('did-finish-load', () => {
-      win.webContents.send('apex:server-info', { ip, port, candidates });
+      win.webContents.send('apex:server-info', payload);
     });
   }).catch((err) => {
     console.error('Lokaler Sync-Server konnte nicht gestartet werden:', err);

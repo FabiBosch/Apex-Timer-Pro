@@ -20,7 +20,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apex Timer Pro V1.0.4 (build 20260713-2034)</title>
+<title>Apex Timer Pro V1.0.5 (build 20260713-2034)</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap');
 :root{
@@ -467,7 +467,7 @@ select.minput option{background:var(--bg2);}
 
 <!-- ═══════════════ HEADER ═══════════════ -->
 <header>
-  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.0.4</span></div>
+  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.0.5</span></div>
   <div class="hdr-center" style="display:flex;gap:8px;align-items:center;">
 
     <button class="app-mode-btn active" id="amStd" onclick="setAppMode('std')">STANDARD</button>
@@ -1091,6 +1091,23 @@ select.minput option{background:var(--bg2);}
             Auf dem iPad im Safari-Browser aufrufen, dann "Zum Home-Bildschirm" hinzufügen.
           </div>
           <div id="localSyncPcAltAddrs" style="display:none;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);margin-top:6px;line-height:1.6;"></div>
+          <div id="localSyncCaWarning" style="display:none;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--yellow);background:rgba(255,214,0,.08);border:1px solid rgba(255,214,0,.3);padding:6px 8px;margin-top:8px;line-height:1.6;">
+            ⚠ Neues Zertifikat erzeugt — bitte auf dem iPad EINMALIG neu installieren (siehe unten), sonst funktionieren Kamera und Sync nicht.
+          </div>
+          <div class="mgrid" style="margin-top:10px;">
+            <div class="mitem full"><label class="mlabel">ZERTIFIKAT AUFS iPAD INSTALLIEREN (einmalig, für Kamera + Sync nötig)</label>
+              <div style="display:flex;gap:6px;">
+                <input class="minput" id="localSyncCertAddr" readonly onclick="this.select()" style="flex:1;">
+                <button class="tbl-btn" onclick="_localSyncCopyCertAddr()" id="localSyncCopyCertBtn" style="white-space:nowrap;">📋 KOPIEREN</button>
+              </div>
+            </div>
+          </div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--text-dim);margin-top:4px;line-height:1.7;">
+            Auf dem iPad in Safari (nicht als Homescreen-Icon) öffnen → "Profil installieren" antippen und bestätigen → danach:
+            Einstellungen → Allgemein → VPN &amp; Geräteverwaltung → Profil installieren → nochmal bestätigen → danach:
+            Einstellungen → Allgemein → Info → Zertifikatsvertrauenseinstellungen → für "Apex Timer Pro" aktivieren.
+            Erst danach die PC-Adresse oben (https://…) aufrufen und als Homescreen-Icon speichern.
+          </div>
         </div>
         <div id="localSyncClientInput">
           <div class="mgrid">
@@ -8059,13 +8076,13 @@ function exportData(p) {
   var suggestedName=parts.join(' - ')+'.txt';
   // Filename dialog
   var NL='\n', SEP='='.repeat(54);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.4 - RUNDENZEITEN'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.0.5 - RUNDENZEITEN'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   STANDARD / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
   if(meta.name) txt+='  Session: '+meta.name+NL;
   if(meta.weather) txt+='  Wetter:  '+meta.weather+NL;
-  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.4'+NL+SEP+NL;
+  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.5'+NL+SEP+NL;
   _exportPendingData={type:'single',txt:txt,suggestedName:suggestedName};
   _openExportModal(suggestedName);
 }
@@ -8090,7 +8107,7 @@ function exportVS() {
     else winner='GLEICHSTAND';
   }
   var NL='\n', SEP='='.repeat(colW*2+5);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.4 - VS ERGEBNISSE'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.0.5 - VS ERGEBNISSE'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   VS / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
@@ -8103,7 +8120,7 @@ function exportVS() {
     var c2=l2&&i2<l2.length?l2[i2]:'';
     txt+=c1+' | '+c2+NL;
   }
-  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.4'+NL+SEP+NL;
+  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.5'+NL+SEP+NL;
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
   var _s1=ps[1],_s2=ps[2]; var _t1=_s1.totalMs+_s1.penalty,_t2=_s2.totalMs+_s2.penalty; var _l1=_s1.laps.length,_l2=_s2.laps.length;
@@ -8630,29 +8647,56 @@ function _localSyncCopyPcAddr() {
   }
 }
 
+function _localSyncCopyCertAddr() {
+  var input = document.getElementById('localSyncCertAddr');
+  var btn = document.getElementById('localSyncCopyCertBtn');
+  if(!input || !input.value) return;
+  function done(ok) {
+    if(!btn) return;
+    var prev = btn.textContent;
+    btn.textContent = ok ? '✓ KOPIERT' : '✕ FEHLER';
+    setTimeout(function(){ btn.textContent = prev; }, 1500);
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(input.value).then(function(){ done(true); }).catch(function(){ done(false); });
+  } else {
+    try { input.select(); document.execCommand('copy'); done(true); } catch(e) { done(false); }
+  }
+}
+
 // PC-Variante (window.__apexServerInfo per IPC gesetzt) zeigt die eigene
-// Adresse zum Ablesen; Browser/iPad-Variante zeigt das Eingabefeld.
+// Adresse zum Ablesen; Browser/iPad-Variante zeigt das Eingabefeld. Die
+// App-Adresse ist jetzt https:// (Kamera-Zugriff erfordert einen sicheren
+// Kontext), das Zertifikat für den einmaligen iPad-Trust wird separat über
+// den Klartext-certPort ausgeliefert (lässt sich sonst vor dem Vertrauen
+// nicht laden), siehe local-server.js/cert-manager.js.
 function _localSyncRenderSettingsUI() {
   var pcInfo = document.getElementById('localSyncPcInfo');
   var clientInput = document.getElementById('localSyncClientInput');
   var addrInput = document.getElementById('localSyncAddrInput');
   if(addrInput && !addrInput.value) addrInput.value = _localSyncGetAddr();
   if(window.__apexServerInfo) {
+    var info = window.__apexServerInfo;
+    var protocol = info.protocol || 'https';
     if(pcInfo) pcInfo.style.display = 'block';
     if(clientInput) clientInput.style.display = 'none';
     var pcAddr = document.getElementById('localSyncPcAddr');
-    if(pcAddr) pcAddr.value = 'http://'+window.__apexServerInfo.ip+':'+window.__apexServerInfo.port;
+    if(pcAddr) pcAddr.value = protocol+'://'+info.ip+':'+info.port;
+    var certAddr = document.getElementById('localSyncCertAddr');
+    if(certAddr && info.certPort) certAddr.value = 'http://'+info.ip+':'+info.certPort+'/apex-cert.mobileconfig';
+    var warn = document.getElementById('localSyncCaWarning');
+    if(warn) warn.style.display = info.caReinstallNeeded ? 'block' : 'none';
     // Mehrere Netzwerkkarten (z.B. zusätzlich VPN) erkannt: Alternativen
     // anzeigen, falls die automatisch gewählte Adresse doch die falsche
     // Netzwerkkarte trifft (siehe listLanCandidates() in local-server.js).
     var alt = document.getElementById('localSyncPcAltAddrs');
-    var candidates = window.__apexServerInfo.candidates || [];
+    var candidates = info.candidates || [];
     if(alt) {
       if(candidates.length > 1) {
         alt.style.display = 'block';
         alt.innerHTML = 'Andere gefundene Netzwerkkarten (falls obige Adresse nicht funktioniert):<br>'
           + candidates.map(function(c){
-              return '&nbsp;&nbsp;• http://'+c.address+':'+window.__apexServerInfo.port+' <span style="opacity:.6;">('+c.name+')</span>';
+              return '&nbsp;&nbsp;• '+protocol+'://'+c.address+':'+info.port+' <span style="opacity:.6;">('+c.name+')</span>';
             }).join('<br>');
       } else {
         alt.style.display = 'none';
@@ -8688,7 +8732,7 @@ function _localSyncTick() {
   if (window.apexSyncBridge) return; // PC selbst pollt nicht, nur passiver Server
   var addr = _localSyncGetAddr();
   if (!addr || _localSyncInFlight) return;
-  var url = (addr.indexOf('http')===0 ? addr : 'http://'+addr).replace(/\/$/,'');
+  var url = (addr.indexOf('http')===0 ? addr : 'https://'+addr).replace(/\/$/,'');
   _localSyncInFlight = true;
   _localSyncStatus('SYNCHRONISIERE…', 'var(--yellow)');
 
