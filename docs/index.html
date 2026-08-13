@@ -20,7 +20,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apex Timer Pro V1.0.8 (build 20260713-2034)</title>
+<title>Apex Timer Pro V1.0.9 (build 20260713-2034)</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap');
 :root{
@@ -215,8 +215,8 @@ canvas.hc{display:none;}
    1. Vorderseite zeigt die Ziel-Mindeststandzeit (grün) — direkt nach
       Boxenstopp-Start, keine Drehung.
    2. X Sekunden vor Ablauf der Mindeststandzeit (X = cfg.pitStopGearWarnSec)
-      dreht sich das Schild 180° und zeigt auf der Rückseite "1st GEAR"
-      (gelb) — Vorwarnung zum Losfahren.
+      dreht sich das Schild 180° und zeigt auf der Rückseite "1st Gear"
+      (weiterhin grün, keine Farbänderung) — Vorwarnung zum Losfahren.
    3. Bei Ablauf der Mindeststandzeit dreht sich das Schild weitere 180°
       (insgesamt 360°, wieder vorderseitig sichtbar) und zeigt "GO" (grün) —
       die Vorderseite tauscht dafür ihren Inhalt (Zielzeit → GO), was durch
@@ -229,7 +229,7 @@ canvas.hc{display:none;}
 .pit-lollipop-disc{position:relative;width:168px;height:168px;border-radius:50%;flex-shrink:0;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,.1,.2,1);box-shadow:0 5px 16px rgba(0,0,0,.6);}
 .pit-lollipop-disc.pit-stage-gear{transform:rotateY(180deg);}
 .pit-lollipop-disc.pit-stage-go{transform:rotateY(360deg);}
-.pit-lollipop-stick{width:64px;height:11px;flex-shrink:0;margin-left:-3px;background:linear-gradient(90deg,#3a3a3a,#1a1a1a);border-radius:0 4px 4px 0;box-shadow:2px 2px 4px rgba(0,0,0,.5);}
+.pit-lollipop-stick{width:64px;height:11px;flex-shrink:0;margin-left:-10px;background:linear-gradient(90deg,#3a3a3a,#1a1a1a);border-radius:0 4px 4px 0;box-shadow:2px 2px 4px rgba(0,0,0,.5);}
 .pit-lollipop-face{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;border:5px solid var(--green);background:radial-gradient(circle at 35% 30%,#1a2410,#0a0f06);transition:border-color .25s;}
 .pit-lollipop-lbl{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--text-dim);text-align:center;padding:0 8px;line-height:1.2;}
 .pit-lollipop-val{font-family:'Orbitron',monospace;font-size:32px;font-weight:900;color:var(--green);transition:color .25s;}
@@ -237,7 +237,7 @@ canvas.hc{display:none;}
 .pit-lollipop-front.show-go{border-color:var(--green);}
 .pit-lollipop-front.show-go .pit-lollipop-lbl,.pit-lollipop-front.show-go .pit-lollipop-val{display:none;}
 .pit-lollipop-front.show-go .pit-lollipop-go{display:block;}
-.pit-lollipop-back{transform:rotateY(180deg);border-color:var(--yellow);background:radial-gradient(circle at 35% 30%,#2a2410,#0f0d06);font-family:'Orbitron',monospace;font-size:34px;font-weight:900;color:var(--yellow);letter-spacing:1px;text-shadow:0 0 14px rgba(255,214,0,.6);}
+.pit-lollipop-back{transform:rotateY(180deg);font-family:'Orbitron',monospace;font-size:20px;font-weight:900;color:var(--green);letter-spacing:.5px;white-space:nowrap;text-align:center;text-shadow:0 0 14px rgba(0,255,136,.5);}
 .race-lc .hud-lbl{display:block;margin-top:1px;}
 
 /* PENALTY banner */
@@ -477,7 +477,7 @@ select.minput option{background:var(--bg2);}
 
 <!-- ═══════════════ HEADER ═══════════════ -->
 <header>
-  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.0.8</span></div>
+  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.0.9</span></div>
   <div class="hdr-center" style="display:flex;gap:8px;align-items:center;">
 
     <button class="app-mode-btn active" id="amStd" onclick="setAppMode('std')">STANDARD</button>
@@ -634,7 +634,7 @@ select.minput option{background:var(--bg2);}
             <div class="pit-lollipop-val" id="pitMinTimeVal1">00:0</div>
             <div class="pit-lollipop-go">GO</div>
           </div>
-          <div class="pit-lollipop-face pit-lollipop-back">1st GEAR</div>
+          <div class="pit-lollipop-face pit-lollipop-back">1st Gear</div>
         </div>
         <div class="pit-lollipop-stick"></div>
       </div>
@@ -645,7 +645,7 @@ select.minput option{background:var(--bg2);}
             <div class="pit-lollipop-val" id="pitMinTimeVal2">00:0</div>
             <div class="pit-lollipop-go">GO</div>
           </div>
-          <div class="pit-lollipop-face pit-lollipop-back">1st GEAR</div>
+          <div class="pit-lollipop-face pit-lollipop-back">1st Gear</div>
         </div>
         <div class="pit-lollipop-stick"></div>
       </div>
@@ -5069,7 +5069,7 @@ function _renderPitMinTimeHud(p) {
   var key = _pitKeyFromP(p);
   var st = pitStop[key];
   if(!st.active && st.ms<=0) { wrap.style.display='none'; return; }
-  wrap.style.display = 'block';
+  wrap.style.display = 'flex'; // .pit-lollipop-wrap ist eine Flex-Row (Schild+Stiel nebeneinander) — 'block' würde sie überschreiben und beides untereinander zwingen
   wrap.classList.remove('fading');
   // WICHTIG: kein mitlaufender Timer — zeigt ausschließlich den festen
   // Zielwert dieses Boxenstopps (effectiveMinMs, ggf. gewürfelt), der sich
@@ -8185,13 +8185,13 @@ function exportData(p) {
   var suggestedName=parts.join(' - ')+'.txt';
   // Filename dialog
   var NL='\n', SEP='='.repeat(54);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.8 - RUNDENZEITEN'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.0.9 - RUNDENZEITEN'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   STANDARD / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
   if(meta.name) txt+='  Session: '+meta.name+NL;
   if(meta.weather) txt+='  Wetter:  '+meta.weather+NL;
-  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.8'+NL+SEP+NL;
+  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.9'+NL+SEP+NL;
   _exportPendingData={type:'single',txt:txt,suggestedName:suggestedName};
   _openExportModal(suggestedName);
 }
@@ -8216,7 +8216,7 @@ function exportVS() {
     else winner='GLEICHSTAND';
   }
   var NL='\n', SEP='='.repeat(colW*2+5);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.8 - VS ERGEBNISSE'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.0.9 - VS ERGEBNISSE'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   VS / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
@@ -8229,7 +8229,7 @@ function exportVS() {
     var c2=l2&&i2<l2.length?l2[i2]:'';
     txt+=c1+' | '+c2+NL;
   }
-  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.8'+NL+SEP+NL;
+  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.9'+NL+SEP+NL;
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
   var _s1=ps[1],_s2=ps[2]; var _t1=_s1.totalMs+_s1.penalty,_t2=_s2.totalMs+_s2.penalty; var _l1=_s1.laps.length,_l2=_s2.laps.length;
