@@ -20,7 +20,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apex Timer Pro V1.0.7 (build 20260713-2034)</title>
+<title>Apex Timer Pro V1.0.8 (build 20260713-2034)</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap');
 :root{
@@ -210,24 +210,34 @@ canvas.hc{display:none;}
 .pit-timer-hud.active{animation:pitPulse 1s ease-in-out infinite;}
 @keyframes pitPulse{0%,100%{border-color:var(--yellow);}50%{border-color:rgba(255,214,0,.3);}}
 /* Mindeststandzeit-Anzeige im Stil eines F1-"Lollipop"-Boxenstoppschilds:
-   rundes Schild an einem Stiel, wird im Kamerabild wie ein hochgehaltenes
-   Schild positioniert. Grün bis zur eingestellten Mindestzeit, dann gelb.
-   Bei Erreichen dreht sich das Schild per 3D-Animation um 180° und zeigt auf
-   der Rückseite "GO" — analog zum echten Lollipop-Schild der Boxencrew, das
-   gedreht wird, um dem Fahrer das Losfahren zu signalisieren. Läuft synchron
-   zum Boxenstopp-Timer; nach Ende bleibt es kurz stehen und blendet dann aus. */
-.pit-lollipop-wrap{position:absolute;top:160px;right:14px;width:168px;pointer-events:none;z-index:45;opacity:1;transition:opacity 1s ease-out;perspective:1000px;}
+   rundes Schild an einem seitlichen Stiel (wie ein echtes, von der Crew
+   gehaltenes Kellenschild), im Kamerabild positioniert. Drei Zustände:
+   1. Vorderseite zeigt die Ziel-Mindeststandzeit (grün) — direkt nach
+      Boxenstopp-Start, keine Drehung.
+   2. X Sekunden vor Ablauf der Mindeststandzeit (X = cfg.pitStopGearWarnSec)
+      dreht sich das Schild 180° und zeigt auf der Rückseite "1st GEAR"
+      (gelb) — Vorwarnung zum Losfahren.
+   3. Bei Ablauf der Mindeststandzeit dreht sich das Schild weitere 180°
+      (insgesamt 360°, wieder vorderseitig sichtbar) und zeigt "GO" (grün) —
+      die Vorderseite tauscht dafür ihren Inhalt (Zielzeit → GO), was durch
+      die Drehung selbst verdeckt wird, da die Seite währenddessen ohnehin
+      unsichtbar ist. Läuft synchron zum Boxenstopp-Timer; nach Ende bleibt
+      es kurz stehen und blendet dann aus. */
+.pit-lollipop-wrap{position:absolute;top:160px;right:14px;pointer-events:none;z-index:45;opacity:1;transition:opacity 1s ease-out;perspective:1000px;display:flex;align-items:center;}
 .pit-lollipop-wrap.p2{top:380px;}
 .pit-lollipop-wrap.fading{opacity:0;}
-.pit-lollipop-stick{width:8px;height:40px;background:linear-gradient(180deg,#3a3a3a,#1a1a1a);margin:0 auto;border-radius:3px 3px 0 0;box-shadow:0 2px 3px rgba(0,0,0,.5);}
-.pit-lollipop-disc{position:relative;width:168px;height:168px;border-radius:50%;margin-top:-4px;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,.1,.2,1);box-shadow:0 5px 16px rgba(0,0,0,.6);}
-.pit-lollipop-disc.flipped{transform:rotateY(180deg);}
+.pit-lollipop-disc{position:relative;width:168px;height:168px;border-radius:50%;flex-shrink:0;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,.1,.2,1);box-shadow:0 5px 16px rgba(0,0,0,.6);}
+.pit-lollipop-disc.pit-stage-gear{transform:rotateY(180deg);}
+.pit-lollipop-disc.pit-stage-go{transform:rotateY(360deg);}
+.pit-lollipop-stick{width:64px;height:11px;flex-shrink:0;margin-left:-3px;background:linear-gradient(90deg,#3a3a3a,#1a1a1a);border-radius:0 4px 4px 0;box-shadow:2px 2px 4px rgba(0,0,0,.5);}
 .pit-lollipop-face{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;border:5px solid var(--green);background:radial-gradient(circle at 35% 30%,#1a2410,#0a0f06);transition:border-color .25s;}
-.pit-lollipop-disc.reached .pit-lollipop-front{border-color:var(--yellow);background:radial-gradient(circle at 35% 30%,#2a2410,#0f0d06);}
 .pit-lollipop-lbl{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--text-dim);text-align:center;padding:0 8px;line-height:1.2;}
 .pit-lollipop-val{font-family:'Orbitron',monospace;font-size:32px;font-weight:900;color:var(--green);transition:color .25s;}
-.pit-lollipop-disc.reached .pit-lollipop-val{color:var(--yellow);}
-.pit-lollipop-back{transform:rotateY(180deg);border-color:var(--green);background:radial-gradient(circle at 35% 30%,#0f2410,#050f06);font-family:'Orbitron',monospace;font-size:52px;font-weight:900;color:var(--green);letter-spacing:2px;text-shadow:0 0 16px rgba(0,255,136,.6);}
+.pit-lollipop-go{display:none;font-family:'Orbitron',monospace;font-size:48px;font-weight:900;color:var(--green);letter-spacing:2px;text-shadow:0 0 16px rgba(0,255,136,.6);}
+.pit-lollipop-front.show-go{border-color:var(--green);}
+.pit-lollipop-front.show-go .pit-lollipop-lbl,.pit-lollipop-front.show-go .pit-lollipop-val{display:none;}
+.pit-lollipop-front.show-go .pit-lollipop-go{display:block;}
+.pit-lollipop-back{transform:rotateY(180deg);border-color:var(--yellow);background:radial-gradient(circle at 35% 30%,#2a2410,#0f0d06);font-family:'Orbitron',monospace;font-size:34px;font-weight:900;color:var(--yellow);letter-spacing:1px;text-shadow:0 0 14px rgba(255,214,0,.6);}
 .race-lc .hud-lbl{display:block;margin-top:1px;}
 
 /* PENALTY banner */
@@ -467,7 +477,7 @@ select.minput option{background:var(--bg2);}
 
 <!-- ═══════════════ HEADER ═══════════════ -->
 <header>
-  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.0.7</span></div>
+  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.0.8</span></div>
   <div class="hdr-center" style="display:flex;gap:8px;align-items:center;">
 
     <button class="app-mode-btn active" id="amStd" onclick="setAppMode('std')">STANDARD</button>
@@ -614,31 +624,30 @@ select.minput option{background:var(--bg2);}
         <div class="hud-val" id="pitTimerVal2">00:000</div>
       </div>
       <!-- Mindeststandzeit-Anzeige im Stil eines F1-"Lollipop"-Boxenstopp-
-           schilds: rundes Schild an einem Stiel. Vorderseite zeigt die
-           Zielzeit (grün bis gelb je nach Fortschritt), bei Erreichen der
-           Mindeststandzeit dreht sich das Schild per Animation um 180° und
-           zeigt auf der Rückseite "GO" — wie beim klassischen Lollipop-Schild
-           der Boxencrew. Kein mitlaufender Timer: die Vorderseite zeigt
-           immer die feste Zielmarke, nicht die verstrichene Zeit. -->
+           schilds: rundes Schild an einem seitlichen Stiel, drei Zustände
+           (Zielzeit → "1st GEAR" → "GO"), siehe CSS-Kommentar bei
+           .pit-lollipop-wrap für die genaue Ablauf-Beschreibung. -->
       <div class="pit-lollipop-wrap" id="pitMinTimeHud1" style="display:none;">
-        <div class="pit-lollipop-stick"></div>
         <div class="pit-lollipop-disc" id="pitLollipopDisc1">
           <div class="pit-lollipop-face pit-lollipop-front">
             <div class="pit-lollipop-lbl">MIN. STANDZEIT</div>
             <div class="pit-lollipop-val" id="pitMinTimeVal1">00:0</div>
+            <div class="pit-lollipop-go">GO</div>
           </div>
-          <div class="pit-lollipop-face pit-lollipop-back">GO</div>
+          <div class="pit-lollipop-face pit-lollipop-back">1st GEAR</div>
         </div>
+        <div class="pit-lollipop-stick"></div>
       </div>
       <div class="pit-lollipop-wrap p2" id="pitMinTimeHud2" style="display:none;">
-        <div class="pit-lollipop-stick"></div>
         <div class="pit-lollipop-disc" id="pitLollipopDisc2">
           <div class="pit-lollipop-face pit-lollipop-front">
             <div class="pit-lollipop-lbl">MIN. STANDZEIT P2</div>
             <div class="pit-lollipop-val" id="pitMinTimeVal2">00:0</div>
+            <div class="pit-lollipop-go">GO</div>
           </div>
-          <div class="pit-lollipop-face pit-lollipop-back">GO</div>
+          <div class="pit-lollipop-face pit-lollipop-back">1st GEAR</div>
         </div>
+        <div class="pit-lollipop-stick"></div>
       </div>
       <div class="race-lc" id="raceLc1" style="display:none;">
         <div class="hud-lbl">RUNDE</div>
@@ -921,8 +930,18 @@ select.minput option{background:var(--bg2);}
               <option value="15">15 FPS</option>
             </select>
           </div>
-          <div class="mitem full"><label class="mlabel">HELLIGKEIT (Bildfilter)</label><input type="range" class="minput" id="bright1" min="-100" max="100" value="0" oninput="applyFilters(1)"></div>
-          <div class="mitem full"><label class="mlabel">KONTRAST (Bildfilter)</label><input type="range" class="minput" id="contrast1" min="-100" max="100" value="0" oninput="applyFilters(1)"></div>
+          <div class="mitem full"><label class="mlabel">HELLIGKEIT (Bildfilter)</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="range" class="minput" id="bright1" min="-100" max="100" value="0" oninput="applyFilters(1)" style="flex:1;">
+              <button class="tbl-btn" title="Auf Standard zurücksetzen" onclick="document.getElementById('bright1').value=0;applyFilters(1)">↺</button>
+            </div>
+          </div>
+          <div class="mitem full"><label class="mlabel">KONTRAST (Bildfilter)</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="range" class="minput" id="contrast1" min="-100" max="100" value="0" oninput="applyFilters(1)" style="flex:1;">
+              <button class="tbl-btn" title="Auf Standard zurücksetzen" onclick="document.getElementById('contrast1').value=0;applyFilters(1)">↺</button>
+            </div>
+          </div>
         </div>
         <button class="btn-save" style="margin-top:10px;font-size:9px;padding:7px 16px;" onclick="connectCam(1)">▶ VERBINDEN</button>
         <div class="cam-preview-wrap"><video id="settingsPreview1" autoplay muted playsinline style="width:100%;max-height:160px;object-fit:contain;display:block;"></video></div>
@@ -940,6 +959,7 @@ select.minput option{background:var(--bg2);}
           </div>
         </div>
       </div>
+      <button class="btn-save" style="margin-top:2px;font-size:9px;padding:7px 16px;background:var(--bg3);color:var(--text-dim);border:1px solid var(--border);" onclick="resetAllCameraSettings()">↺ ALLE KAMERAEINSTELLUNGEN ZURÜCKSETZEN</button>
     </div>
     <!-- MOTION TAB -->
     <div id="stMotion" class="mtab-content" style="display:none;">
@@ -1009,16 +1029,16 @@ select.minput option{background:var(--bg2);}
       <div class="msec">
         <div class="msec-title">SPRACHAUSGABE</div>
         <div class="toggle-row"><span class="toggle-label">Sprachausgabe aktiv</span><div class="toggle on" id="tgl-ttsEnabled" onclick="tgl('ttsEnabled'); _ttsUnlock();"></div></div>
+        <div class="toggle-row"><span class="toggle-label">Start-Countdown ansagen</span><div class="toggle" id="tgl-ttsCountdown" onclick="tgl('ttsCountdown')"></div></div>
         <div class="toggle-row"><span class="toggle-label">Rundenzeiten ansagen</span><div class="toggle" id="tgl-ttsLap" onclick="tgl('ttsLap')"></div></div>
         <div class="toggle-row"><span class="toggle-label">Neue Bestzeit ansagen</span><div class="toggle" id="tgl-ttsBest" onclick="tgl('ttsBest')"></div></div>
-        <div class="toggle-row"><span class="toggle-label">Strafen in Zusammenfassung erwähnen</span><div class="toggle on" id="tgl-ttsPenalty" onclick="tgl('ttsPenalty')"></div></div>
         <div class="toggle-row"><span class="toggle-label">"Letzte Runde!" ansagen</span><div class="toggle" id="tgl-ttsLastLap" onclick="tgl('ttsLastLap')"></div></div>
+        <div class="toggle-row"><span class="toggle-label">Zeitablauf-Warnungen ansagen</span><div class="toggle" id="tgl-ttsTimeWarnings" onclick="tgl('ttsTimeWarnings')"></div></div>
+        <div class="toggle-row"><span class="toggle-label">Zusammenfassung am Ende automatisch vorlesen</span><div class="toggle on" id="tgl-ttsSummary" onclick="tgl('ttsSummary')"></div></div>
         <div class="toggle-row"><span class="toggle-label">Startzeit in Zusammenfassung erwähnen</span><div class="toggle" id="tgl-ttsStartTime" onclick="tgl('ttsStartTime')"></div></div>
         <div class="toggle-row"><span class="toggle-label">Ø-Geschwindigkeit (gesamt) in Zusammenfassung erwähnen</span><div class="toggle" id="tgl-ttsAvgSpeed" onclick="tgl('ttsAvgSpeed')"></div></div>
         <div class="toggle-row"><span class="toggle-label">Boxenstopp-Standzeit ansagen</span><div class="toggle on" id="tgl-ttsPitStop" onclick="tgl('ttsPitStop')"></div></div>
-        <div class="toggle-row"><span class="toggle-label">Start-Countdown ansagen</span><div class="toggle" id="tgl-ttsCountdown" onclick="tgl('ttsCountdown')"></div></div>
-        <div class="toggle-row"><span class="toggle-label">Zeitablauf-Warnungen ansagen</span><div class="toggle" id="tgl-ttsTimeWarnings" onclick="tgl('ttsTimeWarnings')"></div></div>
-        <div class="toggle-row"><span class="toggle-label">Zusammenfassung am Ende automatisch vorlesen</span><div class="toggle on" id="tgl-ttsSummary" onclick="tgl('ttsSummary')"></div></div>
+        <div class="toggle-row"><span class="toggle-label">Strafen in Zusammenfassung erwähnen</span><div class="toggle on" id="tgl-ttsPenalty" onclick="tgl('ttsPenalty')"></div></div>
         <div class="mgrid" style="margin-top:10px;">
           <div class="mitem full"><label class="mlabel">ZEITABLAUF-WARNUNG BEI NOCH VERBLEIBENDER ZEIT</label>
             <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
@@ -1946,7 +1966,11 @@ const cfg = {
   // und Max gewürfelt (statt des festen pitStopMinTimeSec) — siehe
   // togglePitStop(). pitStopMinTimeSec bleibt dabei unverändert als reiner
   // manueller Wert erhalten, falls der Zufallsgenerator wieder deaktiviert wird.
-  pitStopMinTimeRandom:false, pitStopMinTimeRandomMin:2, pitStopMinTimeRandomMax:6
+  pitStopMinTimeRandom:false, pitStopMinTimeRandomMin:2, pitStopMinTimeRandomMax:6,
+  // "1st GEAR"-Vorwarnung am Lollipop-Schild: so viele Sekunden vor Ablauf
+  // der Mindeststandzeit dreht sich das Schild schon einmal (siehe
+  // _renderPitMinTimeHud) — 0 deaktiviert die Vorwarnstufe komplett.
+  pitStopGearWarnSec:2
 };
 
 // Alle Boxenstopp-Einstellungsfelder in cfg — werden zusätzlich in
@@ -1958,7 +1982,8 @@ var PITSTOP_CFG_KEYS = [
   'pitStopRequired','pitStopRequiredCount',
   'pitStopPenaltyType','pitStopPenaltyTimeSec','pitStopPenaltyLaps',
   'pitStopMinTimeEnabled','pitStopMinTimeSec','pitStopMinTimeHoldSec',
-  'pitStopMinTimeRandom','pitStopMinTimeRandomMin','pitStopMinTimeRandomMax'
+  'pitStopMinTimeRandom','pitStopMinTimeRandomMin','pitStopMinTimeRandomMax',
+  'pitStopGearWarnSec'
 ];
 // Kopiert die aktuellen cfg-Werte nach db.pitStopSettings — vor jedem
 // saveToLS()-Aufruf sowie vor dem Erstellen des JSON-Export-Payloads.
@@ -3942,14 +3967,38 @@ function _camGetTrack(p) {
   return tracks.length ? tracks[0] : null;
 }
 
+// Liefert einen sinnvollen Rücksetzwert für einen Kamera-Hardware-Regler —
+// die Capabilities-API kennt kein "defaultValue"-Feld, daher Konvention:
+// Mittelwert zwischen Min und Max, auf die gemeldete Schrittweite gerundet.
+function _camRangeDefault(cap) {
+  var min = cap.min!==undefined?cap.min:0, max = cap.max!==undefined?cap.max:100;
+  var step = cap.step!==undefined&&cap.step>0 ? cap.step : ((max-min)/100||1);
+  var def = min + (max-min)/2;
+  return step>0 ? Math.round(def/step)*step : def;
+}
+
+// Setzt einen Kamera-Hardware-Regler auf den übergebenen Wert zurück —
+// aktualisiert Slider-Position, Anzeigewert UND wendet ihn auf die Kamera an.
+function _camResetRangeControl(p, key, defaultVal) {
+  var input = document.getElementById('camNat_'+p+'_'+key+'_input');
+  var valSpan = document.getElementById('camNat_'+p+'_'+key+'_val');
+  if(input) input.value = defaultVal;
+  if(valSpan) valSpan.textContent = defaultVal;
+  _camApplyNative(p, key, defaultVal, true);
+}
+
 function _camRangeRowHtml(p, r, cap, curVal, disabled) {
   var min = cap.min!==undefined?cap.min:0, max = cap.max!==undefined?cap.max:100;
   var step = cap.step!==undefined&&cap.step>0 ? cap.step : ((max-min)/100||1);
   var val = curVal!==undefined ? curVal : min;
   var dis = disabled ? ' disabled' : '';
+  var defaultVal = _camRangeDefault(cap);
   return '<div class="mitem full" style="'+(disabled?'opacity:.4;':'')+'"><label class="mlabel">'+r.label+' <span id="camNat_'+p+'_'+r.key+'_val" style="color:var(--accent);">'+val+'</span></label>'
-    + '<input type="range" class="minput" id="camNat_'+p+'_'+r.key+'_input" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'"'+dis+' '
-    + 'oninput="document.getElementById(\'camNat_'+p+'_'+r.key+'_val\').textContent=this.value; _camApplyNative('+p+',\''+r.key+'\',parseFloat(this.value),true)"></div>';
+    + '<div style="display:flex;gap:6px;align-items:center;">'
+    + '<input type="range" class="minput" id="camNat_'+p+'_'+r.key+'_input" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'"'+dis+' style="flex:1;" '
+    + 'oninput="document.getElementById(\'camNat_'+p+'_'+r.key+'_val\').textContent=this.value; _camApplyNative('+p+',\''+r.key+'\',parseFloat(this.value),true)">'
+    + '<button class="tbl-btn" title="Auf Standard zurücksetzen"'+dis+' onclick="_camResetRangeControl('+p+',\''+r.key+'\','+defaultVal+')">↺</button>'
+    + '</div></div>';
 }
 
 // Baut EINE der vier Kernbereich-Gruppen (Zoom/Fokus/Blende/Farbtemperatur).
@@ -4060,6 +4109,29 @@ function _camApplyNative(p, key, value, isNumeric) {
     // noch auf "Automatisch" steht) werden von der Kamera abgelehnt — das ist
     // kein kritischer Fehler, betrifft nur diese eine Einstellung.
     console.warn('Kamerasteuerung '+key+' konnte nicht angewendet werden:', e);
+  });
+}
+
+// Globaler Reset: setzt Bildfilter (Helligkeit/Kontrast) UND alle von der
+// jeweils verbundenen Kamera gemeldeten Hardware-Regler (Zoom/Fokus/
+// Belichtung/Weißabgleich/weitere) für beide Spieler zurück. Nutzt dieselbe
+// Mittelwert-Konvention wie die einzelnen ↺-Buttons (siehe _camRangeDefault).
+function resetAllCameraSettings() {
+  apexConfirm('Alle Kameraeinstellungen (Bildfilter und Kamera-Hardware) auf Standard zurücksetzen?', function(){
+    [1,2].forEach(function(p){
+      var b = document.getElementById('bright'+p); if(b){ b.value=0; applyFilters(p); }
+      var c = document.getElementById('contrast'+p); if(c){ c.value=0; applyFilters(p); }
+      var track = _camGetTrack(p);
+      if(!track) return;
+      var caps; try{ caps = track.getCapabilities(); }catch(e){ caps=null; }
+      if(!caps) return;
+      var rangeKeys = [];
+      _CAM_CONTROL_GROUPS.forEach(function(g){ g.ranges.forEach(function(r){ if(caps[r.key]!==undefined) rangeKeys.push(r.key); }); });
+      _CAM_EXTRA_CAPS.forEach(function(c2){ if(c2.type==='range' && caps[c2.key]!==undefined) rangeKeys.push(c2.key); });
+      rangeKeys.forEach(function(key){ _camApplyNative(p, key, _camRangeDefault(caps[key]), true); });
+      if(caps.torch!==undefined) _camApplyNative(p, 'torch', false, false);
+      _camBuildNativeControls(p); // Anzeige neu aufbauen, damit alle Regler/Anzeigewerte den zurückgesetzten Stand zeigen
+    });
   });
 }
 
@@ -5006,14 +5078,20 @@ function _renderPitMinTimeHud(p) {
   // angezeigt — dieses Feld dient nur als feststehende Zielmarke.
   var minMs = st.effectiveMinMs || 0;
   val.textContent = fmtMinTimeVal(minMs);
-  // Farblogik UND Dreh-Animation bleiben dynamisch: grün/Vorderseite,
-  // solange die verstrichene Zeit die Zielmarke noch nicht erreicht hat —
-  // sobald sie erreicht ist, dreht sich das Schild um 180° (CSS-Transition
-  // auf .pit-lollipop-disc) und zeigt auf der Rückseite "GO", analog zum
-  // echten Lollipop-Schild der Boxencrew.
-  var isReached = st.ms >= minMs;
-  disc.classList.toggle('reached', isReached);
-  disc.classList.toggle('flipped', isReached);
+  // Drei Zustände (siehe CSS-Kommentar bei .pit-lollipop-wrap):
+  // 1. Vorderseite/Zielzeit — solange weder Vorwarnung noch Mindestzeit
+  //    erreicht sind.
+  // 2. "1st GEAR" (Rückseite, 180°) — ab pitStopGearWarnSec Sekunden vor
+  //    Ablauf der Mindeststandzeit.
+  // 3. "GO" (Vorderseite erneut, aber um volle 360° gedreht, Inhalt auf
+  //    "GO" umgeschaltet) — sobald die Mindeststandzeit erreicht ist.
+  var isGoStage = st.ms >= minMs;
+  var gearWarnMs = Math.max(0, (cfg.pitStopGearWarnSec||0)) * 1000;
+  var isGearStage = !isGoStage && gearWarnMs > 0 && st.ms >= Math.max(0, minMs - gearWarnMs);
+  disc.classList.toggle('pit-stage-gear', isGearStage);
+  disc.classList.toggle('pit-stage-go', isGoStage);
+  var front = disc.querySelector('.pit-lollipop-front');
+  if(front) front.classList.toggle('show-go', isGoStage);
 }
 
 // Bricht einen laufenden Ausfade-Vorgang für Spieler p ab (z.B. weil direkt
@@ -5026,14 +5104,18 @@ function _pitMinTimeCancelFade(p) {
   if(wrap) wrap.classList.remove('fading');
 }
 
-// Setzt das Lollipop-Schild explizit auf die Vorderseite zurück (kein
-// Flip, keine "reached"-Farbe) — NUR beim Start eines neuen Boxenstopps
+// Setzt das Lollipop-Schild explizit auf die Vorderseite/Zielzeit zurück
+// (Zustand 1, keine Drehung) — NUR beim Start eines neuen Boxenstopps
 // aufgerufen (siehe togglePitStop), NICHT beim Beenden: dort soll die
 // Drehung ja gerade erhalten bleiben, damit "GO" während des Nachlaufs
 // sichtbar stehen bleibt (siehe _pitMinTimeStartFadeSequence).
 function _pitMinTimeResetDiscToFront(p) {
   var disc = document.getElementById('pitLollipopDisc'+p);
-  if(disc) { disc.classList.remove('flipped'); disc.classList.remove('reached'); }
+  if(!disc) return;
+  disc.classList.remove('pit-stage-gear');
+  disc.classList.remove('pit-stage-go');
+  var front = disc.querySelector('.pit-lollipop-front');
+  if(front) front.classList.remove('show-go');
 }
 
 // Startet den Nachlauf nach Beendigung eines Boxenstopps: das Element bleibt
@@ -5660,12 +5742,28 @@ function togglePitStopMinTimeEnabled() {
   _renderPitMinTimeHud(2);
 }
 
-// Übernimmt geänderte Mindeststandzeit/Haltezeit sofort in cfg.
+// Speichert die "1st GEAR"-Vorwarnzeit automatisch in der aktiven Strecke
+// (falls eine gewählt ist) — analog zu _saveCooldownToActiveTrack.
+function _savePitStopGearWarnToActiveTrack(sec) {
+  var name = (document.getElementById('activeTrack')||{value:''}).value;
+  if(!name) return;
+  var t = db.tracks.find(function(x){ return x.name===name; });
+  if(!t) return;
+  t.pitStopGearWarnSec = sec;
+  saveToLS();
+}
+
+// Übernimmt geänderte Mindeststandzeit/Haltezeit/Vorwarnzeit sofort in cfg.
 function onPitStopMinTimeValueChange() {
   var secEl = document.getElementById('pitStopMinTimeSec');
   var holdEl = document.getElementById('pitStopMinTimeHoldSec');
+  var gearEl = document.getElementById('pitStopGearWarnSec');
   if(secEl) cfg.pitStopMinTimeSec = Math.max(0, parseFloat(secEl.value)||0);
   if(holdEl) cfg.pitStopMinTimeHoldSec = Math.max(0, parseFloat(holdEl.value)||0);
+  if(gearEl) {
+    cfg.pitStopGearWarnSec = Math.max(0, parseFloat(gearEl.value)||0);
+    _savePitStopGearWarnToActiveTrack(cfg.pitStopGearWarnSec);
+  }
   _renderPitMinTimeHud(1);
   _renderPitMinTimeHud(2);
 }
@@ -5712,6 +5810,7 @@ function openPitStopSettingsModal() {
   document.getElementById('tgl-pitStopMinTimeRandom').classList.toggle('on', cfg.pitStopMinTimeRandom);
   document.getElementById('pitStopMinTimeSec').value = cfg.pitStopMinTimeSec;
   document.getElementById('pitStopMinTimeHoldSec').value = cfg.pitStopMinTimeHoldSec;
+  document.getElementById('pitStopGearWarnSec').value = cfg.pitStopGearWarnSec;
   document.getElementById('pitStopMinTimeRandomMin').value = cfg.pitStopMinTimeRandomMin;
   document.getElementById('pitStopMinTimeRandomMax').value = cfg.pitStopMinTimeRandomMax;
   document.getElementById('pitStopMinTimeFixedWrap').style.display = cfg.pitStopMinTimeRandom ? 'none' : '';
@@ -6151,6 +6250,8 @@ function _buildSavePayload() {
     records: records,
     carreraLayouts: carreraLayouts,
     drawLayouts: drawLayouts,
+    carreraInventory: carreraGetInventory(),
+    carreraInventoryUpdatedAt: carreraGetInventoryUpdatedAt(),
     exportDate: new Date().toISOString()
   }, null, 2);
 }
@@ -6429,6 +6530,14 @@ function onActiveTrackChange(){
 
   // Sperrzeit nach Trigger: pro Strecke gespeicherten Wert laden (Fallback: 2000ms)
   _applyCooldownDisplays((t && t.cooldownMs) || 2000, false, false);
+
+  // "1st GEAR"-Vorwarnzeit: pro Strecke gespeicherten Wert laden (Fallback: 5s).
+  // Eingabefeld existiert unabhängig davon, ob das Boxenstopp-Einstellungen-
+  // Popup gerade geöffnet ist (siehe openPitStopSettingsModal) — direkt
+  // aktualisieren, damit es beim nächsten Öffnen sofort stimmt.
+  cfg.pitStopGearWarnSec = (t && t.pitStopGearWarnSec!=null) ? t.pitStopGearWarnSec : 2;
+  var gearWarnEl = document.getElementById('pitStopGearWarnSec');
+  if(gearWarnEl) gearWarnEl.value = cfg.pitStopGearWarnSec;
 
   if(t && t.type === 'Carrerabahn') {
     // Spurlängen aus dem Carrera-Baukasten lesen (falls gespeichert)
@@ -8076,13 +8185,13 @@ function exportData(p) {
   var suggestedName=parts.join(' - ')+'.txt';
   // Filename dialog
   var NL='\n', SEP='='.repeat(54);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.7 - RUNDENZEITEN'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.0.8 - RUNDENZEITEN'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   STANDARD / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
   if(meta.name) txt+='  Session: '+meta.name+NL;
   if(meta.weather) txt+='  Wetter:  '+meta.weather+NL;
-  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.7'+NL+SEP+NL;
+  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.8'+NL+SEP+NL;
   _exportPendingData={type:'single',txt:txt,suggestedName:suggestedName};
   _openExportModal(suggestedName);
 }
@@ -8107,7 +8216,7 @@ function exportVS() {
     else winner='GLEICHSTAND';
   }
   var NL='\n', SEP='='.repeat(colW*2+5);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.7 - VS ERGEBNISSE'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.0.8 - VS ERGEBNISSE'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   VS / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
@@ -8120,7 +8229,7 @@ function exportVS() {
     var c2=l2&&i2<l2.length?l2[i2]:'';
     txt+=c1+' | '+c2+NL;
   }
-  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.7'+NL+SEP+NL;
+  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.8'+NL+SEP+NL;
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
   var _s1=ps[1],_s2=ps[2]; var _t1=_s1.totalMs+_s1.penalty,_t2=_s2.totalMs+_s2.penalty; var _l1=_s1.laps.length,_l2=_s2.laps.length;
@@ -8451,6 +8560,18 @@ function _apexMerge(incoming) {
     report.push('Zeichnungen: +'+dlr.added+' neu, '+dlr.updated+' aktualisiert');
   }
 
+  // ── Schienen-Bestand — reine Mengenangaben ohne Namen/Konfliktpotenzial,
+  //    daher Last-Write-Wins über den ganzen Bestand hinweg (wie bei den
+  //    Settings-Feldern unten), kein Konflikt-Dialog nötig ────────────────
+  if(incoming.carreraInventory && typeof incoming.carreraInventory === 'object') {
+    var incInvTs = parseInt(incoming.carreraInventoryUpdatedAt||0, 10) || 0;
+    if(incInvTs > carreraGetInventoryUpdatedAt()) {
+      carreraSaveInventory(incoming.carreraInventory, incInvTs);
+      if(typeof carreraLoadInventoryIntoTable==='function') carreraLoadInventoryIntoTable();
+      report.push('Schienen-Bestand: aktualisiert');
+    }
+  }
+
   // ── Sonstiges: Zuweisungen — nur übernehmen wenn lokal noch keine besteht,
   //    kein Konflikt-Dialog nötig (reine "leer → befüllen"-Regel) ─────────
   if(incoming.db && incoming.db.assignments) {
@@ -8549,6 +8670,18 @@ function _localSyncApply(incoming) {
     var r = mergeArrAuto(local, incoming[key], function(x){return x.name;}, 'saved');
     if(r.added || r.updated) { localStorage.setItem(lsKey, JSON.stringify(r.arr)); changed = true; }
   });
+
+  // Schienen-Bestand: reine Mengenangaben, kein Konfliktpotenzial durch
+  // Namen wie bei Fahrer/Auto/Strecke — Last-Write-Wins über den ganzen
+  // Bestand hinweg genügt (analog zu den Settings-Feldern unten).
+  if(incoming.carreraInventory && typeof incoming.carreraInventory === 'object') {
+    var incInvTs = parseInt(incoming.carreraInventoryUpdatedAt||0, 10) || 0;
+    if(incInvTs > carreraGetInventoryUpdatedAt()) {
+      carreraSaveInventory(incoming.carreraInventory, incInvTs);
+      if(typeof carreraLoadInventoryIntoTable==='function') carreraLoadInventoryIntoTable();
+      changed = true;
+    }
+  }
 
   if(incoming.db) {
     if(Array.isArray(incoming.db.drivers)) {
@@ -11180,8 +11313,19 @@ function carreraDrawSchematicOnCanvas(canvas, chain) {
 function carreraGetInventory() {
   try { return JSON.parse(localStorage.getItem('apexCarreraInventory') || '{}'); } catch(e) { return {}; }
 }
-function carreraSaveInventory(inv) {
-  try { localStorage.setItem('apexCarreraInventory', JSON.stringify(inv)); } catch(e) {}
+function carreraGetInventoryUpdatedAt() {
+  return parseInt(localStorage.getItem('apexCarreraInventoryUpdatedAt')||'0', 10) || 0;
+}
+// ts optional: beim normalen Bearbeiten durch den Nutzer wird "jetzt" genutzt;
+// beim Anwenden eines importierten/synchronisierten Bestands (siehe _apexMerge/
+// _localSyncApply) wird der MITGELIEFERTE Zeitstempel übernommen, damit spätere
+// Last-Write-Wins-Vergleiche den tatsächlichen Bearbeitungszeitpunkt behalten
+// statt ihn bei jedem Sync künstlich auf "jetzt" zu setzen.
+function carreraSaveInventory(inv, ts) {
+  try {
+    localStorage.setItem('apexCarreraInventory', JSON.stringify(inv));
+    localStorage.setItem('apexCarreraInventoryUpdatedAt', String(ts || Date.now()));
+  } catch(e) {}
 }
 
 // ── Schienen-Bestand: direktes DOM-Update ──────────────────────────────────
@@ -13568,6 +13712,12 @@ apexAutoSaveInit(); // AutoSave + Folder UI initialisieren
               Bei jedem Boxenstopp wird neu eine Mindeststandzeit zwischen Min und Max gewürfelt.
             </label>
           </div>
+          <div class="mitem full"><label class="mlabel">"1st GEAR"-VORWARNUNG (Sekunden vor Ablauf)</label>
+            <input type="number" class="minput" id="pitStopGearWarnSec" value="2" min="0" max="60" step="1" oninput="onPitStopMinTimeValueChange()">
+          </div>
+          <div class="mitem full"><label class="mlabel" style="line-height:1.7;display:block;color:var(--text-dim);">
+            So viele Sekunden vor Ablauf der Mindeststandzeit dreht sich das Lollipop-Schild einmal auf "1st GEAR", bevor es bei Ablauf endgültig auf "GO" dreht. 0 deaktiviert diese Vorwarnstufe.
+          </label></div>
           <div class="mitem full"><label class="mlabel">ANZEIGE STEHEN LASSEN (Sekunden)</label>
             <input type="number" class="minput" id="pitStopMinTimeHoldSec" value="3" min="0" max="30" step="1" oninput="onPitStopMinTimeValueChange()">
           </div>
