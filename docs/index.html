@@ -20,7 +20,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apex Timer Pro V1.0.13 (build 20260813-1516)</title>
+<title>Apex Timer Pro V1.0.14 (build 20260813-1629)</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap');
 :root{
@@ -97,6 +97,8 @@ canvas.hc{display:none;}
 .thresh-fader::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-7px;border-radius:50%;background:#ff1744;border:2px solid #fff;cursor:pointer;box-shadow:0 0 6px rgba(255,23,68,.8);}
 .thresh-fader::-moz-range-track{height:4px;background:rgba(0,0,0,.55);border:1px solid var(--border);border-radius:2px;}
 .thresh-fader::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#ff1744;border:2px solid #fff;cursor:pointer;box-shadow:0 0 6px rgba(255,23,68,.8);}
+.thresh-fader-reset{position:absolute;top:100%;left:50%;transform:translate(-50%,6px);width:22px;height:22px;padding:0;border-radius:50%;background:rgba(8,12,16,.85);border:1px solid var(--border);color:var(--text-dim);font-size:12px;line-height:1;cursor:pointer;pointer-events:auto;display:flex;align-items:center;justify-content:center;}
+.thresh-fader-reset:hover{color:var(--accent);border-color:var(--accent);}
 
 /* ── DETECTION ZONE ── */
 .dz{position:absolute;cursor:move;user-select:none;}
@@ -485,7 +487,7 @@ select.minput option{background:var(--bg2);}
 
 <!-- ═══════════════ HEADER ═══════════════ -->
 <header>
-  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.0.13</span></div>
+  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.0.14</span></div>
   <div class="hdr-center" style="display:flex;gap:8px;align-items:center;">
 
     <button class="app-mode-btn active" id="amStd" onclick="setAppMode('std')">STANDARD</button>
@@ -599,9 +601,11 @@ select.minput option{background:var(--bg2);}
          cfg.showThreshBar (Einstellungen-Toggle bzw. Taste M). -->
     <div class="thresh-fader-wrap" id="threshFaderWrap1">
       <input type="range" class="thresh-fader" id="threshFader1" min="1" max="30" step="1" value="8" oninput="_onThreshFaderInput(this.value)" title="Schwellwert (Empfindlichkeit)">
+      <button class="thresh-fader-reset" onclick="_resetThreshFader()" title="Schwellwert auf Standard zurücksetzen">↺</button>
     </div>
     <div class="thresh-fader-wrap" id="threshFaderWrap2s">
       <input type="range" class="thresh-fader" id="threshFader2s" min="1" max="30" step="1" value="8" oninput="_onThreshFaderInput(this.value)" title="Schwellwert (Empfindlichkeit)">
+      <button class="thresh-fader-reset" onclick="_resetThreshFader()" title="Schwellwert auf Standard zurücksetzen">↺</button>
     </div>
 
     <!-- Boxenstopp-Button P2 (VS-Modus, gleiche Kamera) — leicht versetzt, damit
@@ -4642,7 +4646,7 @@ function _drawZone(ctx, camR, r, isP2) {
     ctx.fillRect(barX,barY,curW,barH);
     var threshX=barX+Math.min(1,thresh/sensiMax)*barW;
     ctx.strokeStyle='#ff1744'; ctx.lineWidth=2;
-    ctx.beginPath(); ctx.moveTo(threshX,barY-3); ctx.lineTo(threshX,barY+barH+3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(threshX,barY-10); ctx.lineTo(threshX,barY+barH+3); ctx.stroke();
   }
 
   // Guide lines
@@ -4678,7 +4682,7 @@ function _drawZone(ctx, camR, r, isP2) {
   if(triggered){ ctx.strokeStyle='rgba(255,60,0,.6)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(lx,zy+zh/2,13,0,Math.PI*2); ctx.stroke(); }
   ctx.restore();
 
-  _updateThreshFader(isP2?'2s':'1', camR, zx, zy, zw, zh);
+  _updateThreshFader(isP2?'2s':'1', camR, zx, zy, zw, zh, rotDeg);
 }
 
 // ─── Schwellwert-Fader: interaktiver Regler außerhalb der rechten
@@ -4694,29 +4698,36 @@ function _drawZone(ctx, camR, r, isP2) {
 // (das ist der einzige Regler, den die Erkennung tatsächlich ausliest —
 // #sensiRange2 wird aktuell nirgends von der Erkennung gelesen), daher
 // steuern beide Fader (P1/P2) denselben Schwellwert.
+const SENSI_DEFAULT = 8; // Werkseinstellung, siehe value="8" bei #sensiRange
 function _hideThreshFader(pk) {
   var wrap=document.getElementById('threshFaderWrap'+pk);
   if(wrap) wrap.style.display='none';
 }
-function _updateThreshFader(pk, camR, zx, zy, zw, zh) {
+function _updateThreshFader(pk, camR, zx, zy, zw, zh, rotDeg) {
   if(!cfg.showThreshBar) { _hideThreshFader(pk); return; }
   var wrap=document.getElementById('threshFaderWrap'+pk);
   var inp=document.getElementById('threshFader'+pk);
   if(!wrap||!inp) return;
-  var FW=22, gap=14;
-  // Abstand vom Zonen-MITTELPUNKT (Drehpunkt) statt von der unrotierten
-  // rechten Kante: bei einer gedrehten Zone wandern Dreh-/Sperr-Griff um
-  // diesen Punkt herum und würden sonst irgendwann genau unter dem Fader
-  // landen (dann nicht mehr greifbar → Zone lässt sich nicht zurückdrehen).
-  // clearR ist bewusst WINKEL-UNABHÄNGIG (größtmögliche Entfernung von
-  // Zonen-Eckpunkt bzw. Sperr-Griff zum Mittelpunkt, siehe CSS-Offsets von
-  // .dz-rotate-handle/.dz-lock-handle), daher bleibt für JEDEN Drehwinkel
-  // garantiert Luft zwischen Fader und Messfenster/Griffen.
+  var FW=22, gap=8;
+  // Rückt im Normalfall nah an die rechte Zonenkante heran (wie ein Fader
+  // "am Fenster") und weicht nur dann nach rechts aus, wenn Dreh- oder
+  // Sperr-Griff bei der AKTUELLEN Drehung tatsächlich in seine Nähe
+  // schwenken — statt permanent auf einem winkel-unabhängigen worst-case-
+  // Abstand zu sitzen (das saß spürbar zu weit außen). Dafür werden die
+  // Eckpunkte der Zone sowie Dreh-/Sperr-Griff (Offsets siehe CSS bei
+  // .dz-rotate-handle/.dz-lock-handle) mit dem aktuellen Drehwinkel in
+  // Screen-Koordinaten umgerechnet (gleiche Rotationsformel wie ctx.rotate()
+  // beim Zeichnen) und der größte X-Ausschlag nach rechts verwendet.
+  var rad=(rotDeg||0)*Math.PI/180, cosA=Math.cos(rad), sinA=Math.sin(rad);
+  function rotX(lx,ly){ return lx*cosA - ly*sinA; }
+  var reach = Math.max(
+    rotX( zw/2,  zh/2), rotX( zw/2, -zh/2),
+    rotX(-zw/2,  zh/2), rotX(-zw/2, -zh/2),
+    rotX(0, -(zh/2+46)) + 9,   // Dreh-Griff (+ eigener Radius)
+    rotX(40, -(zh/2+46)) + 14  // Sperr-Griff (+ eigener Radius)
+  );
   var pivotX=zx+zw/2;
-  var cornerR=Math.sqrt((zw/2)*(zw/2)+(zh/2)*(zh/2));
-  var lockHandleR=Math.sqrt(40*40+(zh/2+46)*(zh/2+46))+14;
-  var clearR=Math.max(cornerR, lockHandleR);
-  var left=Math.max(2, Math.min(pivotX+clearR+gap, camR.width-FW-2));
+  var left=Math.max(2, Math.min(pivotX+reach+gap, camR.width-FW-2));
   wrap.style.display='block';
   wrap.style.left=left+'px'; wrap.style.top=zy+'px';
   wrap.style.width=FW+'px'; wrap.style.height=zh+'px';
@@ -4729,6 +4740,15 @@ function _onThreshFaderInput(val) {
   var sensiVal=document.getElementById('sensiVal');
   if(sensiEl) sensiEl.value=val;
   if(sensiVal) sensiVal.textContent=val+'%';
+}
+// Setzt den Schwellwert (geteilt von beiden Fadern, siehe Kommentar oben)
+// auf die Werkseinstellung zurück — analog zu den ↺-Buttons bei den
+// Kamera-Hardware-Reglern in den Einstellungen.
+function _resetThreshFader() {
+  var sensiEl=document.getElementById('sensiRange');
+  var sensiVal=document.getElementById('sensiVal');
+  if(sensiEl) sensiEl.value=SENSI_DEFAULT;
+  if(sensiVal) sensiVal.textContent=SENSI_DEFAULT+'%';
 }
 
 // ─── Helper: erfasst EINEN zusammenhängenden Streifen, der alle drei
@@ -4979,7 +4999,7 @@ function drawZoneOverlay(mc, camR, dzR, lineFrac, camIdx, isP2, motPct, lMotPct,
     ctx.fillRect(barX,barY,curW,barH);
     const threshX=barX+Math.min(1,thresh/sensiMax)*barW;
     ctx.strokeStyle='#ff1744'; ctx.lineWidth=2;
-    ctx.beginPath(); ctx.moveTo(threshX,barY-3); ctx.lineTo(threshX,barY+barH+3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(threshX,barY-10); ctx.lineTo(threshX,barY+barH+3); ctx.stroke();
   }
 
   // White guide lines flanking the red trigger line
@@ -5034,7 +5054,7 @@ function drawZoneOverlay(mc, camR, dzR, lineFrac, camIdx, isP2, motPct, lMotPct,
   }
   ctx.restore();
 
-  _updateThreshFader(isP2?'2s':'1', camR, zx, zy, zw, zh);
+  _updateThreshFader(isP2?'2s':'1', camR, zx, zy, zw, zh, rotDeg);
 }
 
 function doTriggerFlash(p,isP2std) {
@@ -8338,13 +8358,13 @@ function exportData(p) {
   var suggestedName=parts.join(' - ')+'.txt';
   // Filename dialog
   var NL='\n', SEP='='.repeat(54);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.13 - RUNDENZEITEN'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.0.14 - RUNDENZEITEN'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   STANDARD / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
   if(meta.name) txt+='  Session: '+meta.name+NL;
   if(meta.weather) txt+='  Wetter:  '+meta.weather+NL;
-  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.13'+NL+SEP+NL;
+  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.14'+NL+SEP+NL;
   _exportPendingData={type:'single',txt:txt,suggestedName:suggestedName};
   _openExportModal(suggestedName);
 }
@@ -8369,7 +8389,7 @@ function exportVS() {
     else winner='GLEICHSTAND';
   }
   var NL='\n', SEP='='.repeat(colW*2+5);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.13 - VS ERGEBNISSE'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.0.14 - VS ERGEBNISSE'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   VS / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
@@ -8382,7 +8402,7 @@ function exportVS() {
     var c2=l2&&i2<l2.length?l2[i2]:'';
     txt+=c1+' | '+c2+NL;
   }
-  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.13'+NL+SEP+NL;
+  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.14'+NL+SEP+NL;
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
   var _s1=ps[1],_s2=ps[2]; var _t1=_s1.totalMs+_s1.penalty,_t2=_s2.totalMs+_s2.penalty; var _l1=_s1.laps.length,_l2=_s2.laps.length;
