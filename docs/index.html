@@ -20,7 +20,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apex Timer Pro V1.0.9 (build 20260713-2034)</title>
+<title>Apex Timer Pro V1.0.10 (build 20260713-2034)</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap');
 :root{
@@ -477,7 +477,7 @@ select.minput option{background:var(--bg2);}
 
 <!-- ═══════════════ HEADER ═══════════════ -->
 <header>
-  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.0.9</span></div>
+  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.0.10</span></div>
   <div class="hdr-center" style="display:flex;gap:8px;align-items:center;">
 
     <button class="app-mode-btn active" id="amStd" onclick="setAppMode('std')">STANDARD</button>
@@ -505,6 +505,11 @@ select.minput option{background:var(--bg2);}
     <video id="vid1" autoplay muted playsinline style="display:none"></video>
     <canvas id="hc1" class="hc"></canvas>
     <canvas id="mc1" class="mc" style="display:none"></canvas>
+    <!-- Blendet NUR das sichtbare Kamerabild aus (spart Render-/Kompositierungs-
+         Aufwand, v.a. auf dem iPad) — Bewegungserkennung liest weiterhin direkt
+         vom <video>-Element und läuft unverändert weiter, Messzone/Buttons/HUDs
+         bleiben sichtbar. -->
+    <button id="camPreviewToggle1" onclick="toggleCamPreview(1)" title="Kamerabild ausblenden (spart Akku)" style="position:absolute;top:8px;left:8px;z-index:50;width:30px;height:30px;border-radius:50%;background:rgba(8,12,16,.75);border:1px solid var(--border);color:var(--text-dim);font-size:14px;cursor:pointer;display:none;align-items:center;justify-content:center;">👁</button>
     <div class="cam-placeholder" id="ph1">
       <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
       <p>KEIN KAMERASIGNAL<br>EINSTELLUNGEN → KAMERA</p>
@@ -3897,6 +3902,8 @@ async function connectCam(p) {
     document.getElementById('ph'+p).style.display='none';
     (function(){var _t=document.getElementById('overlay'+p);if(_t)_t.style.display='block';})();
     document.getElementById('mc'+p).style.display='block';
+    var camPreviewBtn=document.getElementById('camPreviewToggle'+p);
+    if(camPreviewBtn) camPreviewBtn.style.display='flex';
     document.getElementById('dz1').style.display='block';
     if(appMode==='vs') document.getElementById('dz2std').style.display='block';
     _updatePitBtnVisibility();
@@ -3909,6 +3916,21 @@ async function connectCam(p) {
     _camBuildNativeControls(p);
 
   }catch(e){ apexAlert('Kamera '+p+' Fehler:\n'+e.message); }
+}
+
+// Blendet NUR das sichtbare <video>-Element aus/ein (spart Render-/
+// Kompositierungs-Aufwand des Browsers, besonders bei hoher Auflösung auf
+// dem iPad) — die Bewegungserkennung (startMotion/detectMotion) liest das
+// Kamerabild direkt über drawImage() vom <video>-Element, was unabhängig
+// von dessen CSS-Sichtbarkeit funktioniert und daher unverändert weiterläuft.
+function toggleCamPreview(p) {
+  var vid = document.getElementById('vid'+p);
+  var btn = document.getElementById('camPreviewToggle'+p);
+  if(!vid || !btn) return;
+  var hidden = vid.style.display === 'none';
+  vid.style.display = hidden ? 'block' : 'none';
+  btn.textContent = hidden ? '👁' : '🙈';
+  btn.title = hidden ? 'Kamerabild ausblenden (spart Akku)' : 'Kamerabild einblenden';
 }
 
 function applyFilters(p) {
@@ -4245,11 +4267,22 @@ function _sampleZone(vid, hcEl, camR, dzId, lineId, pk, sp) {
     // also muss die Abtastung um -rotDeg gegengedreht werden, damit exakt die
     // Pixel gelesen werden, die im Kamerabild unter der gedrehten Box liegen.
     var rad=-rotDeg*Math.PI/180;
+    // Nur die Achsen-parallele Bounding-Box des rotierten Zonenrechtecks aus
+    // dem Vollbild schneiden (statt des kompletten Frames) — src- und
+    // dest-Rechteck sind identisch (bbX/bbY/bbW/bbH), daher liefert das unter
+    // derselben Transformation exakt dieselben Pixel wie vorher, nur ohne
+    // das gesamte Kamerabild jedes Frame neu zu rastern/skalieren.
+    var cosA=Math.abs(Math.cos(rad)), sinA=Math.abs(Math.sin(rad));
+    var bbW=Math.min(vw, Math.ceil(vW*cosA+vH*sinA)+2);
+    var bbH=Math.min(vh, Math.ceil(vW*sinA+vH*cosA)+2);
+    var bbX=Math.max(0, Math.round(pivotVX-bbW/2));
+    var bbY=Math.max(0, Math.round(pivotVY-bbH/2));
+    bbW=Math.min(bbW, vw-bbX); bbH=Math.min(bbH, vh-bbY);
     ctx2.save();
     ctx2.translate(pivotVX-vx, pivotVY-vy);
     ctx2.rotate(rad);
     ctx2.translate(-pivotVX,-pivotVY);
-    ctx2.drawImage(vid,0,0,vw,vh,0,0,vw,vh);
+    ctx2.drawImage(vid,bbX,bbY,bbW,bbH,bbX,bbY,bbW,bbH);
     ctx2.restore();
   }
   var cur=ctx2.getImageData(0,0,vW,vH).data;
@@ -4613,13 +4646,23 @@ function _captureZoneStrip(vid, hcEl, stripX, stripY, stripW, stripH, rotDeg, pi
     // Schnellpfad ohne Rotation — unverändertes Verhalten
     ctx.drawImage(vid, stripX, stripY, stripW, stripH, 0, 0, stripW, stripH);
   } else {
-    // Gegenrotation zur CSS-Drehung der Zone (siehe _sampleZone für Herleitung)
+    // Gegenrotation zur CSS-Drehung der Zone (siehe _sampleZone für Herleitung).
+    // Wie dort: nur die Bounding-Box des rotierten Streifens aus dem Vollbild
+    // schneiden statt des kompletten Frames (src==dest-Rechteck, daher unter
+    // derselben Transformation pixelgleich zum Vollbild-Ansatz).
     const rad=-rotDeg*Math.PI/180;
+    var vw2=vid.videoWidth, vh2=vid.videoHeight;
+    var cosA=Math.abs(Math.cos(rad)), sinA=Math.abs(Math.sin(rad));
+    var bbW=Math.min(vw2, Math.ceil(stripW*cosA+stripH*sinA)+2);
+    var bbH=Math.min(vh2, Math.ceil(stripW*sinA+stripH*cosA)+2);
+    var bbX=Math.max(0, Math.round(pivotVX-bbW/2));
+    var bbY=Math.max(0, Math.round(pivotVY-bbH/2));
+    bbW=Math.min(bbW, vw2-bbX); bbH=Math.min(bbH, vh2-bbY);
     ctx.save();
     ctx.translate(pivotVX-stripX, pivotVY-stripY);
     ctx.rotate(rad);
     ctx.translate(-pivotVX,-pivotVY);
-    ctx.drawImage(vid, 0,0,vid.videoWidth,vid.videoHeight, 0,0,vid.videoWidth,vid.videoHeight);
+    ctx.drawImage(vid, bbX,bbY,bbW,bbH, bbX,bbY,bbW,bbH);
     ctx.restore();
   }
   return ctx.getImageData(0,0,stripW,stripH).data;
@@ -8185,13 +8228,13 @@ function exportData(p) {
   var suggestedName=parts.join(' - ')+'.txt';
   // Filename dialog
   var NL='\n', SEP='='.repeat(54);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.9 - RUNDENZEITEN'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.0.10 - RUNDENZEITEN'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   STANDARD / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
   if(meta.name) txt+='  Session: '+meta.name+NL;
   if(meta.weather) txt+='  Wetter:  '+meta.weather+NL;
-  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.9'+NL+SEP+NL;
+  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.10'+NL+SEP+NL;
   _exportPendingData={type:'single',txt:txt,suggestedName:suggestedName};
   _openExportModal(suggestedName);
 }
@@ -8216,7 +8259,7 @@ function exportVS() {
     else winner='GLEICHSTAND';
   }
   var NL='\n', SEP='='.repeat(colW*2+5);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.9 - VS ERGEBNISSE'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.0.10 - VS ERGEBNISSE'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   VS / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
@@ -8229,7 +8272,7 @@ function exportVS() {
     var c2=l2&&i2<l2.length?l2[i2]:'';
     txt+=c1+' | '+c2+NL;
   }
-  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.9'+NL+SEP+NL;
+  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.10'+NL+SEP+NL;
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
   var _s1=ps[1],_s2=ps[2]; var _t1=_s1.totalMs+_s1.penalty,_t2=_s2.totalMs+_s2.penalty; var _l1=_s1.laps.length,_l2=_s2.laps.length;

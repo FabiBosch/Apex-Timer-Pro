@@ -1,6 +1,6 @@
 {
   "name": "apextimerpro",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Apex Timer Pro - Carrera-Bahn Zeitmessung",
   "main": "main.js",
   "scripts": {
