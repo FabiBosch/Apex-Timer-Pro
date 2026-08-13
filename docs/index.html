@@ -20,7 +20,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apex Timer Pro V1.0.12 (build 20260813-1512)</title>
+<title>Apex Timer Pro V1.0.13 (build 20260813-1516)</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap');
 :root{
@@ -485,7 +485,7 @@ select.minput option{background:var(--bg2);}
 
 <!-- ═══════════════ HEADER ═══════════════ -->
 <header>
-  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.0.12</span></div>
+  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.0.13</span></div>
   <div class="hdr-center" style="display:flex;gap:8px;align-items:center;">
 
     <button class="app-mode-btn active" id="amStd" onclick="setAppMode('std')">STANDARD</button>
@@ -4194,6 +4194,14 @@ function getDirSM(pid){
   return dirSM[pid];
 }
 
+// Feste Obergrenze der Schwellwert-Anzeige (Balken + Fader, Taste M): bewusst
+// KLEINER als das Maximum des Empfindlichkeits-Reglers (30), damit der
+// Balken für typische Auslöse-Ausschläge (meist 5-15%) noch sichtbar
+// reagiert, statt auf der vollen 0-30-Skala winzig zu wirken. Ein
+// Schwellwert oberhalb dieses Werts wird an der rechten Kante angezeigt
+// (Marker-Linie/Fader laufen dann auf Anschlag).
+const THRESH_BAR_SCALE_MAX = 15;
+
 // Width of each guard band and center band in VIDEO pixels (scaled from screen)
 const GUARD_VID_PX = 12;   // ~half width of band captured per zone
 
@@ -4619,13 +4627,14 @@ function _drawZone(ctx, camR, r, isP2) {
   // alte, rein relative Balken-Füllung (die sich immer bis zum Schwellwert
   // auf volle Breite normierte, wodurch nicht erkennbar war, OB der
   // Schwellwert z.B. bei 8% oder 20% liegt) läuft die Skala jetzt fest von
-  // 0 bis zum Maximalwert des Empfindlichkeits-Reglers — die rote Linie
-  // markiert die AKTUELLE Schwellwert-Position auf dieser festen Skala und
-  // wandert automatisch mit, sobald die Empfindlichkeit geändert wird. Die
-  // Balkenbreite selbst folgt zx/zw und damit automatisch der Zonenbreite.
+  // 0 bis THRESH_BAR_SCALE_MAX (bewusst kleiner als der volle Regler-Bereich
+  // bis 30, siehe Kommentar dort) — die rote Linie markiert die AKTUELLE
+  // Schwellwert-Position auf dieser festen Skala und wandert automatisch
+  // mit, sobald die Empfindlichkeit geändert wird. Die Balkenbreite selbst
+  // folgt zx/zw und damit automatisch der Zonenbreite.
   if(cfg.showThreshBar) {
     var barX=zx+3, barY=zy+zh-7, barW=zw-6, barH=4;
-    var sensiMax=parseFloat((document.getElementById('sensiRange')||{max:30}).max)||30;
+    var sensiMax=THRESH_BAR_SCALE_MAX;
     ctx.fillStyle='rgba(0,0,0,.5)';
     ctx.fillRect(barX,barY,barW,barH);
     var curW=Math.min(1,r.cPct/sensiMax)*barW;
@@ -4962,7 +4971,7 @@ function drawZoneOverlay(mc, camR, dzR, lineFrac, camIdx, isP2, motPct, lMotPct,
   // Schwellwert, dazu eine rote Linie an der tatsächlichen Schwellwert-Position.
   if(cfg.showThreshBar) {
     const barX=zx+3, barY=zy+zh-7, barW=zw-6, barH=4;
-    const sensiMax=parseFloat((document.getElementById('sensiRange')||{max:30}).max)||30;
+    const sensiMax=THRESH_BAR_SCALE_MAX;
     ctx.fillStyle='rgba(0,0,0,.5)';
     ctx.fillRect(barX,barY,barW,barH);
     const curW=Math.min(1,motPct/sensiMax)*barW;
@@ -8329,13 +8338,13 @@ function exportData(p) {
   var suggestedName=parts.join(' - ')+'.txt';
   // Filename dialog
   var NL='\n', SEP='='.repeat(54);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.12 - RUNDENZEITEN'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.0.13 - RUNDENZEITEN'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   STANDARD / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
   if(meta.name) txt+='  Session: '+meta.name+NL;
   if(meta.weather) txt+='  Wetter:  '+meta.weather+NL;
-  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.12'+NL+SEP+NL;
+  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.13'+NL+SEP+NL;
   _exportPendingData={type:'single',txt:txt,suggestedName:suggestedName};
   _openExportModal(suggestedName);
 }
@@ -8360,7 +8369,7 @@ function exportVS() {
     else winner='GLEICHSTAND';
   }
   var NL='\n', SEP='='.repeat(colW*2+5);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.12 - VS ERGEBNISSE'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.0.13 - VS ERGEBNISSE'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   VS / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
@@ -8373,7 +8382,7 @@ function exportVS() {
     var c2=l2&&i2<l2.length?l2[i2]:'';
     txt+=c1+' | '+c2+NL;
   }
-  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.12'+NL+SEP+NL;
+  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.13'+NL+SEP+NL;
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
   var _s1=ps[1],_s2=ps[2]; var _t1=_s1.totalMs+_s1.penalty,_t2=_s2.totalMs+_s2.penalty; var _l1=_s1.laps.length,_l2=_s2.laps.length;
