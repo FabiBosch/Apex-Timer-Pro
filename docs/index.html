@@ -20,7 +20,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apex Timer Pro V1.0.10 (build 20260713-2034)</title>
+<title>Apex Timer Pro V1.0.11 (build 20260813-1454)</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap');
 :root{
@@ -89,6 +89,14 @@ canvas.hc{display:none;}
 .cam-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--text-dim);text-align:center;position:absolute;inset:0;}
 .cam-placeholder svg{opacity:.2;}
 .cam-placeholder p{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;line-height:2;}
+
+/* ── SCHWELLWERT-FADER (außerhalb der rechten Zonenseite, Taste M) ── */
+.thresh-fader-wrap{position:absolute;display:none;pointer-events:none;z-index:20;}
+.thresh-fader{position:absolute;top:50%;left:50%;margin:0;padding:0;pointer-events:auto;-webkit-appearance:none;appearance:none;background:transparent;transform:translate(-50%,-50%) rotate(-90deg);touch-action:none;}
+.thresh-fader::-webkit-slider-runnable-track{height:4px;background:rgba(0,0,0,.55);border:1px solid var(--border);border-radius:2px;}
+.thresh-fader::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-7px;border-radius:50%;background:#ff1744;border:2px solid #fff;cursor:pointer;box-shadow:0 0 6px rgba(255,23,68,.8);}
+.thresh-fader::-moz-range-track{height:4px;background:rgba(0,0,0,.55);border:1px solid var(--border);border-radius:2px;}
+.thresh-fader::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#ff1744;border:2px solid #fff;cursor:pointer;box-shadow:0 0 6px rgba(255,23,68,.8);}
 
 /* ── DETECTION ZONE ── */
 .dz{position:absolute;cursor:move;user-select:none;}
@@ -477,7 +485,7 @@ select.minput option{background:var(--bg2);}
 
 <!-- ═══════════════ HEADER ═══════════════ -->
 <header>
-  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.0.10</span></div>
+  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.0.11</span></div>
   <div class="hdr-center" style="display:flex;gap:8px;align-items:center;">
 
     <button class="app-mode-btn active" id="amStd" onclick="setAppMode('std')">STANDARD</button>
@@ -583,6 +591,17 @@ select.minput option{background:var(--bg2);}
       <div class="dz-rotate-handle" data-dz="2s" title="Ziehen zum Drehen · Doppelklick = zurücksetzen"></div>
       <div class="dz-lock-handle" data-dz="2s" title="Messfenster sperren/entsperren">🔓</div>
       <button class="dz-dir" id="dirBtn2s" onclick="toggleDir('2s')"><span class="dz-dir-arrow">↔</span> BEIDE</button>
+    </div>
+
+    <!-- Schwellwert-Fader: liegt außerhalb der rechten Seite des jeweiligen
+         Messfensters, Position/Größe wird pro Frame in _updateThreshFader()
+         anhand der aktuellen Zonengeometrie gesetzt. Ein-/Ausblenden über
+         cfg.showThreshBar (Einstellungen-Toggle bzw. Taste M). -->
+    <div class="thresh-fader-wrap" id="threshFaderWrap1">
+      <input type="range" class="thresh-fader" id="threshFader1" min="1" max="30" step="1" value="8" oninput="_onThreshFaderInput(this.value)" title="Schwellwert (Empfindlichkeit)">
+    </div>
+    <div class="thresh-fader-wrap" id="threshFaderWrap2s">
+      <input type="range" class="thresh-fader" id="threshFader2s" min="1" max="30" step="1" value="8" oninput="_onThreshFaderInput(this.value)" title="Schwellwert (Empfindlichkeit)">
     </div>
 
     <!-- Boxenstopp-Button P2 (VS-Modus, gleiche Kamera) — leicht versetzt, damit
@@ -996,6 +1015,7 @@ select.minput option{background:var(--bg2);}
           </div>
         </div>
         <div class="toggle-row"><span class="toggle-label">Messzone anzeigen</span><div class="toggle on" id="tgl-showZone" onclick="tgl('showZone')"></div></div>
+        <div class="toggle-row"><span class="toggle-label">Schwellwert-Anzeige (Taste M)</span><div class="toggle" id="tgl-showThreshBar" onclick="tgl('showThreshBar')"></div></div>
         <div id="sensiP2Section" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
           <div class="msec-title" style="color:var(--p2);">P2 EMPFINDLICHKEIT (wird im VS-Modus eingeblendet)</div>
           <div class="mgrid">
@@ -1946,7 +1966,7 @@ let sessMode = 'training'; // 'training' | 'race'
 let racePhase = 'idle';    // 'idle' | 'lights_on' | 'go' — global for both players
 
 const cfg = {
-  showZone:true, sndStart:true, sndLap:true, sndBest:true, sndFinish:true, sndSession:true,
+  showZone:true, showThreshBar:false, sndStart:true, sndLap:true, sndBest:true, sndFinish:true, sndSession:true,
   showHud:true, hlBest:true, hlWorst:true, showDelta:true, flashFx:true,
   skipFirst:false, falseStart:true, sndCountdown:false, sndTimedWarning:true, sndGo:false,
   instantReplay:true,
@@ -2076,7 +2096,8 @@ var SHORTCUT_DEFAULTS = {
   pitStopP2:    { code:'KeyN',       label:'Boxenstopp Fahrer 2 (nur VS)' },
   pitStopSettings: { code:'KeyP',    label:'Boxenstopp-Einstellungen öffnen' },
   saveFile:     { code:'KeyS', ctrl:true, label:'Speichern (JSON-Datei)' },
-  loadFile:     { code:'KeyO', ctrl:true, label:'Laden (JSON-Datei, überschreibt alles)' }
+  loadFile:     { code:'KeyO', ctrl:true, label:'Laden (JSON-Datei, überschreibt alles)' },
+  showThreshBar:{ code:'KeyM',       label:'Schwellwert-Anzeige ein/aus' }
 };
 let db = { tracks:[], drivers:[], cars:[], assignments:{p1Driver:'',p2Driver:'',p1Car:'',p2Car:''}, sessionMeta:{},
   shortcuts: JSON.parse(JSON.stringify(SHORTCUT_DEFAULTS)) };
@@ -4211,6 +4232,8 @@ function detectMotionVS() {
   if(cfg.showZone) {
     if(r1) _drawZone(ctx,camR,r1,false);
     if(r2) _drawZone(ctx,camR,r2,true);
+  } else {
+    _hideThreshFader('1'); _hideThreshFader('2s');
   }
 
   // Update motion bars for both zones
@@ -4592,12 +4615,26 @@ function _drawZone(ctx, camR, r, isP2) {
   ctx.lineWidth=1; ctx.setLineDash([5,4]);
   ctx.strokeRect(zx,zy,zw,zh); ctx.setLineDash([]);
 
-  // Motion bar
-  ctx.fillStyle='rgba(0,0,0,.4)';
-  ctx.fillRect(zx+3,zy+zh-7,zw-6,4);
-  var fw=Math.min(1,r.cPct/thresh)*(zw-6);
-  ctx.fillStyle=triggered?'#ff3c00':(isP2?'#ff6b00':'#00e5ff');
-  ctx.fillRect(zx+3,zy+zh-7,fw,4);
+  // Schwellwert-Anzeige (Taste M / Einstellungen → Bewegung): anders als die
+  // alte, rein relative Balken-Füllung (die sich immer bis zum Schwellwert
+  // auf volle Breite normierte, wodurch nicht erkennbar war, OB der
+  // Schwellwert z.B. bei 8% oder 20% liegt) läuft die Skala jetzt fest von
+  // 0 bis zum Maximalwert des Empfindlichkeits-Reglers — die rote Linie
+  // markiert die AKTUELLE Schwellwert-Position auf dieser festen Skala und
+  // wandert automatisch mit, sobald die Empfindlichkeit geändert wird. Die
+  // Balkenbreite selbst folgt zx/zw und damit automatisch der Zonenbreite.
+  if(cfg.showThreshBar) {
+    var barX=zx+3, barY=zy+zh-7, barW=zw-6, barH=4;
+    var sensiMax=parseFloat((document.getElementById('sensiRange')||{max:30}).max)||30;
+    ctx.fillStyle='rgba(0,0,0,.5)';
+    ctx.fillRect(barX,barY,barW,barH);
+    var curW=Math.min(1,r.cPct/sensiMax)*barW;
+    ctx.fillStyle=triggered?'#ff3c00':(isP2?'#ff6b00':'#00e5ff');
+    ctx.fillRect(barX,barY,curW,barH);
+    var threshX=barX+Math.min(1,thresh/sensiMax)*barW;
+    ctx.strokeStyle='#ff1744'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(threshX,barY-3); ctx.lineTo(threshX,barY+barH+3); ctx.stroke();
+  }
 
   // Guide lines
   var guideOff=Math.min(50,zw*0.35);
@@ -4631,6 +4668,46 @@ function _drawZone(ctx, camR, r, isP2) {
   ctx.beginPath(); ctx.arc(lx,zy+zh/2,triggered?7:4.5,0,Math.PI*2); ctx.fill();
   if(triggered){ ctx.strokeStyle='rgba(255,60,0,.6)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(lx,zy+zh/2,13,0,Math.PI*2); ctx.stroke(); }
   ctx.restore();
+
+  _updateThreshFader(isP2?'2s':'1', camR, zx, zy, zw, zh);
+}
+
+// ─── Schwellwert-Fader: interaktiver Regler außerhalb der rechten
+// Zonenseite (Taste M / Einstellungen, dieselbe Sichtbarkeit wie die
+// Schwellwert-Anzeige). Technik: ein normaler horizontaler <input
+// type=range> wird per CSS um -90° gedreht (siehe .thresh-fader), dadurch
+// entsteht ein vertikaler Fader ohne die inkonsistente
+// Browser-Unterstützung für "echte" vertikale Range-Inputs. Position/Größe
+// werden HIER jeden Frame aus der aktuellen Zonengeometrie (zx/zy/zw/zh,
+// camPanel-relative Pixel — dieselbe Basis wie die Canvas-Zeichnung)
+// gesetzt, damit der Fader beim Verschieben/Skalieren des Messfensters
+// automatisch mitwandert. Der Wert wird direkt an #sensiRange gespiegelt
+// (das ist der einzige Regler, den die Erkennung tatsächlich ausliest —
+// #sensiRange2 wird aktuell nirgends von der Erkennung gelesen), daher
+// steuern beide Fader (P1/P2) denselben Schwellwert.
+function _hideThreshFader(pk) {
+  var wrap=document.getElementById('threshFaderWrap'+pk);
+  if(wrap) wrap.style.display='none';
+}
+function _updateThreshFader(pk, camR, zx, zy, zw, zh) {
+  if(!cfg.showThreshBar) { _hideThreshFader(pk); return; }
+  var wrap=document.getElementById('threshFaderWrap'+pk);
+  var inp=document.getElementById('threshFader'+pk);
+  if(!wrap||!inp) return;
+  var FW=22, gap=10;
+  var left=Math.max(2, Math.min(zx+zw+gap, camR.width-FW-2));
+  wrap.style.display='block';
+  wrap.style.left=left+'px'; wrap.style.top=zy+'px';
+  wrap.style.width=FW+'px'; wrap.style.height=zh+'px';
+  inp.style.width=zh+'px'; inp.style.height=FW+'px';
+  var sensiEl=document.getElementById('sensiRange');
+  if(sensiEl && document.activeElement!==inp) inp.value=sensiEl.value;
+}
+function _onThreshFaderInput(val) {
+  var sensiEl=document.getElementById('sensiRange');
+  var sensiVal=document.getElementById('sensiVal');
+  if(sensiEl) sensiEl.value=val;
+  if(sensiVal) sensiVal.textContent=val+'%';
 }
 
 // ─── Helper: erfasst EINEN zusammenhängenden Streifen, der alle drei
@@ -4844,7 +4921,7 @@ function drawZoneOverlay(mc, camR, dzR, lineFrac, camIdx, isP2, motPct, lMotPct,
   mc.width=camR.width; mc.height=camR.height;
   const ctx=mc.getContext('2d');
   ctx.clearRect(0,0,mc.width,mc.height);
-  if(!cfg.showZone) return;
+  if(!cfg.showZone) { _hideThreshFader(isP2?'2s':'1'); return; }
 
   const zx=dzR.left-camR.left, zy=dzR.top-camR.top;
   const zw=dzR.width, zh=dzR.height;
@@ -4867,12 +4944,22 @@ function drawZoneOverlay(mc, camR, dzR, lineFrac, camIdx, isP2, motPct, lMotPct,
   ctx.lineWidth=1; ctx.setLineDash([5,4]);
   ctx.strokeRect(zx,zy,zw,zh); ctx.setLineDash([]);
 
-  // Motion bar inside zone bottom
-  ctx.fillStyle='rgba(0,0,0,.4)';
-  ctx.fillRect(zx+3,zy+zh-7,zw-6,4);
-  const fw=Math.min(1,motPct/thresh)*(zw-6);
-  ctx.fillStyle=triggered?'#ff3c00':(isP2?'#ff6b00':'#00e5ff');
-  ctx.fillRect(zx+3,zy+zh-7,fw,4);
+  // Schwellwert-Anzeige (Taste M / Einstellungen → Bewegung) — siehe
+  // ausführlichen Kommentar in _drawZone() für die Herleitung: feste Skala
+  // 0..Empfindlichkeits-Maximum statt relativer Normierung auf den
+  // Schwellwert, dazu eine rote Linie an der tatsächlichen Schwellwert-Position.
+  if(cfg.showThreshBar) {
+    const barX=zx+3, barY=zy+zh-7, barW=zw-6, barH=4;
+    const sensiMax=parseFloat((document.getElementById('sensiRange')||{max:30}).max)||30;
+    ctx.fillStyle='rgba(0,0,0,.5)';
+    ctx.fillRect(barX,barY,barW,barH);
+    const curW=Math.min(1,motPct/sensiMax)*barW;
+    ctx.fillStyle=triggered?'#ff3c00':(isP2?'#ff6b00':'#00e5ff');
+    ctx.fillRect(barX,barY,curW,barH);
+    const threshX=barX+Math.min(1,thresh/sensiMax)*barW;
+    ctx.strokeStyle='#ff1744'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(threshX,barY-3); ctx.lineTo(threshX,barY+barH+3); ctx.stroke();
+  }
 
   // White guide lines flanking the red trigger line
   const guideOff = Math.min(50,zw*0.35);
@@ -4925,6 +5012,8 @@ function drawZoneOverlay(mc, camR, dzR, lineFrac, camIdx, isP2, motPct, lMotPct,
     ctx.beginPath(); ctx.arc(lx,zy+zh/2,13,0,Math.PI*2); ctx.stroke();
   }
   ctx.restore();
+
+  _updateThreshFader(isP2?'2s':'1', camR, zx, zy, zw, zh);
 }
 
 function doTriggerFlash(p,isP2std) {
@@ -8228,13 +8317,13 @@ function exportData(p) {
   var suggestedName=parts.join(' - ')+'.txt';
   // Filename dialog
   var NL='\n', SEP='='.repeat(54);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.10 - RUNDENZEITEN'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.0.11 - RUNDENZEITEN'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   STANDARD / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
   if(meta.name) txt+='  Session: '+meta.name+NL;
   if(meta.weather) txt+='  Wetter:  '+meta.weather+NL;
-  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.10'+NL+SEP+NL;
+  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.11'+NL+SEP+NL;
   _exportPendingData={type:'single',txt:txt,suggestedName:suggestedName};
   _openExportModal(suggestedName);
 }
@@ -8259,7 +8348,7 @@ function exportVS() {
     else winner='GLEICHSTAND';
   }
   var NL='\n', SEP='='.repeat(colW*2+5);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.10 - VS ERGEBNISSE'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.0.11 - VS ERGEBNISSE'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   VS / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
@@ -8272,7 +8361,7 @@ function exportVS() {
     var c2=l2&&i2<l2.length?l2[i2]:'';
     txt+=c1+' | '+c2+NL;
   }
-  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.10'+NL+SEP+NL;
+  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.11'+NL+SEP+NL;
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
   var _s1=ps[1],_s2=ps[2]; var _t1=_s1.totalMs+_s1.penalty,_t2=_s2.totalMs+_s2.penalty; var _l1=_s1.laps.length,_l2=_s2.laps.length;
@@ -12447,6 +12536,7 @@ document.addEventListener('keydown',e=>{
   // sonst den Browser-eigenen "Seite speichern"/"Datei öffnen"-Dialog auslöst.
   if(_shortcutMatch(e,'saveFile')) { e.preventDefault(); apexSaveNow(); }
   if(_shortcutMatch(e,'loadFile')) { e.preventDefault(); loadAllData(); }
+  if(_shortcutMatch(e,'showThreshBar')) { e.preventDefault(); tgl('showThreshBar'); }
 });
 
 // ═══════════════════════════════════════════════════════
