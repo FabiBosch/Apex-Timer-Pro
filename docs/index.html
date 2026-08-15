@@ -351,13 +351,13 @@ canvas.hc{display:none;}
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.87);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
 .modal-backdrop.open{display:flex;}
 .modal{background:var(--bg2);border:1px solid var(--border);width:600px;max-width:96vw;max-height:90vh;overflow-y:auto;position:relative;display:flex;flex-direction:column;}
-.modal.wide{width:780px;}
+.modal.wide{width:920px;}
 .modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);}
 .modal-hdr{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
 .modal-title{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;letter-spacing:3px;color:var(--accent);}
 .modal-close{background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;padding:3px 7px;}
 .modal-close:hover{color:var(--text);}
-.modal-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.modal-tabs{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--border);flex-shrink:0;}
 .mtab{padding:9px 18px;font-family:'Orbitron',monospace;font-size:9px;font-weight:700;letter-spacing:2px;cursor:pointer;border:none;background:transparent;color:var(--text-dim);transition:all .2s;border-bottom:2px solid transparent;}
 .mtab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .modal-body{padding:18px 20px;overflow-y:auto;flex:1;}
@@ -600,11 +600,11 @@ select.minput option{background:var(--bg2);}
          anhand der aktuellen Zonengeometrie gesetzt. Ein-/Ausblenden über
          cfg.showThreshBar (Einstellungen-Toggle bzw. Taste M). -->
     <div class="thresh-fader-wrap" id="threshFaderWrap1">
-      <input type="range" class="thresh-fader" id="threshFader1" min="1" max="30" step="1" value="8" oninput="_onThreshFaderInput(this.value)" title="Schwellwert (Empfindlichkeit)">
+      <input type="range" class="thresh-fader" id="threshFader1" min="1" max="15" step="1" value="8" oninput="_onThreshFaderInput(this.value)" title="Schwellwert (Empfindlichkeit)">
       <button class="thresh-fader-reset" onclick="_resetThreshFader()" title="Schwellwert auf Standard zurücksetzen">↺</button>
     </div>
     <div class="thresh-fader-wrap" id="threshFaderWrap2s">
-      <input type="range" class="thresh-fader" id="threshFader2s" min="1" max="30" step="1" value="8" oninput="_onThreshFaderInput(this.value)" title="Schwellwert (Empfindlichkeit)">
+      <input type="range" class="thresh-fader" id="threshFader2s" min="1" max="15" step="1" value="8" oninput="_onThreshFaderInput(this.value)" title="Schwellwert (Empfindlichkeit)">
       <button class="thresh-fader-reset" onclick="_resetThreshFader()" title="Schwellwert auf Standard zurücksetzen">↺</button>
     </div>
 
@@ -971,7 +971,10 @@ select.minput option{background:var(--bg2);}
             </div>
           </div>
         </div>
-        <button class="btn-save" style="margin-top:10px;font-size:9px;padding:7px 16px;" onclick="connectCam(1)">▶ VERBINDEN</button>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="btn-save" style="font-size:9px;padding:7px 16px;" onclick="connectCam(1)">▶ VERBINDEN</button>
+          <button class="btn-save" style="font-size:9px;padding:7px 16px;background:rgba(255,23,68,.08);color:var(--red);border-color:rgba(255,23,68,.3);" onclick="disconnectCam(1)">✕ TRENNEN</button>
+        </div>
         <div class="cam-preview-wrap"><video id="settingsPreview1" autoplay muted playsinline style="width:100%;max-height:160px;object-fit:contain;display:block;"></video></div>
       </div>
       <div class="msec">
@@ -995,10 +998,10 @@ select.minput option{background:var(--bg2);}
         <div class="msec-title">BEWEGUNGSERKENNUNG</div>
         <div class="mgrid">
           <div class="mitem full"><label class="mlabel">EMPFINDLICHKEIT (1=hoch, 30=niedrig)</label>
-            <input type="range" class="minput" id="sensiRange" min="1" max="30" value="8" oninput="document.getElementById('sensiVal').textContent=this.value+'%'">
+            <input type="range" class="minput" id="sensiRange" min="1" max="15" value="8" oninput="document.getElementById('sensiVal').textContent=this.value+'%'">
           </div>
           <div class="mitem full" style="display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);">
-            <span>Hoch (1%)</span><span id="sensiVal">8%</span><span>Niedrig (30%)</span>
+            <span>Hoch (1%)</span><span id="sensiVal">8%</span><span>Niedrig (15%)</span>
           </div>
           <div class="mitem full"><label class="mlabel">SPERRZEIT NACH TRIGGER</label>
             <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
@@ -1024,7 +1027,7 @@ select.minput option{background:var(--bg2);}
           <div class="msec-title" style="color:var(--p2);">P2 EMPFINDLICHKEIT (wird im VS-Modus eingeblendet)</div>
           <div class="mgrid">
             <div class="mitem full"><label class="mlabel">P2 EMPFINDLICHKEIT (1=hoch, 30=niedrig)</label>
-              <input type="range" class="minput" id="sensiRange2" min="1" max="30" value="8" oninput="document.getElementById('sensiVal2').textContent=this.value+'%'">
+              <input type="range" class="minput" id="sensiRange2" min="1" max="15" value="8" oninput="document.getElementById('sensiVal2').textContent=this.value+'%'">
             </div>
             <div class="mitem full" style="display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);">
               <span>Hoch</span><span id="sensiVal2">8%</span><span>Niedrig</span>
@@ -1122,55 +1125,6 @@ select.minput option{background:var(--bg2);}
           </div>
         </div>
       </div>
-      <div class="msec" style="margin-top:14px;">
-        <div class="msec-title">LOKALE SYNCHRONISIERUNG (PC ↔ iPad, selbes WLAN)</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);margin-bottom:8px;line-height:1.5;">
-          Aufzeichnungen, Profile, Fotos und Instant-Replay-Videos werden automatisch im Hintergrund abgeglichen, solange beide Geräte im selben WLAN sind — ohne Cloud.
-        </div>
-        <div id="localSyncPcInfo" style="display:none;">
-          <div class="mgrid">
-            <div class="mitem full"><label class="mlabel">DIESE PC-ADRESSE AUFS iPAD EINGEBEN</label>
-              <div style="display:flex;gap:6px;">
-                <input class="minput" id="localSyncPcAddr" readonly onclick="this.select()" style="flex:1;">
-                <button class="tbl-btn" onclick="_localSyncCopyPcAddr()" id="localSyncCopyBtn" style="white-space:nowrap;">📋 KOPIEREN</button>
-              </div>
-            </div>
-          </div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);margin-top:4px;">
-            Auf dem iPad im Safari-Browser aufrufen, dann "Zum Home-Bildschirm" hinzufügen.
-          </div>
-          <div id="localSyncPcAltAddrs" style="display:none;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);margin-top:6px;line-height:1.6;"></div>
-          <div id="localSyncCaWarning" style="display:none;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--yellow);background:rgba(255,214,0,.08);border:1px solid rgba(255,214,0,.3);padding:6px 8px;margin-top:8px;line-height:1.6;">
-            ⚠ Neues Zertifikat erzeugt — bitte auf dem iPad EINMALIG neu installieren (siehe unten), sonst funktionieren Kamera und Sync nicht.
-          </div>
-          <div class="mgrid" style="margin-top:10px;">
-            <div class="mitem full"><label class="mlabel">ZERTIFIKAT AUFS iPAD INSTALLIEREN (einmalig, für Kamera + Sync nötig)</label>
-              <div style="display:flex;gap:6px;">
-                <input class="minput" id="localSyncCertAddr" readonly onclick="this.select()" style="flex:1;">
-                <button class="tbl-btn" onclick="_localSyncCopyCertAddr()" id="localSyncCopyCertBtn" style="white-space:nowrap;">📋 KOPIEREN</button>
-              </div>
-            </div>
-          </div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--text-dim);margin-top:4px;line-height:1.7;">
-            Auf dem iPad in Safari (nicht als Homescreen-Icon) öffnen → "Profil installieren" antippen und bestätigen → danach:
-            Einstellungen → Allgemein → VPN &amp; Geräteverwaltung → Profil installieren → nochmal bestätigen → danach:
-            Einstellungen → Allgemein → Info → Zertifikatsvertrauenseinstellungen → für "Apex Timer Pro" aktivieren.
-            Erst danach die PC-Adresse oben (https://…) aufrufen und als Homescreen-Icon speichern.
-          </div>
-        </div>
-        <div id="localSyncClientInput">
-          <div class="mgrid">
-            <div class="mitem full"><label class="mlabel">PC-ADRESSE (z.B. 192.168.1.23:4123)</label>
-              <div style="display:flex;gap:6px;">
-                <input class="minput" id="localSyncAddrInput" placeholder="192.168.1.23:4123" style="flex:1;" onkeydown="if(event.key==='Enter'){this.blur();_localSyncOnAddrChange();}" onblur="_localSyncOnAddrChange()">
-                <button class="tbl-btn" onclick="document.getElementById('localSyncAddrInput').blur();_localSyncOnAddrChange();" style="white-space:nowrap;">✓ ÜBERNEHMEN</button>
-              </div>
-            </div>
-          </div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--text-dim);margin-top:4px;">Nach Eingabe mit Enter oder "ÜBERNEHMEN" bestätigen — synchronisiert erst dann.</div>
-          <div id="localSyncStatus" style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);margin-top:4px;">— nicht konfiguriert</div>
-        </div>
-      </div>
     </div>
     <!-- SHORTCUTS TAB -->
     <div id="stShortcuts" class="mtab-content" style="display:none;">
@@ -1208,6 +1162,7 @@ select.minput option{background:var(--bg2);}
     <button class="mtab" onclick="showMTab('dtRaceOpts')">RENNOPTIONEN</button>
     <button class="mtab" onclick="showMTab('dtSession')">SESSION</button>
     <button class="mtab" onclick="showMTab('dtSave')">SPEICHERN</button>
+    <button class="mtab" onclick="showMTab('dtSync')">SYNCHRONISIEREN</button>
   </div>
   <div class="modal-body">
     <!-- TRACKS -->
@@ -1505,7 +1460,65 @@ select.minput option{background:var(--bg2);}
         </div>
       </div>
     </div>
-
+    <!-- SYNC TAB -->
+    <div id="dtSync" class="mtab-content" style="display:none;">
+      <div class="msec">
+        <div class="msec-title">LOKALE SYNCHRONISIERUNG (PC ↔ iPad, selbes WLAN)</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);margin-bottom:8px;line-height:1.5;">
+          Aufzeichnungen, Profile, Fotos und Instant-Replay-Videos werden automatisch im Hintergrund abgeglichen, solange beide Geräte im selben WLAN sind — ohne Cloud.
+        </div>
+        <div id="localSyncPcInfo" style="display:none;">
+          <div class="mgrid">
+            <div class="mitem full"><label class="mlabel">DIESE PC-ADRESSE AUFS iPAD EINGEBEN</label>
+              <div style="display:flex;gap:6px;">
+                <input class="minput" id="localSyncPcAddr" readonly onclick="this.select()" style="flex:1;">
+                <button class="tbl-btn" onclick="_localSyncCopyPcAddr()" id="localSyncCopyBtn" style="white-space:nowrap;">📋 KOPIEREN</button>
+              </div>
+            </div>
+          </div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);margin-top:4px;">
+            Auf dem iPad im Safari-Browser aufrufen, dann "Zum Home-Bildschirm" hinzufügen.
+          </div>
+          <div id="localSyncPcAltAddrs" style="display:none;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);margin-top:6px;line-height:1.6;"></div>
+          <div id="localSyncCaWarning" style="display:none;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--yellow);background:rgba(255,214,0,.08);border:1px solid rgba(255,214,0,.3);padding:6px 8px;margin-top:8px;line-height:1.6;">
+            ⚠ Neues Zertifikat erzeugt — bitte auf dem iPad EINMALIG neu installieren (siehe unten), sonst funktionieren Kamera und Sync nicht.
+          </div>
+          <div class="mgrid" style="margin-top:10px;">
+            <div class="mitem full"><label class="mlabel">ZERTIFIKAT AUFS iPAD INSTALLIEREN (einmalig, für Kamera + Sync nötig)</label>
+              <div style="display:flex;gap:6px;">
+                <input class="minput" id="localSyncCertAddr" readonly onclick="this.select()" style="flex:1;">
+                <button class="tbl-btn" onclick="_localSyncCopyCertAddr()" id="localSyncCopyCertBtn" style="white-space:nowrap;">📋 KOPIEREN</button>
+              </div>
+            </div>
+          </div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--text-dim);margin-top:4px;line-height:1.7;">
+            Auf dem iPad in Safari (nicht als Homescreen-Icon) öffnen → "Profil installieren" antippen und bestätigen → danach:
+            Einstellungen → Allgemein → VPN &amp; Geräteverwaltung → Profil installieren → nochmal bestätigen → danach:
+            Einstellungen → Allgemein → Info → Zertifikatsvertrauenseinstellungen → für "Apex Timer Pro" aktivieren.
+            Erst danach die PC-Adresse oben (https://…) aufrufen und als Homescreen-Icon speichern.
+          </div>
+        </div>
+        <div id="localSyncClientInput">
+          <div class="mgrid">
+            <div class="mitem full"><label class="mlabel">PC-ADRESSE (z.B. 192.168.1.23:4123)</label>
+              <div style="display:flex;gap:6px;">
+                <input class="minput" id="localSyncAddrInput" placeholder="192.168.1.23:4123" style="flex:1;" onkeydown="if(event.key==='Enter'){this.blur();_localSyncOnAddrChange();}" onblur="_localSyncOnAddrChange()">
+                <button class="tbl-btn" onclick="document.getElementById('localSyncAddrInput').blur();_localSyncOnAddrChange();" style="white-space:nowrap;">✓ ÜBERNEHMEN</button>
+              </div>
+            </div>
+          </div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--text-dim);margin-top:4px;">Nach Eingabe mit Enter oder "ÜBERNEHMEN" bestätigen — synchronisiert erst dann.</div>
+          <div id="localSyncSuggestAddr" style="display:none;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--yellow);background:rgba(255,214,0,.08);border:1px solid rgba(255,214,0,.3);padding:6px 8px;margin-top:6px;line-height:1.6;">
+            Diese Seite läuft auf <span id="localSyncSuggestAddrValue" style="font-weight:bold;"></span> — als Sync-Adresse verwenden?
+            <button class="tbl-btn" onclick="_localSyncUseDetectedAddr()" style="white-space:nowrap;margin-left:6px;">✓ VERWENDEN</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+            <div id="localSyncStatus" style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);flex:1;">— nicht konfiguriert</div>
+            <button class="tbl-btn" onclick="_localSyncTick()" style="white-space:nowrap;">↻ SYNC JETZT</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </div>
   <div class="modal-footer">
@@ -3943,6 +3956,30 @@ async function connectCam(p) {
   }catch(e){ apexAlert('Kamera '+p+' Fehler:\n'+e.message); }
 }
 
+// Trennt die Kamera von Spieler p wieder (Kehrseite von connectCam): stoppt
+// den MediaStream, die Bewegungserkennungs-Schleife und das Instant-Replay,
+// und setzt die UI auf den Zustand vor dem Verbinden zurück.
+function disconnectCam(p) {
+  var s=ps[p];
+  if(s.motionRafId) { cancelAnimationFrame(s.motionRafId); s.motionRafId=null; }
+  _replayStop(p);
+  if(s.stream) { s.stream.getTracks().forEach(function(t){t.stop();}); s.stream=null; }
+  var vid=document.getElementById('vid'+p);
+  if(vid) { vid.srcObject=null; vid.style.display='none'; }
+  var prev=document.getElementById('settingsPreview1');
+  if(prev && p===1) prev.srcObject=null;
+  var ph=document.getElementById('ph'+p); if(ph) ph.style.display='';
+  var overlay=document.getElementById('overlay'+p); if(overlay) overlay.style.display='none';
+  var mc=document.getElementById('mc'+p); if(mc) mc.style.display='none';
+  var camPreviewBtn=document.getElementById('camPreviewToggle'+p); if(camPreviewBtn) camPreviewBtn.style.display='none';
+  var dz1=document.getElementById('dz1'); if(dz1) dz1.style.display='none';
+  if(appMode==='vs') { var dz2=document.getElementById('dz2std'); if(dz2) dz2.style.display='none'; }
+  _hideThreshFader('1'); _hideThreshFader('2s');
+  _updatePitBtnVisibility();
+  setSdot('sdot', false, false);
+  var stextEl=document.getElementById('stext'); if(stextEl) stextEl.textContent='GETRENNT';
+}
+
 // Blendet NUR das sichtbare <video>-Element aus/ein (spart Render-/
 // Kompositierungs-Aufwand des Browsers, besonders bei hoher Auflösung auf
 // dem iPad) — die Bewegungserkennung (startMotion/detectMotion) liest das
@@ -4198,12 +4235,14 @@ function getDirSM(pid){
   return dirSM[pid];
 }
 
-// Feste Obergrenze der Schwellwert-Anzeige (Balken + Fader, Taste M): bewusst
-// KLEINER als das Maximum des Empfindlichkeits-Reglers (30), damit der
-// Balken für typische Auslöse-Ausschläge (meist 5-15%) noch sichtbar
-// reagiert, statt auf der vollen 0-30-Skala winzig zu wirken. Ein
-// Schwellwert oberhalb dieses Werts wird an der rechten Kante angezeigt
-// (Marker-Linie/Fader laufen dann auf Anschlag).
+// Feste Obergrenze der Schwellwert-Anzeige (Balken + Fader, Taste M).
+// Muss mit dem max-Attribut von #sensiRange/#sensiRange2/#threshFader1/
+// #threshFader2s übereinstimmen (aktuell 15) — sonst läuft die Marker-Linie
+// bereits VOR dem physischen Anschlag des Faders an die rechte Kante und
+// bleibt dort stehen, obwohl der Fader selbst noch weiter aufgedreht werden
+// kann (genau dieser Mismatch war der Bug in v1.0.11-1.0.14, als die
+// Anzeige-Skala hierauf verkleinert wurde, der Regler selbst aber bei
+// max="30" blieb).
 const THRESH_BAR_SCALE_MAX = 15;
 
 // Width of each guard band and center band in VIDEO pixels (scaled from screen)
@@ -6021,13 +6060,13 @@ const tabGroups={
   stDisplay:['stCamera','stMotion','stSound','stDisplay','stShortcuts'],
   stShortcuts:['stCamera','stMotion','stSound','stDisplay','stShortcuts'],
   stRaceOpts:['stCamera','stMotion','stSound','stDisplay','stShortcuts'],
-  dtTrack:['dtTrack','dtDriver','dtCar','dtRaceOpts','dtSession','dtSave'],
-  dtDriver:['dtTrack','dtDriver','dtCar','dtRaceOpts','dtSession','dtSave'],
-  dtCar:['dtTrack','dtDriver','dtCar','dtRaceOpts','dtSession','dtSave'],
-  dtRaceOpts:['dtTrack','dtDriver','dtCar','dtRaceOpts','dtSession','dtSave'],
-  dtSession:['dtTrack','dtDriver','dtCar','dtRaceOpts','dtSession','dtSave'],
-  dtSave:['dtTrack','dtDriver','dtCar','dtRaceOpts','dtSession','dtSave'],
-  dtSave:['dtTrack','dtDriver','dtCar','dtRaceOpts','dtSession','dtSave'],
+  dtTrack:['dtTrack','dtDriver','dtCar','dtRaceOpts','dtSession','dtSave','dtSync'],
+  dtDriver:['dtTrack','dtDriver','dtCar','dtRaceOpts','dtSession','dtSave','dtSync'],
+  dtCar:['dtTrack','dtDriver','dtCar','dtRaceOpts','dtSession','dtSave','dtSync'],
+  dtRaceOpts:['dtTrack','dtDriver','dtCar','dtRaceOpts','dtSession','dtSave','dtSync'],
+  dtSession:['dtTrack','dtDriver','dtCar','dtRaceOpts','dtSession','dtSave','dtSync'],
+  dtSave:['dtTrack','dtDriver','dtCar','dtRaceOpts','dtSession','dtSave','dtSync'],
+  dtSync:['dtTrack','dtDriver','dtCar','dtRaceOpts','dtSession','dtSave','dtSync'],
 };
 function showMTab(tab){
   const group=tabGroups[tab];
@@ -6076,7 +6115,7 @@ function _stabilizeModalHeight(activeTab, group) {
 function tabName(t){
   const m={stCamera:'KAMERA',stMotion:'BEWEGUNG',stSound:'TON',stDisplay:'ANZEIGE',stShortcuts:'SHORTCUTS',stRaceOpts:'RENNOPTIONEN',
            dtTrack:'STRECKEN',dtDriver:'FAHRER',dtCar:'FAHRZEUGE',
-           dtRaceOpts:'RENNOPTIONEN',dtSession:'SESSION',dtSave:'SPEICHERN'};
+           dtRaceOpts:'RENNOPTIONEN',dtSession:'SESSION',dtSave:'SPEICHERN',dtSync:'SYNCHRONISIEREN'};
   return m[t]||t;
 }
 
@@ -8918,6 +8957,34 @@ function _localSyncGetAddr() {
   return (localStorage.getItem('apexLocalSyncAddr')||'').trim();
 }
 
+// localStorage ist pro Browser-Origin isoliert — ändert sich die lokale
+// PC-IP oder der Port (z.B. DHCP-Neuvergabe oder Port-Fallback bei einer
+// noch laufenden Zweitinstanz, siehe listenWithFallback() in
+// local-server.js), lädt das iPad technisch eine NEUE Origin mit leerem
+// Speicher, obwohl die gespeicherte Adresse eigentlich noch "da" wäre.
+// Lädt die Seite aber direkt über die lokale PC-Adresse (Normalfall), kennt
+// sie ihr eigenes Sync-Ziel bereits über location — kein Tippen nötig.
+// Nur für den Client-Fall relevant (window.apexSyncBridge existiert nur im
+// PC/Electron-Fenster) und nur, wenn wirklich über eine rohe LAN-IP
+// aufgerufen (nicht z.B. über die GitHub-Pages-Standalone-Adresse, wo kein
+// sinnvolles Sync-Ziel ableitbar ist).
+function _localSyncDetectOwnOrigin() {
+  if (window.apexSyncBridge) return null;
+  if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(location.hostname)) return null;
+  return location.protocol + '//' + location.host;
+}
+
+function _localSyncUseDetectedAddr() {
+  var addr = _localSyncDetectOwnOrigin();
+  if (!addr) return;
+  var input = document.getElementById('localSyncAddrInput');
+  if (input) input.value = addr;
+  localStorage.setItem('apexLocalSyncAddr', addr);
+  var hint = document.getElementById('localSyncSuggestAddr');
+  if (hint) hint.style.display = 'none';
+  _localSyncTick();
+}
+
 function _localSyncStatus(msg, color) {
   var el = document.getElementById('localSyncStatus');
   if(el) { el.textContent = msg; el.style.color = color || 'var(--text-dim)'; }
@@ -8981,6 +9048,25 @@ function _localSyncRenderSettingsUI() {
   var clientInput = document.getElementById('localSyncClientInput');
   var addrInput = document.getElementById('localSyncAddrInput');
   if(addrInput && !addrInput.value) addrInput.value = _localSyncGetAddr();
+  var detectedAddr = _localSyncDetectOwnOrigin();
+  if(addrInput && detectedAddr) {
+    if(!addrInput.value) {
+      // Leeres Feld (z.B. neue Origin nach IP-Wechsel) — direkt befüllen,
+      // kein Tippen nötig.
+      addrInput.value = detectedAddr;
+      localStorage.setItem('apexLocalSyncAddr', detectedAddr);
+    } else if(addrInput.value.replace(/^https?:\/\//,'').replace(/\/$/,'') !== detectedAddr.replace(/^https?:\/\//,'')) {
+      // Feld hat schon einen (evtl. veralteten/falschen) Wert, der vom
+      // erkannten eigenen Origin abweicht — nur vorschlagen, nicht
+      // überschreiben (Nutzer bestätigt per Tap).
+      var hint = document.getElementById('localSyncSuggestAddr');
+      if(hint) {
+        hint.style.display = 'block';
+        var hintAddr = document.getElementById('localSyncSuggestAddrValue');
+        if(hintAddr) hintAddr.textContent = detectedAddr;
+      }
+    }
+  }
   if(window.__apexServerInfo) {
     var info = window.__apexServerInfo;
     var protocol = info.protocol || 'https';

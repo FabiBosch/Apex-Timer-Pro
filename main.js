@@ -30,6 +30,29 @@ autoUpdater.on('error', (err) => logUpdate('FEHLER: ' + (err && (err.stack || er
 autoUpdater.on('download-progress', (p) => logUpdate('Download läuft: ' + Math.round(p.percent) + '%'));
 autoUpdater.on('update-downloaded', (info) => logUpdate('Update heruntergeladen (' + info.version + ') — wird beim nächsten Neustart installiert.'));
 
+// Verhindert, dass wiederholte Neustarts (z.B. beim Testen) den Update-Check
+// zu oft auslösen und GitHubs Secondary-Rate-Limit (429 "Too many requests")
+// treffen — die blockt danach bis zu einer Stunde JEDEN weiteren Versuch,
+// auch legitime. Mindestabstand zwischen zwei Checks, persistiert über
+// App-Neustarts hinweg in einer eigenen State-Datei (userData).
+var updateStatePath = path.join(app.getPath('userData'), 'update-check-state.json');
+var UPDATE_CHECK_MIN_INTERVAL_MS = 60 * 60 * 1000;
+
+function shouldCheckForUpdates() {
+  try {
+    var state = JSON.parse(fs.readFileSync(updateStatePath, 'utf8'));
+    return (Date.now() - (state.lastCheckedAt || 0)) >= UPDATE_CHECK_MIN_INTERVAL_MS;
+  } catch (e) {
+    return true; // keine/kaputte State-Datei -> darf prüfen
+  }
+}
+
+function markUpdateChecked() {
+  try {
+    fs.writeFileSync(updateStatePath, JSON.stringify({ lastCheckedAt: Date.now() }));
+  } catch (e) {}
+}
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1280,
@@ -111,7 +134,12 @@ app.whenReady().then(() => {
   createWindow();
 
   // Nach Updates suchen, sobald die App gestartet ist
-  autoUpdater.checkForUpdatesAndNotify();
+  if (shouldCheckForUpdates()) {
+    markUpdateChecked();
+    autoUpdater.checkForUpdatesAndNotify();
+  } else {
+    logUpdate('Update-Check übersprungen (letzter Check < 1h her)');
+  }
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
