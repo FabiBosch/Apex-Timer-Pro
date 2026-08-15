@@ -43,7 +43,8 @@
     "publish": {
       "provider": "github",
       "owner": "FabiBosch",
-      "repo": "Apex-Timer-Pro"
+      "repo": "Apex-Timer-Pro",
+      "draft": false
     }
   }
 }
