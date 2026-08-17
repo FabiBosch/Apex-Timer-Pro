@@ -20,7 +20,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apex Timer Pro V1.1.0 (build 20260817-1200)</title>
+<title>Apex Timer Pro V1.2.0 (build 20260817-1600)</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap');
 :root{
@@ -139,9 +139,15 @@ canvas.hc{display:none;}
    Sperre) folgt exakt demselben Muster wie die Messfenster — bewusst OHNE
    Rotation, da ein Kreis keine sinnvolle Ausrichtung hat. */
 .pit-btn-wrap{position:absolute;touch-action:none;z-index:12;}
-.pit-btn{width:100%;height:100%;border-radius:50%;background:rgba(255,214,0,.15);border:3px solid var(--yellow);color:var(--yellow);cursor:pointer;touch-action:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:28px;line-height:1;-webkit-tap-highlight-color:transparent;transition:background .15s,transform .1s;}
+.pit-btn{width:100%;height:100%;border-radius:50%;background:rgba(255,214,0,.15);border:3px solid var(--yellow);color:var(--yellow);cursor:pointer;touch-action:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:28px;line-height:1;-webkit-tap-highlight-color:transparent;transition:background .15s,border-color .15s,color .15s,transform .1s;}
 .pit-btn:active{transform:scale(.94);}
 .pit-btn.active{background:var(--yellow);color:#000;animation:pitBtnPulse 1s ease-in-out infinite;}
+/* Boxenstoppfenster ist gerade offen (aktuelle Runde/Minute liegt in einem
+   noch nicht erfüllten Fenster) — hellrot als dringliches "jetzt boxen"-
+   Signal. Weicht dem tatsächlich laufenden Boxenstopp (.active), daher
+   :not(.active). Zurück auf Gelb, sobald das Fenster erfüllt oder vorbei
+   ist, siehe _updatePitStopWindowLabels. */
+.pit-btn.window-open:not(.active){background:rgba(255,110,110,.18);border-color:#ff6e6e;color:#ff6e6e;}
 @keyframes pitBtnPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,214,0,.5);}50%{box-shadow:0 0 0 10px rgba(255,214,0,0);}}
 .pit-btn-lbl{font-family:'Orbitron',monospace;font-size:22px;font-weight:900;letter-spacing:2px;}
 /* Boxenstopp-Pflicht aktiv: die normale Beschriftung (Symbol + "BOX") bleibt
@@ -164,6 +170,20 @@ canvas.hc{display:none;}
 /* Fahrer-Beschriftung links neben dem Vorhängeschloss — rein informativ,
    daher pointer-events:none, damit sie weder Klicks noch Drag/Resize stört. */
 .pit-driver-label{position:absolute;top:-10px;right:40px;background:rgba(8,12,16,.9);border:2px solid #fff;border-radius:4px;padding:2px 7px;font-family:'Orbitron',monospace;font-size:11px;font-weight:900;letter-spacing:1px;color:var(--yellow);z-index:14;pointer-events:none;user-select:none;}
+/* Boxenstoppfenster-Anzeige: eine Zeile "Fenster X-Y" pro Pflicht-
+   Boxenstopp, unterhalb des Buttons. pointer-events:none (rein
+   informativ, wie .pit-driver-label), stört Drag/Resize/Sperre nicht. Nur
+   sichtbar bei aktiver Pflicht UND aktiviertem Fenster-Feature, siehe
+   _updatePitStopWindowLabels. */
+.pit-window-labels{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:6px;display:flex;flex-direction:column;gap:4px;align-items:center;pointer-events:none;user-select:none;z-index:12;}
+/* --pit-lbl-scale wird von _apexUpdatePitWindowLabelScale am .pit-btn-wrap
+   gesetzt (vererbt sich auf die Labels): wächst der Button über seine
+   Standardgröße (160px) hinaus, wächst die Schrift proportional mit; unter
+   der Standardgröße bleibt sie bewusst bei ihrer normalen Größe (Skalierung
+   nach unten würde die Lesbarkeit unnötig verschlechtern). */
+.pit-window-label{background:rgba(8,12,16,.9);border:1px solid var(--yellow);border-radius:4px;padding:calc(4px * var(--pit-lbl-scale,1)) calc(10px * var(--pit-lbl-scale,1));font-family:'Share Tech Mono',monospace;font-size:calc(15px * var(--pit-lbl-scale,1));font-weight:700;letter-spacing:1px;color:var(--yellow);white-space:nowrap;}
+.pit-window-label.fulfilled{border-color:var(--green);color:var(--green);}
+.pit-window-label.missed{border-color:var(--red);color:var(--red);}
 .dz-dir{position:absolute;bottom:-24px;right:0;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;background:rgba(8,12,16,.95);border:1px solid var(--border);color:var(--accent);padding:4px 10px;cursor:pointer;white-space:nowrap;touch-action:none;min-height:28px;display:flex;align-items:center;gap:4px;z-index:3;}
 .dz-dir-arrow{font-size:16px;line-height:1;}
 
@@ -417,6 +437,14 @@ select.minput option{background:var(--bg2);}
 
 /* ── RECORDS MODAL ── */
 .rec-track-list{display:flex;flex-direction:column;gap:6px;margin-bottom:18px;}
+.rec-track-row{display:flex;align-items:stretch;}
+.drag-handle{cursor:grab;color:var(--text-dim);user-select:none;touch-action:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rec-track-row .drag-handle{padding:0 8px;font-size:14px;background:var(--bg3);border:1px solid var(--border);border-right:none;}
+#trackTable td.drag-handle{padding:0 6px;font-size:13px;width:16px;}
+.drag-reorder-active{opacity:.55;}
+tr.drag-reorder-active td{box-shadow:0 0 0 1px var(--accent) inset;}
+.rec-track-row.drag-reorder-active{box-shadow:0 0 0 2px var(--accent) inset;}
+body.drag-reorder-noselect,body.drag-reorder-noselect *{user-select:none !important;-webkit-user-select:none !important;}
 .rec-track-btn{padding:8px 16px;background:var(--bg3);border:1px solid var(--border);color:var(--text-dim);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .2s;text-align:left;flex:1;min-width:0;}
 .rec-track-btn:hover{border-color:var(--accent);color:var(--accent);}
 .rec-track-btn.active{background:rgba(0,229,255,.12);border-color:var(--accent);color:var(--accent);}
@@ -495,7 +523,7 @@ select.minput option{background:var(--bg2);}
 
 <!-- ═══════════════ HEADER ═══════════════ -->
 <header>
-  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.1.0</span></div>
+  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.2.0</span></div>
   <div class="hdr-center" style="display:flex;gap:8px;align-items:center;">
 
     <button class="app-mode-btn active" id="amStd" onclick="setAppMode('std')">STANDARD</button>
@@ -558,6 +586,7 @@ select.minput option{background:var(--bg2);}
       <div class="pit-handle-resize" data-pit="1" title="Größe ändern"></div>
       <div class="pit-driver-label" data-pit="1">F1</div>
       <div class="pit-lock-handle" data-pit="1" title="Boxenstopp-Button sperren/entsperren">🔓</div>
+      <div class="pit-window-labels" id="pitWindowLabels1"></div>
     </div>
 
     <!-- Detection zone P1 -->
@@ -628,6 +657,7 @@ select.minput option{background:var(--bg2);}
       <div class="pit-handle-resize" data-pit="2" title="Größe ändern"></div>
       <div class="pit-driver-label" data-pit="2">F2</div>
       <div class="pit-lock-handle" data-pit="2" title="Boxenstopp-Button sperren/entsperren">🔓</div>
+      <div class="pit-window-labels" id="pitWindowLabels2"></div>
     </div>
 
     <div class="trigger-flash p1" id="tf1"></div>
@@ -1219,7 +1249,7 @@ select.minput option{background:var(--bg2);}
       </div>
       <div class="msec">
         <div class="msec-title">GESPEICHERTE STRECKEN</div>
-        <table class="data-table" id="trackTable"><thead><tr><th onclick="apexSort('track',0)">NAME</th><th>VORSCHAU</th><th onclick="apexSort('track',1)">ORT</th><th onclick="apexSort('track',2)">LÄNGE</th><th onclick="apexSort('track',3)">TYP</th><th></th></tr></thead><tbody id="trackTbody"></tbody></table>
+        <table class="data-table" id="trackTable"><thead><tr><th style="width:16px;"></th><th onclick="apexSort('track',0)">NAME</th><th>VORSCHAU</th><th onclick="apexSort('track',1)">ORT</th><th onclick="apexSort('track',2)">LÄNGE</th><th onclick="apexSort('track',3)">TYP</th><th></th></tr></thead><tbody id="trackTbody"></tbody></table>
       </div>
       <div class="msec">
         <div class="msec-title">STRECKE HINZUFÜGEN</div>
@@ -2092,7 +2122,19 @@ const cfg = {
   // "1st GEAR"-Vorwarnung am Lollipop-Schild: so viele Sekunden vor Ablauf
   // der Mindeststandzeit dreht sich das Schild schon einmal (siehe
   // _renderPitMinTimeHud) — 0 deaktiviert die Vorwarnstufe komplett.
-  pitStopGearWarnSec:2
+  pitStopGearWarnSec:2,
+  // Boxenstoppfenster: zusätzliche Pflicht, dass JEDER Pflicht-Boxenstopp
+  // (siehe pitStopRequiredCount) innerhalb eines EIGENEN, konfigurierten
+  // Runden- (Rundenrennen) bzw. Minutenfensters (Zeitrennen) absolviert
+  // werden muss. Arrays werden immer synchron zu pitStopRequiredCount
+  // gehalten (siehe _syncPitStopWindowsLength) — ein {start,end}-Objekt pro
+  // Pflicht-Boxenstopp. Werden bei jeder Auswertung über Math.min/max
+  // normalisiert (start<=end), damit ein versehentlich vertauschtes Feld
+  // beim Tippen nicht sofort korrigiert werden muss (siehe
+  // _pitStopWindowsNormalized, gleiche Idee wie bei pitStopMinTimeRandomMax).
+  pitStopWindowEnabled:false,
+  pitStopWindowsLaps:[{start:1,end:1}],
+  pitStopWindowsMin:[{start:0,end:0}]
 };
 
 // Alle Boxenstopp-Einstellungsfelder in cfg — werden zusätzlich in
@@ -2105,7 +2147,8 @@ var PITSTOP_CFG_KEYS = [
   'pitStopPenaltyType','pitStopPenaltyTimeSec','pitStopPenaltyLaps',
   'pitStopMinTimeEnabled','pitStopMinTimeSec','pitStopMinTimeHoldSec',
   'pitStopMinTimeRandom','pitStopMinTimeRandomMin','pitStopMinTimeRandomMax',
-  'pitStopGearWarnSec'
+  'pitStopGearWarnSec',
+  'pitStopWindowEnabled','pitStopWindowsLaps','pitStopWindowsMin'
 ];
 // Kopiert die aktuellen cfg-Werte nach db.pitStopSettings — vor jedem
 // saveToLS()-Aufruf sowie vor dem Erstellen des JSON-Export-Payloads.
@@ -2122,6 +2165,37 @@ function _pitStopSyncFromDb() {
   PITSTOP_CFG_KEYS.forEach(function(k){
     if(db.pitStopSettings[k]!==undefined) cfg[k] = db.pitStopSettings[k];
   });
+  _syncPitStopWindowsLength();
+}
+
+// Hält cfg.pitStopWindowsLaps/-Min synchron zur aktuellen Pflicht-Anzahl:
+// fehlende Fenster werden mit einem Default ergänzt, überzählige (nach
+// Verringern der Anzahl) am ENDE abgeschnitten — frühere Fenster bleiben
+// dabei unangetastet.
+function _syncPitStopWindowsLength() {
+  var n = Math.max(1, cfg.pitStopRequiredCount||1);
+  if(!Array.isArray(cfg.pitStopWindowsLaps)) cfg.pitStopWindowsLaps = [];
+  if(!Array.isArray(cfg.pitStopWindowsMin)) cfg.pitStopWindowsMin = [];
+  while(cfg.pitStopWindowsLaps.length < n) cfg.pitStopWindowsLaps.push({start:1,end:1});
+  while(cfg.pitStopWindowsMin.length < n) cfg.pitStopWindowsMin.push({start:0,end:0});
+  cfg.pitStopWindowsLaps.length = n;
+  cfg.pitStopWindowsMin.length = n;
+}
+// Normalisiert ein Fenster-Array für die Auswertung: start<=end wird hier
+// erzwungen (nicht schon beim Tippen), damit vertauschte Eingaben den
+// Nutzer nicht durch springende Feldwerte stören.
+function _pitStopWindowsNormalized(kind) {
+  var arr = (kind==='laps' ? cfg.pitStopWindowsLaps : cfg.pitStopWindowsMin) || [];
+  return arr.map(function(w){ return { start: Math.min(w.start,w.end), end: Math.max(w.start,w.end) }; });
+}
+// Liefert das zum aktuellen sessMode passende, normalisierte Fenster-Array
+// — leer außerhalb von Rennen/Zeitrennen (Training/Superpole haben ohnehin
+// keine Boxenstopp-Pflicht, siehe togglePitStop-Guard und die Aufrufstellen
+// von _pitStopCheckAndApplyPenalty in recordLap()).
+function _pitStopWindowsForMode() {
+  if(sessMode==='race') return _pitStopWindowsNormalized('laps');
+  if(sessMode==='timed') return _pitStopWindowsNormalized('min');
+  return [];
 }
 
 // Per-player state (indexed 1 or 2)
@@ -2141,6 +2215,7 @@ const ps = {};
     pitStopExtraLaps: 0,
     pitStopDeductLaps: 0,
     pitStopMissedPenalty: null,
+    pitStopWindowMissed: [], // bei aktivem Boxenstoppfenster die konkret verpassten Fenster [{start,end},...]
     totalMs: 0,
     lapMs: 0,
     laps: [],
@@ -2196,7 +2271,7 @@ var SHORTCUT_DEFAULTS = {
   showThreshBar:{ code:'KeyM',       label:'Schwellwert-Anzeige ein/aus' },
   fullscreen:   { code:'F10',        label:'Vollbild (Karte zeichnen / Vektor-Design / Carrera-Baukasten)' }
 };
-let db = { tracks:[], drivers:[], cars:[], assignments:{p1Driver:'',p2Driver:'',p1Car:'',p2Car:''}, sessionMeta:{},
+let db = { tracks:[], trackOrder:[], drivers:[], cars:[], assignments:{p1Driver:'',p2Driver:'',p1Car:'',p2Car:''}, sessionMeta:{},
   // Grabsteine für gelöschte Fahrer/Fahrzeuge/Strecken (Key=Name/Modell → Löschzeitpunkt in ms) —
   // verhindert, dass eine Löschung durch einen Sync von einem noch nicht aktualisierten Gerät
   // wiederbelebt wird. Liegt bewusst INNERHALB von db, damit es automatisch durch die bestehende
@@ -3066,6 +3141,7 @@ function resetPlayer(p) {
   s.pitStopExtraLaps=0;      // Rundenrennen+Strafrunden: zusätzliche Pflichtrunden
   s.pitStopDeductLaps=0;     // Zeitrennen+Strafrunden: abgezogene gefahrene Runden
   s.pitStopMissedPenalty=null; // Gesamtstrafe für nicht absolvierte Pflicht-Boxenstopps (Sidebar-Anzeige)
+  s.pitStopWindowMissed=[];    // konkret verpasste Boxenstoppfenster
   s.lightsOn=false; s.lightsOut=false;
   s.skipFirstDone=false; s.falseStartDone=false; s.falseStartActive=false;
   // Falls gerade noch ein Replay-Clip im Hintergrund fertiggestellt wird
@@ -3183,6 +3259,7 @@ function tick(p) {
     }
   }
 
+  if(cfg.pitStopWindowEnabled) _updatePitStopWindowLabels(p); // Fenster-Anzeige live mit Rundenzahl/Zeit mitführen
   renderHud(p);
   s.rafId=requestAnimationFrame(()=>tick(p));
 }
@@ -5280,8 +5357,17 @@ function _pitStopFinish(p) {
     ms: st.ms,
     penalized: !!penaltyResult,
     penaltyType: penaltyResult ? penaltyResult.penaltyType : null,
-    penaltyValue: penaltyResult ? penaltyResult.penaltyValue : null
+    penaltyValue: penaltyResult ? penaltyResult.penaltyValue : null,
+    // Für die Boxenstoppfenster-Prüfung: bei welcher abgeschlossenen
+    // Rundenzahl bzw. nach wie vielen Minuten Sessionzeit dieser Boxenstopp
+    // ABGESCHLOSSEN wurde. _pitStopFinish() wird in recordLap() VOR dem
+    // s.laps.push() der laufenden Runde aufgerufen, s.laps.length ist hier
+    // also "Runden komplett abgeschlossen" — genau die gewünschte Semantik
+    // ("Fenster 8-14" = zwischen Runde 8 und 14 abgeschlossen).
+    atLap: s.laps ? s.laps.length : 0,
+    atMin: (s.totalMs||0) / 60000
   });
+  _updatePitStopWindowLabels(p);
   _updateStartTimeDisplay(p); // Sidebar-Anzeige jetzt MIT dem gerade abgeschlossenen Boxenstopp aktualisieren
 }
 
@@ -5440,11 +5526,12 @@ function _pitStopReset(p) {
   var st = pitStop[key];
   st.active = false; st.startTs = null; st.ms = 0;
   cancelAnimationFrame(st.rafId);
-  var s = ps[p]; if(s) { s.pitStopMs = null; s.pitStopCount = 0; s.pitStops = []; }
+  var s = ps[p]; if(s) { s.pitStopMs = null; s.pitStopCount = 0; s.pitStops = []; s.pitStopWindowMissed = []; }
   var btn = document.getElementById('pitBtn'+p); if(btn) btn.classList.remove('active');
   _renderPitStopTimer(p);
   _updateStartTimeDisplay(p);
   _updatePitBtnRequiredDisplay(p);
+  _updatePitStopWindowLabels(p);
   // Mindeststandzeit-Timer ebenfalls vollständig zurücksetzen: laufenden
   // Ausfade-Vorgang abbrechen, Schild zurückdrehen und das Element verstecken.
   _pitMinTimeCancelFade(p);
@@ -5493,6 +5580,7 @@ function _pitStopReset(p) {
 function _pitStopCheckAndApplyPenalty(p) {
   var s = ps[p];
   if(!s || !cfg.pitStopRequired || s.pitStopPenaltyApplied) return false;
+  if(cfg.pitStopWindowEnabled) return _pitStopCheckAndApplyWindowPenalty(p);
   var done = s.pitStopCount||0;
   var required = Math.max(0, cfg.pitStopRequiredCount||0);
   var missing = required - done;
@@ -5513,6 +5601,41 @@ function _pitStopCheckAndApplyPenalty(p) {
       missing: missing,
       penaltyType: lastResult.penaltyType,
       totalPenaltyValue: lastResult.penaltyValue*missing
+    };
+  }
+  return lastResult;
+}
+
+// Boxenstoppfenster-Variante von _pitStopCheckAndApplyPenalty: prüft JEDES
+// konfigurierte Fenster UNABHÄNGIG (mind. ein Boxenstopp mit atLap/atMin
+// innerhalb [start,end]?) und verhängt pro NICHT erfülltem Fenster genau
+// einmal die konfigurierte Strafe — mehrere Boxenstopps in einem Fenster
+// erfüllen dieses trotzdem nur EINMAL, entschuldigen aber KEIN anderes,
+// verpasstes Fenster (jedes Fenster wird einzeln gegen die komplette
+// Boxenstopp-Historie geprüft, nicht nacheinander/verbrauchend).
+function _pitStopCheckAndApplyWindowPenalty(p) {
+  var s = ps[p];
+  var windows = _pitStopWindowsForMode();
+  if(!windows.length) return false;
+  var field = sessMode==='race' ? 'atLap' : 'atMin';
+  var missedWindows = windows.filter(function(w){
+    return !(s.pitStops||[]).some(function(stop){
+      var v = stop[field];
+      return v!=null && v>=w.start && v<=w.end;
+    });
+  });
+  s.pitStopPenaltyApplied = true; // ab hier: genau einmal geprüft, nie wieder
+  s.pitStopWindowMissed = missedWindows;
+  if(!missedWindows.length) return false;
+  var lastResult = false;
+  missedWindows.forEach(function(){
+    lastResult = _pitStopApplyPenalty(p, 'Boxenstopp-Fenster verpasst');
+  });
+  if(lastResult) {
+    s.pitStopMissedPenalty = {
+      missing: missedWindows.length,
+      penaltyType: lastResult.penaltyType,
+      totalPenaltyValue: lastResult.penaltyValue*missedWindows.length
     };
   }
   return lastResult;
@@ -5590,6 +5713,10 @@ function _updatePitBtnVisibility() {
   if(!modeOk) { [1,2].forEach(function(p){ if(pitStop[_pitKeyFromP(p)].active) _pitStopFinish(p); }); }
   _updatePitBtnRequiredDisplay(1);
   if(appMode==='vs') _updatePitBtnRequiredDisplay(2);
+  _apexUpdatePitWindowLabelScale(1);
+  if(appMode==='vs') _apexUpdatePitWindowLabelScale(2);
+  _updatePitStopWindowLabels(1);
+  if(appMode==='vs') _updatePitStopWindowLabels(2);
 }
 
 // Schaltet den Inhalt des Boxenstopp-Buttons zwischen der normalen Ansicht
@@ -5617,6 +5744,59 @@ function _updatePitBtnRequiredDisplay(p) {
   numEl.style.display = 'block';
   numEl.textContent = remaining;
   btn.classList.toggle('fulfilled', remaining===0);
+}
+
+// Zeigt unterhalb des Boxenstopp-Buttons je eine Zeile "Fenster X-Y" pro
+// konfiguriertem Boxenstoppfenster — Rundenrennen zeigt Rundennummern
+// (pitStopWindowsLaps), Zeitrennen Minuten (pitStopWindowsMin, ganzzahlig
+// gerundet). fulfilled (grün) = mind. ein Boxenstopp dieses Spielers liegt
+// bereits in diesem Fenster; missed (rot) = das Fenster ist bereits vorbei
+// (aktuelle Runde/Minute > Fensterende) und wurde nicht erfüllt; sonst
+// neutral/gelb (Fenster steht noch aus oder läuft gerade).
+function _updatePitStopWindowLabels(p) {
+  var wrap = document.getElementById('pitWindowLabels'+p);
+  var btn = document.getElementById('pitBtn'+p);
+  if(!wrap) return;
+  var show = cfg.pitStopRequired && cfg.pitStopWindowEnabled && (sessMode==='race' || sessMode==='timed');
+  var windows = show ? _pitStopWindowsForMode() : [];
+  if(!show || !windows.length) {
+    wrap.style.display = 'none'; wrap.innerHTML='';
+    if(btn) btn.classList.remove('window-open');
+    return;
+  }
+  var s = ps[p];
+  var field = sessMode==='race' ? 'atLap' : 'atMin';
+  var progress = sessMode==='race' ? (s.laps?s.laps.length:0) : ((s.totalMs||0)/60000);
+  var anyOpen = false;
+  wrap.style.display = 'flex';
+  wrap.innerHTML = windows.map(function(w){
+    var fulfilled = (s.pitStops||[]).some(function(stop){
+      var v = stop[field];
+      return v!=null && v>=w.start && v<=w.end;
+    });
+    // Fenster ist "offen" (Boxenstopp jetzt fällig), solange es noch nicht
+    // erfüllt wurde UND der Fortschritt bereits innerhalb von [start,end]
+    // liegt — steuert die Rot-Färbung des Buttons, siehe .window-open.
+    if(!fulfilled && progress >= w.start && progress <= w.end) anyOpen = true;
+    var missed = !fulfilled && progress > w.end;
+    var cls = fulfilled ? 'fulfilled' : (missed ? 'missed' : '');
+    var lbl = sessMode==='race' ? (w.start+'-'+w.end) : (Math.round(w.start)+'-'+Math.round(w.end));
+    return '<div class="pit-window-label '+cls+'">Fenster '+lbl+'</div>';
+  }).join('');
+  if(btn) btn.classList.toggle('window-open', anyOpen);
+}
+
+// Skaliert die Schrift der Boxenstoppfenster-Labels mit der Buttongröße:
+// wird der Button per Resize-Handle größer als seine Standardgröße (160px)
+// gezogen, wächst die Beschriftung proportional mit (--pit-lbl-scale, siehe
+// .pit-window-label); ist der Button kleiner/gleich Standard, bleibt die
+// Schrift auf ihrer normalen Größe (kein Schrumpfen unter den Standard).
+function _apexUpdatePitWindowLabelScale(p) {
+  var wrap = document.getElementById('pitBtnWrap'+p);
+  if(!wrap) return;
+  var w = wrap.offsetWidth || parseFloat(wrap.style.width) || 160;
+  var scale = Math.max(1, w / 160);
+  wrap.style.setProperty('--pit-lbl-scale', scale);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -5972,6 +6152,7 @@ var pitBtnLocked = {1:false, 2:false};
       var newSizePx = Math.max(36, Math.min(280, dragging.w0 + dPx));
       el.style.width = newSizePx+'px';
       el.style.height = newSizePx+'px';
+      _apexUpdatePitWindowLabelScale(dragging.p);
       if(e.touches) e.preventDefault();
     }
   }
@@ -6009,6 +6190,8 @@ function togglePitStopRequired() {
   document.getElementById('tgl-pitStopRequired').classList.toggle('on', cfg.pitStopRequired);
   _updatePitBtnRequiredDisplay(1);
   _updatePitBtnRequiredDisplay(2);
+  _updatePitStopWindowLabels(1);
+  _updatePitStopWindowLabels(2);
 }
 
 // Übernimmt eine geänderte Pflicht-Anzahl sofort in die Button-Anzeige.
@@ -6016,8 +6199,62 @@ function onPitStopRequiredCountChange() {
   var el = document.getElementById('pitStopRequiredCount');
   var v = parseInt(el.value)||1;
   cfg.pitStopRequiredCount = Math.max(1, v);
+  _syncPitStopWindowsLength();
+  if(document.getElementById('pitStopWindowsLapsWrap')) _renderPitStopWindowInputs(); // Modal ggf. offen: Zeilenzahl live anpassen
   _updatePitBtnRequiredDisplay(1);
   _updatePitBtnRequiredDisplay(2);
+  _updatePitStopWindowLabels(1);
+  _updatePitStopWindowLabels(2);
+}
+
+// Baut die Boxenstoppfenster-Eingabezeilen neu auf — je eine Start/Ende-
+// Zeile pro Pflicht-Boxenstopp, getrennt für Rundenrennen und Zeitrennen.
+// Aufgerufen beim Öffnen des Popups UND bei jeder Änderung der Pflicht-
+// Anzahl, damit die Zeilenzahl synchron bleibt. Rührt NICHT an den
+// einzelnen Start/Ende-Feldern selbst während der Eingabe (siehe
+// onPitStopWindowValueChange) — kein Fokusverlust während des Tippens.
+function _renderPitStopWindowInputs() {
+  _syncPitStopWindowsLength();
+  var lapsWrap = document.getElementById('pitStopWindowsLapsWrap');
+  var minWrap = document.getElementById('pitStopWindowsMinWrap');
+  if(!lapsWrap || !minWrap) return;
+  lapsWrap.innerHTML = cfg.pitStopWindowsLaps.map(function(w, i){
+    return '<div class="mitem"><label class="mlabel">BOX '+(i+1)+' AB RUNDE</label>'
+      + '<input type="number" class="minput" min="1" max="999" step="1" value="'+w.start+'" oninput="onPitStopWindowValueChange(\'laps\','+i+',\'start\',this.value)"></div>'
+      + '<div class="mitem"><label class="mlabel">BOX '+(i+1)+' BIS RUNDE</label>'
+      + '<input type="number" class="minput" min="1" max="999" step="1" value="'+w.end+'" oninput="onPitStopWindowValueChange(\'laps\','+i+',\'end\',this.value)"></div>';
+  }).join('');
+  minWrap.innerHTML = cfg.pitStopWindowsMin.map(function(w, i){
+    return '<div class="mitem"><label class="mlabel">BOX '+(i+1)+' AB MINUTE</label>'
+      + '<input type="number" class="minput" min="0" max="999" step="1" value="'+w.start+'" oninput="onPitStopWindowValueChange(\'min\','+i+',\'start\',this.value)"></div>'
+      + '<div class="mitem"><label class="mlabel">BOX '+(i+1)+' BIS MINUTE</label>'
+      + '<input type="number" class="minput" min="0" max="999" step="1" value="'+w.end+'" oninput="onPitStopWindowValueChange(\'min\','+i+',\'end\',this.value)"></div>';
+  }).join('');
+}
+
+// Übernimmt ein geändertes Fenster-Feld sofort in cfg. Start>Ende wird
+// bewusst NICHT hier korrigiert (kein Nachziehen des anderen Feldes während
+// des Tippens) — die Normalisierung erfolgt erst beim Auslesen, siehe
+// _pitStopWindowsNormalized (gleiches Muster wie schon bei
+// pitStopMinTimeRandomMin/Max).
+function onPitStopWindowValueChange(kind, idx, field, rawVal) {
+  var arr = kind==='laps' ? cfg.pitStopWindowsLaps : cfg.pitStopWindowsMin;
+  if(!arr || !arr[idx]) return;
+  var minAllowed = kind==='laps' ? 1 : 0;
+  arr[idx][field] = Math.max(minAllowed, parseInt(rawVal)||minAllowed);
+  _updatePitStopWindowLabels(1);
+  _updatePitStopWindowLabels(2);
+}
+
+// Analog zu togglePitStopRequired: schaltet das Boxenstoppfenster-Feature
+// ein/aus und aktualisiert sofort Eingabebereich + Live-HUD-Anzeige.
+function togglePitStopWindowEnabled() {
+  cfg.pitStopWindowEnabled = !cfg.pitStopWindowEnabled;
+  document.getElementById('tgl-pitStopWindowEnabled').classList.toggle('on', cfg.pitStopWindowEnabled);
+  var wrap = document.getElementById('pitStopWindowSection');
+  if(wrap) wrap.style.display = cfg.pitStopWindowEnabled ? '' : 'none';
+  _updatePitStopWindowLabels(1);
+  _updatePitStopWindowLabels(2);
 }
 
 // Schaltet zwischen den Eingabefeldern für Strafzeit und Strafrunden um,
@@ -6122,6 +6359,10 @@ function openPitStopSettingsModal() {
   document.getElementById('pitStopMinTimeRandomMax').value = cfg.pitStopMinTimeRandomMax;
   document.getElementById('pitStopMinTimeFixedWrap').style.display = cfg.pitStopMinTimeRandom ? 'none' : '';
   document.getElementById('pitStopMinTimeRandomWrap').style.display = cfg.pitStopMinTimeRandom ? '' : 'none';
+
+  document.getElementById('tgl-pitStopWindowEnabled').classList.toggle('on', cfg.pitStopWindowEnabled);
+  document.getElementById('pitStopWindowSection').style.display = cfg.pitStopWindowEnabled ? '' : 'none';
+  _renderPitStopWindowInputs();
 
   openModal('pitStopSettingsModal');
 }
@@ -7078,7 +7319,8 @@ function renderTables(){
   var prevTrack = document.getElementById('activeTrack').value;
   // ── tracks ──
   var trackKeys=['name','location','length','type'];
-  var sortedTracks=_apexSortedArr(db.tracks, trackKeys, 'track');
+  // col===-1: manuelle Reihenfolge (per Drag & Drop gesetzt) statt Spaltensortierung.
+  var sortedTracks = _apexSortState.track.col===-1 ? _apexOrderTracksByTrackOrder(db.tracks) : _apexSortedArr(db.tracks, trackKeys, 'track');
   var tb=document.getElementById('trackTbody');
   var at=document.getElementById('activeTrack');
   at.innerHTML='<option value="">-- keine --</option>';
@@ -7091,20 +7333,26 @@ function renderTables(){
       lenDisplay = avg+'m <span style="font-size:7px;color:var(--text-dim);">Ø</span>';
     }
     var previewAttr = t.name.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-    return `<tr><td>${t.name}</td><td><canvas class="track-tbl-thumb" data-track-name="${previewAttr}" width="60" height="34" style="display:block;background:#0a0e12;border:1px solid var(--border);"></canvas></td><td>${t.location||''}</td><td>${lenDisplay}</td><td>${t.type||''}</td><td style="display:flex;gap:4px;"><button class="tbl-btn" onclick="editTrack(${i})">✎</button><button class="tbl-btn del" onclick="delTrack(${i})">✕</button></td></tr>`;
+    return `<tr data-drag-id="${previewAttr}"><td class="drag-handle" title="Ziehen zum Sortieren">⠿</td><td>${t.name}</td><td><canvas class="track-tbl-thumb" data-track-name="${previewAttr}" width="60" height="34" style="display:block;background:#0a0e12;border:1px solid var(--border);"></canvas></td><td>${t.location||''}</td><td>${lenDisplay}</td><td>${t.type||''}</td><td style="display:flex;gap:4px;"><button class="tbl-btn" onclick="editTrack(${i})">✎</button><button class="tbl-btn del" onclick="delTrack(${i})">✕</button></td></tr>`;
   }).join('');
-  db.tracks.forEach(t=>{const o=document.createElement('option');o.value=t.name;o.textContent=t.name;at.appendChild(o);});
+  _apexOrderTracksByTrackOrder(db.tracks).forEach(t=>{const o=document.createElement('option');o.value=t.name;o.textContent=t.name;at.appendChild(o);});
   if(prevTrack) at.value=prevTrack;
   onActiveTrackChange(); // Spur-Dropdown aktualisieren
   tb.querySelectorAll('.track-tbl-thumb').forEach(function(cv){
     var tname = cv.getAttribute('data-track-name');
     if(tname) _apexRenderTrackPreviewInto(cv, tname, 'cw');
   });
+  _apexMakeReorderable(tb, 'tr[data-drag-id]', function(order){
+    _apexSortState.track.col = -1; // Drag überschreibt eine ggf. aktive Spaltensortierung
+    _apexSaveTrackOrder(order);
+    renderTables();
+  });
   // sort indicators — Sortier-Spalten-Index (0=NAME,1=ORT,2=LÄNGE,3=TYP, aus
-  // trackKeys) auf die tatsächliche Kopfzeilen-Position gemappt (VORSCHAU
-  // dazwischen ist nicht sortierbar, verschiebt daher die Positionen ab ORT).
+  // trackKeys) auf die tatsächliche Kopfzeilen-Position gemappt (Griff-Spalte
+  // davor und VORSCHAU dazwischen sind nicht sortierbar, verschieben daher
+  // die Positionen ab ORT).
   var ths=document.querySelectorAll('#trackTable thead th');
-  [0,2,3,4].forEach(function(thIdx, sortCol){
+  [1,3,4,5].forEach(function(thIdx, sortCol){
     if(ths[thIdx]) ths[thIdx].className=_apexSortState.track.col===sortCol?(_apexSortState.track.dir===1?'sort-asc':'sort-desc'):'';
   });
 
@@ -8638,13 +8886,13 @@ function exportData(p) {
   var suggestedName=parts.join(' - ')+'.txt';
   // Filename dialog
   var NL='\n', SEP='='.repeat(54);
-  var txt=SEP+NL+'  Apex Timer Pro V1.1.0 - RUNDENZEITEN'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.2.0 - RUNDENZEITEN'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   STANDARD / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
   if(meta.name) txt+='  Session: '+meta.name+NL;
   if(meta.weather) txt+='  Wetter:  '+meta.weather+NL;
-  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.1.0'+NL+SEP+NL;
+  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.2.0'+NL+SEP+NL;
   _exportPendingData={type:'single',txt:txt,suggestedName:suggestedName};
   _openExportModal(suggestedName);
 }
@@ -8669,7 +8917,7 @@ function exportVS() {
     else winner='GLEICHSTAND';
   }
   var NL='\n', SEP='='.repeat(colW*2+5);
-  var txt=SEP+NL+'  Apex Timer Pro V1.1.0 - VS ERGEBNISSE'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.2.0 - VS ERGEBNISSE'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   VS / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
@@ -8682,7 +8930,7 @@ function exportVS() {
     var c2=l2&&i2<l2.length?l2[i2]:'';
     txt+=c1+' | '+c2+NL;
   }
-  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.1.0'+NL+SEP+NL;
+  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.2.0'+NL+SEP+NL;
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
   var _s1=ps[1],_s2=ps[2]; var _t1=_s1.totalMs+_s1.penalty,_t2=_s2.totalMs+_s2.penalty; var _l1=_s1.laps.length,_l2=_s2.laps.length;
@@ -9193,7 +9441,7 @@ function _localSyncApply(incoming) {
       });
     }
     if((incoming.db.updatedAt||0) > (db.updatedAt||0)) {
-      ['sessionMeta','shortcuts','pitStopSettings'].forEach(function(f){
+      ['sessionMeta','shortcuts','pitStopSettings','trackOrder'].forEach(function(f){
         if(incoming.db[f]) db[f] = incoming.db[f];
       });
       changed = true;
@@ -13889,6 +14137,7 @@ function buildSessionRecord(p) {
     pitStopMs: s.pitStopMs!=null ? s.pitStopMs : null,
     pitStops: (s.pitStops && s.pitStops.length) ? JSON.parse(JSON.stringify(s.pitStops)) : [],
     pitStopMissedPenalty: s.pitStopMissedPenalty ? JSON.parse(JSON.stringify(s.pitStopMissedPenalty)) : null,
+    pitStopWindowMissed: (s.pitStopWindowMissed && s.pitStopWindowMissed.length) ? JSON.parse(JSON.stringify(s.pitStopWindowMissed)) : [],
     bestMs: bestTime,
     worstMs: worstTime,
     avgMs: avg,
@@ -14090,7 +14339,7 @@ function editRecord(id) {
   var existing = document.getElementById(formId);
   if(existing) existing.remove();
 
-  var trackOpts = db.tracks.map(function(t){
+  var trackOpts = _apexOrderTracksByTrackOrder(db.tracks).map(function(t){
     return '<option'+(t.name===rec.track?' selected':'')+'>'+t.name+'</option>';
   }).join('');
   var carOpts = [''].concat(db.cars.map(function(c){ return (c.num?'#'+c.num+' ':'')+c.model; })).map(function(v){
@@ -14177,6 +14426,7 @@ function renderRecordsModal() {
     var n = r.track || '(Ohne Strecke)';
     if(trackNames.indexOf(n)===-1) trackNames.push(n);
   });
+  trackNames = _apexOrderedTrackNames(trackNames);
 
   if(!trackNames.length) {
     trackListEl.innerHTML = '<div class="rec-no-track">Keine Strecken oder Aufzeichnungen vorhanden.<br>Sessions mit "SESSION SPEICHERN" archivieren.</div>';
@@ -14200,7 +14450,8 @@ function renderRecordsModal() {
       ? 'background:rgba(0,229,255,.12);border-color:var(--accent);color:var(--accent);'
       : 'background:var(--bg3);border-color:var(--border);color:var(--text-dim);';
     var borderCol = isAct ? 'var(--accent)' : 'var(--border)';
-    return '<div style="display:flex;align-items:stretch;">'
+    return '<div class="rec-track-row" data-drag-id="'+attrEsc+'">'
+      + '<div class="drag-handle" title="Ziehen zum Sortieren">⠿</div>'
       + '<button class="rec-track-btn'+(isAct?' active':'')+'" style="border-right:none;margin:0;'+activeBtnStyle+'" onclick="selectRecTrack(\''+esc+'\')">'
       + name + '<span class="rtb-count">'+cnt+' SESSION'+(cnt!==1?'S':'')+'</span>'
       + '</button>'
@@ -14220,6 +14471,10 @@ function renderRecordsModal() {
   thumbs.forEach(function(cv){
     var tname = cv.getAttribute('data-track-name');
     if(tname) _apexRenderTrackPreviewInto(cv, tname, 'cw');
+  });
+  _apexMakeReorderable(trackListEl, '.rec-track-row[data-drag-id]', function(order){
+    _apexSaveTrackOrder(order);
+    renderRecordsModal();
   });
 
   if(_recActiveTrack && trackNames.indexOf(_recActiveTrack) !== -1) {
@@ -14951,6 +15206,132 @@ function _apexSortArr(arr, key) {
   if (key === 'track') st_tbl = _apexSortState.track;
   // key is actually the key name here - handled below
   return arr;
+}
+
+// ── Strecken-Reihenfolge (manuell per Drag & Drop, siehe _apexMakeReorderable) ──
+// db.trackOrder hält eine Liste von Streckennamen in der gewünschten Anzeige-
+// Reihenfolge; Namen, die dort nicht vorkommen (z.B. neu angelegte Strecken),
+// werden stabil ans Ende sortiert. Wird sowohl von der Streckentabelle
+// (Reiter "Strecken") als auch von der Streckenliste im Aufzeichnungen-Dialog
+// genutzt, sodass beide Listen dieselbe Reihenfolge teilen.
+function _apexOrderedTrackNames(names) {
+  var order = db.trackOrder || [];
+  var rank = {};
+  order.forEach(function(n,i){ rank[n]=i; });
+  return names.slice().sort(function(a,b){
+    var ra = rank.hasOwnProperty(a) ? rank[a] : Infinity;
+    var rb = rank.hasOwnProperty(b) ? rank[b] : Infinity;
+    return ra - rb;
+  });
+}
+function _apexOrderTracksByTrackOrder(tracks) {
+  var order = db.trackOrder || [];
+  var rank = {};
+  order.forEach(function(n,i){ rank[n]=i; });
+  return tracks.slice().sort(function(a,b){
+    var ra = rank.hasOwnProperty(a.name) ? rank[a.name] : Infinity;
+    var rb = rank.hasOwnProperty(b.name) ? rank[b.name] : Infinity;
+    return ra - rb;
+  });
+}
+function _apexSaveTrackOrder(namesInNewOrder) {
+  var old = db.trackOrder || [];
+  var visible = {};
+  namesInNewOrder.forEach(function(n){ visible[n]=true; });
+  var others = old.filter(function(n){ return !visible[n]; });
+  db.trackOrder = namesInNewOrder.concat(others);
+  saveToLS();
+}
+
+// ── Generisches Drag & Drop / Touch-Hold Umsortieren von Listen ──
+// Macht die direkten Item-Elemente eines Containers per gedrückter linker
+// Maustaste (PC, sofortiges Ziehen) bzw. gehaltenem Touch (iPad, kurzer
+// Hold zur Unterscheidung von Scrollen) verschiebbar. onDrop(order) wird
+// beim Loslassen mit der neuen Reihenfolge (Array der data-drag-id Werte)
+// aufgerufen — Persistierung und Re-Render obliegen dem Aufrufer. Bindet
+// die Listener einmalig pro Container (überlebt wiederholte innerHTML-
+// Neuaufbauten, da nur die Kind-Elemente ersetzt werden, nicht der Container).
+function _apexMakeReorderable(container, itemSelector, onDrop) {
+  if(!container || container._apexReorderBound) return;
+  container._apexReorderBound = true;
+  var HOLD_MS = 380, MOVE_CANCEL_PX = 8;
+
+  function itemFor(target) { return target && target.closest ? target.closest(itemSelector) : null; }
+  function isInteractive(target) { return !!(target && target.closest && target.closest('button,canvas,input,select,a,textarea')); }
+
+  function beginDrag(item) {
+    item.classList.add('drag-reorder-active');
+    document.body.classList.add('drag-reorder-noselect');
+    return item;
+  }
+  function moveTo(container, dragEl, clientY) {
+    var siblings = Array.prototype.slice.call(container.querySelectorAll(itemSelector)).filter(function(el){ return el!==dragEl; });
+    for(var i=0;i<siblings.length;i++){
+      var r = siblings[i].getBoundingClientRect();
+      if(clientY < r.top + r.height/2) { container.insertBefore(dragEl, siblings[i]); return; }
+    }
+    container.appendChild(dragEl);
+  }
+  function finishDrag(container, dragEl) {
+    dragEl.classList.remove('drag-reorder-active');
+    document.body.classList.remove('drag-reorder-noselect');
+    var order = Array.prototype.slice.call(container.querySelectorAll(itemSelector)).map(function(el){ return el.getAttribute('data-drag-id'); });
+    onDrop(order);
+  }
+
+  container.addEventListener('mousedown', function(e){
+    if(e.button !== 0) return;
+    var item = itemFor(e.target);
+    if(!item || isInteractive(e.target)) return;
+    var startX = e.clientX, startY = e.clientY, dragEl = null, moved = false;
+    function onMove(ev){
+      if(!moved) {
+        if(Math.abs(ev.clientX-startX) < MOVE_CANCEL_PX && Math.abs(ev.clientY-startY) < MOVE_CANCEL_PX) return;
+        moved = true; dragEl = beginDrag(item);
+      }
+      moveTo(container, dragEl, ev.clientY);
+      ev.preventDefault();
+    }
+    function onUp(){
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      if(moved && dragEl) finishDrag(container, dragEl);
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+
+  container.addEventListener('touchstart', function(e){
+    var item = itemFor(e.target);
+    if(!item || isInteractive(e.target)) return;
+    var touch = e.touches[0];
+    var startX = touch.clientX, startY = touch.clientY, dragEl = null, active = false;
+    var holdTimer = setTimeout(function(){
+      holdTimer = null; active = true; dragEl = beginDrag(item);
+      if(navigator.vibrate) { try{ navigator.vibrate(15); }catch(err){} }
+    }, HOLD_MS);
+    function onTouchMove(ev){
+      var t = ev.touches[0];
+      if(!active) {
+        if(Math.abs(t.clientX-startX) > MOVE_CANCEL_PX || Math.abs(t.clientY-startY) > MOVE_CANCEL_PX) {
+          if(holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+        }
+        return;
+      }
+      ev.preventDefault();
+      moveTo(container, dragEl, t.clientY);
+    }
+    function onTouchEnd(){
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+      document.removeEventListener('touchcancel', onTouchEnd);
+      if(holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+      if(active && dragEl) finishDrag(container, dragEl);
+    }
+    document.addEventListener('touchmove', onTouchMove, {passive:false});
+    document.addEventListener('touchend', onTouchEnd);
+    document.addEventListener('touchcancel', onTouchEnd);
+  });
 }
 
 // ── Zielflaggen bei Session-Ende ──
@@ -16086,6 +16467,22 @@ apexAutoSaveInit(); // AutoSave + Folder UI initialisieren
           <div class="mitem full"><label class="mlabel" style="line-height:1.7;display:block;color:var(--text-dim);">
             Solange die Pflicht aktiv ist, zeigt der Boxenstopp-Touchbutton zusätzlich zur Beschriftung "BOX" die Anzahl noch ausstehender Boxenstopps als eigene Zeile. Bei 0 wird der Button grün.
           </label></div>
+        </div>
+      </div>
+      <div class="msec">
+        <div class="msec-title">BOXENSTOPPFENSTER</div>
+        <div class="toggle-row">
+          <span class="toggle-label">Boxenstoppfenster aktiv</span>
+          <div class="toggle" id="tgl-pitStopWindowEnabled" onclick="togglePitStopWindowEnabled()"></div>
+        </div>
+        <div id="pitStopWindowSection" style="display:none;margin-top:8px;">
+          <label class="mlabel" style="display:block;margin-bottom:6px;">RUNDENRENNEN — FENSTER JE PFLICHT-BOXENSTOPP (RUNDE VON/BIS)</label>
+          <div class="mgrid" id="pitStopWindowsLapsWrap"></div>
+          <label class="mlabel" style="display:block;margin:12px 0 6px;">ZEITRENNEN — FENSTER JE PFLICHT-BOXENSTOPP (MINUTE VON/BIS)</label>
+          <div class="mgrid" id="pitStopWindowsMinWrap"></div>
+          <label class="mlabel" style="line-height:1.7;display:block;color:var(--text-dim);margin-top:8px;">
+            Wirkt nur, solange die Boxenstopp-Pflicht oben aktiv ist. Jeder Pflicht-Boxenstopp bekommt sein eigenes Fenster; fehlt in einem Fenster ein Boxenstopp, greift die eingestellte Strafe — auch wenn in einem anderen Fenster mehrfach angehalten wurde. Wird während der Session als "Fenster X-Y" unterhalb des Boxenstopp-Buttons angezeigt.
+          </label>
         </div>
       </div>
       <div class="msec">
