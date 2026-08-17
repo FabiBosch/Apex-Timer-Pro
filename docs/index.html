@@ -9414,7 +9414,10 @@ function _localSyncTick() {
   ]).then(function(res){
     var outgoing = res[0]; outgoing.clips = res[1]; localClipManifest = res[1];
     var ctrl = (typeof AbortController!=='undefined') ? new AbortController() : null;
-    var timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 5000) : null;
+    // 5s war für die inzwischen deutlich gewachsene Payload (Fotos, Carrera-/
+    // Vektor-Layouts, Lösch-Grabsteine) zu knapp bemessen und brach echte,
+    // nur langsame Syncs über WLAN vorzeitig als "nicht erreichbar" ab.
+    var timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 20000) : null;
     return fetch(url+'/api/sync', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
