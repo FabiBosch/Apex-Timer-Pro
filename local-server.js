@@ -36,8 +36,15 @@ function isPrivateAddress(addr) {
 // Tunnel-/virtuelles Subnetz) — z.B. NordVPN/NordLynx, WireGuard, Hyper-V,
 // WSL, Docker. Solche Adapter dürfen als Sync-Adresse nie bevorzugt werden.
 var VIRTUAL_ADAPTER_PATTERN = /nordlynx|nordvpn|wireguard|openvpn|\bvpn\b|\btap\b|\btun\b|virtual|vethernet|hyper-v|docker|wsl|loopback|\bppp\b|zerotier|tailscale|vmware|virtualbox|hamachi|radmin|bluetooth/i;
-// Namen typischer physischer Adapter (WLAN/Ethernet) — werden bevorzugt.
-var PHYSICAL_ADAPTER_PATTERN = /wlan|wi-?fi|ethernet|\blan\b/i;
+// Eindeutig benannte physische Adapter (WLAN/Ethernet) — höchste Priorität.
+var PHYSICAL_ADAPTER_PATTERN = /wlan|wi-?fi|ethernet/i;
+// Uneindeutig nur "LAN" benannte Adapter (z.B. "LAN-Verbindung") können eine
+// echte zweite Netzwerkkarte sein, aber genauso ein VPN-Client oder anderer
+// virtueller Adapter mit generischem Namen in einem völlig anderen Subnetz
+// (beobachtet: "LAN-Verbindung" in 10.x.x.x, während iPad/PC tatsächlich im
+// 192.168.x.x-WLAN via "Ethernet"/"WLAN" verbunden waren — nicht erreichbar).
+// Werden daher NACH eindeutigen WLAN/Ethernet-Adaptern eingeordnet.
+var AMBIGUOUS_LAN_PATTERN = /\blan\b/i;
 
 // Liefert alle privaten, nicht-internen IPv4-Adressen, sortiert danach, wie
 // wahrscheinlich sie vom iPad im selben WLAN erreichbar sind: echte WLAN-/
@@ -60,7 +67,8 @@ function listLanCandidates() {
 }
 function _adapterRank(name) {
   if (PHYSICAL_ADAPTER_PATTERN.test(name)) return 0;
-  if (VIRTUAL_ADAPTER_PATTERN.test(name)) return 2;
+  if (VIRTUAL_ADAPTER_PATTERN.test(name)) return 3;
+  if (AMBIGUOUS_LAN_PATTERN.test(name)) return 2;
   return 1;
 }
 
@@ -148,7 +156,10 @@ function createRequestHandler(win, docsRoot, getRendererReady) {
         var incoming;
         try { incoming = JSON.parse(buf.toString('utf8')); }
         catch (e) { res.writeHead(400); res.end('Ungültiges JSON'); return; }
-        requestFromRenderer(win, 'apex:apply-sync', incoming).then(function (result) {
+        // 8s Standard-Timeout ist für die inzwischen deutlich gewachsene
+        // Sync-Verarbeitung (Fotos, Carrera-/Vektor-Layouts, Lösch-Abgleich)
+        // zu knapp — an das clientseitige Abbruch-Timeout angeglichen.
+        requestFromRenderer(win, 'apex:apply-sync', incoming, 20000).then(function (result) {
           res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
           res.end(JSON.stringify(result));
         }).catch(function (e) { res.writeHead(500); res.end(String(e.message || e)); });
