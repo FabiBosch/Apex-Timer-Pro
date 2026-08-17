@@ -20,7 +20,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apex Timer Pro V1.0.15 (build 20260815-2000)</title>
+<title>Apex Timer Pro V1.1.0 (build 20260817-1200)</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap');
 :root{
@@ -118,13 +118,18 @@ canvas.hc{display:none;}
 .dz-rotate-line{position:absolute;top:-34px;left:50%;transform:translateX(-50%);width:2px;height:28px;background:var(--accent);opacity:.55;pointer-events:none;}
 .dz-rotate-handle{position:absolute;top:-46px;left:50%;transform:translate(-50%,-50%);width:18px;height:18px;background:var(--accent);border:2px solid #fff;border-radius:50%;cursor:grab;touch-action:none;z-index:8;}
 .dz-rotate-handle:active{cursor:grabbing;}
-/* Ausrichtungs-/Bearbeitungssperre: rechts neben dem Drehen-Fangpunkt, minimal
+/* Ausrichtungs-/Bearbeitungssperre: links neben dem Drehen-Fangpunkt, minimal
    größer (20px statt 16px) und in derselben Farbgebung wie die Fangpunkte. */
-.dz-lock-handle{position:absolute;top:-46px;left:calc(50% + 40px);transform:translate(-50%,-50%);width:28px;height:28px;background:var(--accent);border:2px solid #fff;border-radius:50%;cursor:pointer;touch-action:none;z-index:9;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;user-select:none;}
+.dz-lock-handle{position:absolute;top:-46px;left:calc(50% - 48px);transform:translate(-50%,-50%);width:28px;height:28px;background:var(--accent);border:2px solid #fff;border-radius:50%;cursor:pointer;touch-action:none;z-index:9;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;user-select:none;}
 /* Gesperrt: kräftiges Rot statt Akzentfarbe — zweites, robustes Unterscheidungsmerkmal
    neben dem Symbol selbst (offenes/geschlossenes Schloss-Emoji sieht bei kleiner
    Darstellung auf manchen Geräten/Browsern sehr ähnlich aus). */
 .dz-lock-handle.locked{background:var(--red);}
+/* Empfindlichkeits-Fader ein-/ausblenden: rechts neben dem Drehen-Fangpunkt,
+   spiegelbildlich zum Sperr-Griff (gleicher Abstand, gleiche Größe) — v.a.
+   fürs iPad wichtig, wo die Tastatur-Kurzwahl (Taste M) nicht griffbereit ist. */
+.dz-fader-toggle-handle{position:absolute;top:-46px;left:calc(50% + 48px);transform:translate(-50%,-50%);width:28px;height:28px;background:var(--bg3);border:2px solid var(--border);border-radius:50%;cursor:pointer;touch-action:none;z-index:9;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;user-select:none;color:var(--text-dim);}
+.dz-fader-toggle-handle.active{background:var(--accent);border-color:#fff;color:#000;}
 .dz-lbl{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;white-space:nowrap;padding:1px 5px;background:rgba(8,12,16,.9);}
 .dz-lbl.c1{color:var(--p1);}
 .dz-lbl.c2{color:var(--p2);}
@@ -351,6 +356,8 @@ canvas.hc{display:none;}
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.87);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
 .modal-backdrop.open{display:flex;}
 .modal{background:var(--bg2);border:1px solid var(--border);width:600px;max-width:96vw;max-height:90vh;overflow-y:auto;position:relative;display:flex;flex-direction:column;}
+.modal-backdrop.fullscreen .modal{width:98vw;max-width:98vw;height:96vh;max-height:96vh;}
+.modal-backdrop.fullscreen #carreraSchematicWrap{max-width:100%;}
 .modal.wide{width:920px;}
 .modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);}
 .modal-hdr{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
@@ -409,8 +416,8 @@ select.minput option{background:var(--bg2);}
 #settingsPreview{width:100%;max-height:180px;object-fit:contain;display:block;}
 
 /* ── RECORDS MODAL ── */
-.rec-track-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
-.rec-track-btn{padding:8px 16px;background:var(--bg3);border:1px solid var(--border);color:var(--text-dim);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .2s;}
+.rec-track-list{display:flex;flex-direction:column;gap:6px;margin-bottom:18px;}
+.rec-track-btn{padding:8px 16px;background:var(--bg3);border:1px solid var(--border);color:var(--text-dim);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .2s;text-align:left;flex:1;min-width:0;}
 .rec-track-btn:hover{border-color:var(--accent);color:var(--accent);}
 .rec-track-btn.active{background:rgba(0,229,255,.12);border-color:var(--accent);color:var(--accent);}
 .rec-track-btn .rtb-count{display:block;font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--text-dim);margin-top:2px;letter-spacing:1px;}
@@ -450,6 +457,7 @@ select.minput option{background:var(--bg2);}
 .carrera-chain-chip .ccc-num{background:var(--green);color:#000;font-weight:700;padding:0 4px;border-radius:2px;min-width:16px;text-align:center;}
 .carrera-chain-chip:hover,.carrera-chain-chip:active{background:rgba(255,23,68,.15);border-color:rgba(255,23,68,.5);color:var(--red);}
 .carrera-chain-chip.confirming{background:rgba(255,23,68,.25);border-color:var(--red);color:var(--red);}
+.carrera-chip-selected{background:rgba(255,214,0,.18)!important;border-color:var(--yellow)!important;color:var(--yellow)!important;box-shadow:0 0 8px rgba(255,214,0,.5);}
 .rsc-detail{display:none;margin-top:8px;border-top:1px solid rgba(0,229,255,.12);padding-top:8px;}
 .rsc-detail.open{display:block;}
 .rsc-detail table{width:100%;border-collapse:collapse;font-family:'Share Tech Mono',monospace;font-size:9px;}
@@ -487,7 +495,7 @@ select.minput option{background:var(--bg2);}
 
 <!-- ═══════════════ HEADER ═══════════════ -->
 <header>
-  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.0.15</span></div>
+  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.1.0</span></div>
   <div class="hdr-center" style="display:flex;gap:8px;align-items:center;">
 
     <button class="app-mode-btn active" id="amStd" onclick="setAppMode('std')">STANDARD</button>
@@ -572,6 +580,7 @@ select.minput option{background:var(--bg2);}
       <div class="dz-rotate-line"></div>
       <div class="dz-rotate-handle" data-dz="1" title="Ziehen zum Drehen · Doppelklick = zurücksetzen"></div>
       <div class="dz-lock-handle" data-dz="1" title="Messfenster sperren/entsperren">🔓</div>
+      <div class="dz-fader-toggle-handle" data-dz="1" title="Empfindlichkeits-Fader ein-/ausblenden">🎚</div>
       <button class="dz-dir" id="dirBtn1" onclick="toggleDir(1)"><span class="dz-dir-arrow">↔</span> BEIDE</button>
     </div>
 
@@ -592,6 +601,7 @@ select.minput option{background:var(--bg2);}
       <div class="dz-rotate-line"></div>
       <div class="dz-rotate-handle" data-dz="2s" title="Ziehen zum Drehen · Doppelklick = zurücksetzen"></div>
       <div class="dz-lock-handle" data-dz="2s" title="Messfenster sperren/entsperren">🔓</div>
+      <div class="dz-fader-toggle-handle" data-dz="2s" title="Empfindlichkeits-Fader ein-/ausblenden">🎚</div>
       <button class="dz-dir" id="dirBtn2s" onclick="toggleDir('2s')"><span class="dz-dir-arrow">↔</span> BEIDE</button>
     </div>
 
@@ -1209,15 +1219,15 @@ select.minput option{background:var(--bg2);}
       </div>
       <div class="msec">
         <div class="msec-title">GESPEICHERTE STRECKEN</div>
-        <table class="data-table" id="trackTable"><thead><tr><th onclick="apexSort('track',0)">NAME</th><th onclick="apexSort('track',1)">ORT</th><th onclick="apexSort('track',2)">LÄNGE</th><th onclick="apexSort('track',3)">TYP</th><th></th></tr></thead><tbody id="trackTbody"></tbody></table>
+        <table class="data-table" id="trackTable"><thead><tr><th onclick="apexSort('track',0)">NAME</th><th>VORSCHAU</th><th onclick="apexSort('track',1)">ORT</th><th onclick="apexSort('track',2)">LÄNGE</th><th onclick="apexSort('track',3)">TYP</th><th></th></tr></thead><tbody id="trackTbody"></tbody></table>
       </div>
       <div class="msec">
         <div class="msec-title">STRECKE HINZUFÜGEN</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-save" style="font-size:9px;padding:8px 14px;background:rgba(0,229,255,.07);color:var(--accent);border:1px solid rgba(0,229,255,.3);text-align:center;line-height:1.6;" onclick="openTrackEditModal()">✎ MANUELL HINZUFÜGEN<br><span style="font-size:7px;opacity:.6;font-weight:400;">Name, Länge, Typ manuell</span></button>
           <button class="btn-save" style="font-size:9px;padding:8px 14px;background:rgba(0,229,255,.07);color:var(--accent);border:1px solid rgba(0,229,255,.3);text-align:center;line-height:1.6;" onclick="openModal('gpsMeasureModal')">🛰 GPS-MESSUNG<br><span style="font-size:7px;opacity:.6;font-weight:400;">Strecke ablaufen/fahren</span></button>
           <button class="btn-save" style="font-size:9px;padding:8px 14px;background:rgba(0,229,255,.07);color:var(--accent);border:1px solid rgba(0,229,255,.3);text-align:center;line-height:1.6;" onclick="openModal('drawTrackModal')">✏ STRECKE ZEICHNEN<br><span style="font-size:7px;opacity:.6;font-weight:400;">Kartenbild + Linie</span></button>
           <button class="btn-save" style="font-size:9px;padding:8px 14px;background:rgba(0,229,255,.07);color:var(--accent);border:1px solid rgba(0,229,255,.3);text-align:center;line-height:1.6;" onclick="openModal('carreraBuildModal')">🏁 CARRERABAHN-BAUKASTEN<br><span style="font-size:7px;opacity:.6;font-weight:400;">Schienen → Draufsicht + Länge</span></button>
-          <button class="btn-save" style="font-size:9px;padding:8px 14px;background:rgba(0,229,255,.07);color:var(--accent);border:1px solid rgba(0,229,255,.3);text-align:center;line-height:1.6;" onclick="openTrackEditModal()">✎ MANUELL HINZUFÜGEN<br><span style="font-size:7px;opacity:.6;font-weight:400;">Name, Länge, Typ manuell</span></button>
         </div>
         <!-- Hidden inputs kept for compatibility with addTrack() and GPS flow -->
         <input type="hidden" id="trName"><input type="hidden" id="trLocation">
@@ -1354,15 +1364,6 @@ select.minput option{background:var(--bg2);}
           Boxenstopp-Pflicht, Strafen und Mindeststandzeit sind jetzt in einem eigenen Popup zusammengefasst.
         </div>
         <button class="btn-save" style="font-size:9px;padding:8px 14px;background:rgba(255,214,0,.07);color:var(--yellow);border:1px solid rgba(255,214,0,.3);" onclick="openPitStopSettingsModal()">🔧 BOXENSTOPP-EINSTELLUNGEN ÖFFNEN (Taste P)</button>
-      </div>
-      <div class="msec">
-        <div class="msec-title">TRAINING — MESSSPERRZEIT NACH START</div>
-        <div class="mgrid">
-          <div class="mitem full"><label class="mlabel">SPERRZEIT (Sekunden) — Messung ignoriert in dieser Zeit</label>
-            <input type="number" class="minput" id="trainingLockSec" value="0" min="0" max="60" step="1">
-          </div>
-          <div class="mitem full"><label class="mlabel" style="color:var(--text-dim);line-height:1.7;display:block;">Verhindert Fehlmessungen direkt nach dem Start. Standard: 5s. Bei 0 sofort messbereit.</label></div>
-        </div>
       </div>
       <div class="msec">
         <div class="msec-title">SESSION-STARTVERZÖGERUNG</div>
@@ -1683,8 +1684,8 @@ select.minput option{background:var(--bg2);}
     <div id="carreraBuildPartGrid" style="margin-bottom:10px;"></div>
 
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-      <button id="carreraUndoBtn" class="btn-cancel" onclick="carreraUndo()" disabled style="border-color:rgba(180,180,255,.3);color:#aab0ff;opacity:.5;">⟵ ZURÜCK</button>
-      <button id="carreraRedoBtn" class="btn-cancel" onclick="carreraRedo()" disabled style="border-color:rgba(180,180,255,.3);color:#aab0ff;opacity:.5;">VORWÄRTS ⟶</button>
+      <button id="carreraUndoBtn" class="btn-cancel" onclick="carreraUndo()" disabled title="Zurück" style="border-color:rgba(180,180,255,.3);color:#aab0ff;opacity:.5;">↶</button>
+      <button id="carreraRedoBtn" class="btn-cancel" onclick="carreraRedo()" disabled title="Vorwärts" style="border-color:rgba(180,180,255,.3);color:#aab0ff;opacity:.5;">↷</button>
       <button class="btn-cancel" onclick="carreraRotate(-1)" style="border-color:rgba(100,180,255,.3);color:#64b4ff;" title="30° gegen Uhrzeigersinn">↺ 30°</button>
       <button class="btn-cancel" onclick="carreraRotate(1)"  style="border-color:rgba(100,180,255,.3);color:#64b4ff;" title="30° im Uhrzeigersinn">↻ 30°</button>
       <button id="carreraDirBtn" class="btn-cancel" onclick="carreraToggleDirection()" style="border-color:rgba(255,214,0,.3);color:var(--text-dim);" title="Fahrtrichtung für Spurdarstellung umkehren">⇄ RICHTUNG UMKEHREN</button>
@@ -1701,6 +1702,14 @@ select.minput option{background:var(--bg2);}
     </div>
     <div id="carreraSchematicWrap" style="position:relative;width:100%;max-width:660px;margin:0 auto;border:1px solid var(--border);background:#0a0e12;">
       <canvas id="carreraSchematicCanvas" style="width:100%;display:block;"></canvas>
+    </div>
+
+    <div id="carreraSelectionBar" style="display:none;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;padding:8px 12px;background:rgba(255,214,0,.08);border:1px solid rgba(255,214,0,.35);flex-wrap:wrap;">
+      <span id="carreraSelectionLabel" style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--yellow);letter-spacing:.5px;"></span>
+      <div style="display:flex;gap:6px;">
+        <button class="btn-cancel" onclick="carreraDeleteSelected()" style="font-size:8px;padding:5px 10px;border-color:rgba(255,23,68,.4);color:var(--red);">🗑 LÖSCHEN (Entf)</button>
+        <button class="btn-cancel" onclick="carreraDeselect()" style="font-size:8px;padding:5px 10px;color:var(--text-dim);">✕ AUSWAHL AUFHEBEN</button>
+      </div>
     </div>
 
     <div style="display:flex;gap:14px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
@@ -1750,6 +1759,7 @@ select.minput option{background:var(--bg2);}
   </div>
   <!-- Tabs -->
   <div style="display:flex;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;">
+    <button id="dtTab-vector" onclick="dtShowTab('vector')" style="flex:1;padding:10px 6px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;cursor:pointer;">📐 VEKTOR-DESIGN</button>
     <button id="dtTab-draw" onclick="dtShowTab('draw')" style="flex:1;padding:10px 6px;background:rgba(0,229,255,.1);border:none;border-bottom:2px solid var(--accent);color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;cursor:pointer;">✏ ZEICHNEN</button>
     <button id="dtTab-saved" onclick="dtShowTab('saved')" style="flex:1;padding:10px 6px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;cursor:pointer;">💾 GESPEICHERTE STRECKEN</button>
   </div>
@@ -1834,6 +1844,75 @@ select.minput option{background:var(--bg2);}
     </div>
     <div id="dtLayoutList" style="display:flex;flex-direction:column;gap:10px;"></div>
   </div>
+
+  <!-- Vector designer pane -->
+  <div id="dtPane-vector" class="modal-body" style="display:none;">
+    <p style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);line-height:1.8;margin-bottom:10px;">
+      Punkte klicken zum Setzen, ersten Punkt erneut anklicken zum Schließen der Schleife. Bestehende Punkte per Ziehen verschieben,
+      Doppelklick auf eine Strecke fügt einen neuen Punkt ein. Shift beim Setzen/Ziehen rastet auf 15°-Winkel ein.
+    </p>
+    <div style="margin-bottom:8px;">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;">WERKZEUGE</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;">
+        <button id="vtDrawBtn" class="btn-cancel" onclick="vtSetMode('draw')" style="font-size:8px;padding:5px 9px;color:var(--green);">✏ PUNKTE SETZEN</button>
+        <button id="vtPanBtn" class="btn-cancel" onclick="vtSetMode('pan')" style="font-size:8px;padding:5px 9px;">✋ VERSCHIEBEN</button>
+        <button class="btn-cancel" onclick="vtDeleteSelectedPoint()" style="font-size:8px;padding:5px 9px;border-color:rgba(255,23,68,.3);color:var(--red);">✕ PUNKT LÖSCHEN</button>
+        <button class="btn-cancel" onclick="vtClearAll()" style="font-size:8px;padding:5px 9px;border-color:rgba(255,23,68,.3);color:var(--red);">🗑 ALLES LÖSCHEN</button>
+        <button class="btn-cancel" onclick="vtUndo()" style="font-size:8px;padding:5px 9px;">⟵ ZURÜCK</button>
+        <button class="btn-cancel" onclick="vtRedo()" style="font-size:8px;padding:5px 9px;">VORWÄRTS ⟶</button>
+      </div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;">STRECKE</div>
+      <div class="mgrid" style="margin-bottom:8px;">
+        <div class="mitem"><label class="mlabel">BREITE (m)</label><input class="minput" type="number" min="1" step="0.5" id="vtWidthInput" value="5" onchange="vtOnGlobalFieldChange()"></div>
+        <div class="mitem"><label class="mlabel">BOXENGASSE (m, optional)</label><input class="minput" type="number" min="0" step="0.5" id="vtPitWidthInput" placeholder="—" onchange="vtOnGlobalFieldChange()"></div>
+        <div class="mitem"><label class="mlabel">SPANNUNG (1=Standard, &lt;1 schärfer, &gt;1 weicher)</label><input class="minput" type="number" min="0.1" max="3" step="0.1" id="vtTensionInput" value="1" onchange="vtOnGlobalFieldChange()"></div>
+      </div>
+      <div id="vtPointPanel" style="display:none;align-items:center;gap:8px;margin-bottom:8px;background:var(--bg3);border:1px solid var(--border);padding:8px 10px;">
+        <label class="mlabel" style="margin:0;">SPANNUNG DIESES PUNKTS (leer = globaler Standard)</label>
+        <input class="minput" type="number" min="0.1" max="3" step="0.1" id="vtPointTension" style="width:100px;" onchange="vtOnPointTensionChange()">
+      </div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;">SATELLITENKARTE (benötigt Internet)</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:4px;">
+        <input class="minput" id="vtGeoSearchInput" placeholder="Adresse/Ort suchen…" style="flex:1;min-width:160px;" onkeydown="if(event.key==='Enter'){vtGeocodeSearch();event.preventDefault();}">
+        <button class="tbl-btn" onclick="vtGeocodeSearch()" style="white-space:nowrap;">🔍 SUCHEN</button>
+        <button class="tbl-btn" onclick="vtClearSatellite()" style="white-space:nowrap;">✕ ENTFERNEN</button>
+      </div>
+      <div id="vtGeoSearchStatus" style="font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--text-dim);margin-bottom:8px;"></div>
+    </div>
+
+    <div style="position:relative;width:100%;overflow:hidden;background:#0a0e12;border:1px solid var(--border);" id="vtCanvasWrap">
+      <canvas id="vtCanvas" style="display:block;width:100%;touch-action:none;cursor:crosshair;"></canvas>
+    </div>
+
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);">
+      <div>LÄNGE: <b style="color:var(--accent);" id="vtStatLength">—</b></div>
+      <div>LÄNGSTE GERADE: <b style="color:var(--accent);" id="vtStatStraight">—</b></div>
+      <div>ENGSTE KURVE: <b style="color:var(--accent);" id="vtStatTight">—</b></div>
+    </div>
+
+    <div class="msec" style="margin-top:14px;">
+      <div class="msec-title">RUNDENZEIT-SIMULATION</div>
+      <div class="mgrid" style="margin-bottom:8px;">
+        <div class="mitem full"><label class="mlabel">FAHRZEUG</label>
+          <select class="minput" id="vtVehicleSelect" onchange="vtRunSimulation()"></select>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+        <button class="btn-cancel" onclick="vtRunSimulation()" style="border-color:rgba(0,229,255,.3);color:var(--accent);font-size:8px;padding:5px 9px;">▶ SIMULIEREN</button>
+        <button class="btn-cancel" onclick="vtAutoCalibrate()" style="border-color:rgba(255,214,0,.3);color:var(--yellow);font-size:8px;padding:5px 9px;">⚖ AUTO-KALIBRIEREN AUS AUFZEICHNUNGEN</button>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);margin-bottom:6px;">
+        <div>RUNDENZEIT: <b style="color:var(--accent);font-size:14px;" id="vtSimLapTime">—</b></div>
+        <div>TOPSPEED: <b style="color:var(--accent);" id="vtSimTopSpeed">—</b></div>
+        <div style="display:flex;align-items:center;gap:4px;">KALIBRIERUNG:
+          <input class="minput" type="number" min="0.3" max="3" step="0.05" id="vtCalibrationValue" value="1" style="width:70px;" onchange="vtOnCalibrationChange()">×
+        </div>
+      </div>
+      <div id="vtSimCompare" style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);"></div>
+    </div>
+
+    <button class="btn-cancel" onclick="vtSaveAsTrack()" style="margin-top:10px;border-color:rgba(0,255,136,.4);color:var(--green);font-size:8px;padding:5px 9px;">💾 STRECKE SPEICHERN</button>
+  </div>
 </div>
 </div>
 
@@ -1899,6 +1978,7 @@ select.minput option{background:var(--bg2);}
     <div style="display:flex;gap:8px;">
       <button class="btn-cancel" onclick="exportAllFilteredSessions()" style="border-color:var(--accent);color:var(--accent);">📄 ALLE EXPORTIEREN (PDF)</button>
       <button class="btn-cancel" onclick="ttsSpeakSummary()" style="border-color:var(--yellow);color:var(--yellow);">🔊 ZUSAMMENFASSUNG</button>
+      <button class="btn-cancel" onclick="recScrollToFilters()" style="border-color:var(--accent);color:var(--accent);">⬆ NACH OBEN</button>
     </div>
     <button class="btn-cancel" onclick="closeModal('recordsModal')">SCHLIESSEN</button>
   </div>
@@ -2080,7 +2160,6 @@ const ps = {};
     lightsOut: false,
     falseStartDone: false,
     falseStartActive: false,  // true between false-start crossing and GO
-    trainingLocked: false,
     paused: false,
     pausedAt: null,
     skipFirstDone: false,
@@ -2114,9 +2193,15 @@ var SHORTCUT_DEFAULTS = {
   pitStopSettings: { code:'KeyP',    label:'Boxenstopp-Einstellungen öffnen' },
   saveFile:     { code:'KeyS', ctrl:true, label:'Speichern (JSON-Datei)' },
   loadFile:     { code:'KeyO', ctrl:true, label:'Laden (JSON-Datei, überschreibt alles)' },
-  showThreshBar:{ code:'KeyM',       label:'Schwellwert-Anzeige ein/aus' }
+  showThreshBar:{ code:'KeyM',       label:'Schwellwert-Anzeige ein/aus' },
+  fullscreen:   { code:'F10',        label:'Vollbild (Karte zeichnen / Vektor-Design / Carrera-Baukasten)' }
 };
 let db = { tracks:[], drivers:[], cars:[], assignments:{p1Driver:'',p2Driver:'',p1Car:'',p2Car:''}, sessionMeta:{},
+  // Grabsteine für gelöschte Fahrer/Fahrzeuge/Strecken (Key=Name/Modell → Löschzeitpunkt in ms) —
+  // verhindert, dass eine Löschung durch einen Sync von einem noch nicht aktualisierten Gerät
+  // wiederbelebt wird. Liegt bewusst INNERHALB von db, damit es automatisch durch die bestehende
+  // Speicher-/Sync-Pipeline (saveToLS/_buildSavePayload, kein Feld-Whitelisting) mitläuft.
+  deletedEntities: { drivers:{}, cars:{}, tracks:{} },
   shortcuts: JSON.parse(JSON.stringify(SHORTCUT_DEFAULTS)) };
 
 // ═══════════════════════════════════════════════════════
@@ -2830,15 +2915,7 @@ function startTraining(p) {
   // lapStart=null: Runde 1 beginnt erst beim ersten Überfahren der Messlinie
   s.lapStart=null;
   s.lapMs=0;
-  // Training lockout: ignore motion triggers for N seconds after start
-  var _lockEl=document.getElementById('trainingLockSec');
-  var _lockSec=_lockEl?Math.max(0,parseInt(_lockEl.value)||0):5;
-  s.trainingLocked=false;
   s.paused=false; s.pausedAt=null;
-  if(_lockSec>0) {
-    s.trainingLocked=true;
-    setTimeout(function(){ s.trainingLocked=false; }, _lockSec*1000);
-  }
   setPlayerUI(p,true);
   updateHdrLight();
   if(p===1 && cfg.sndStart) tone('start');
@@ -2991,7 +3068,6 @@ function resetPlayer(p) {
   s.pitStopMissedPenalty=null; // Gesamtstrafe für nicht absolvierte Pflicht-Boxenstopps (Sidebar-Anzeige)
   s.lightsOn=false; s.lightsOut=false;
   s.skipFirstDone=false; s.falseStartDone=false; s.falseStartActive=false;
-  s.trainingLocked=false;
   // Falls gerade noch ein Replay-Clip im Hintergrund fertiggestellt wird
   // (z.B. Reset direkt nach der letzten Runde eines Rennens), erst
   // abwarten, bevor die Zuordnung gelöscht wird — sonst geht die
@@ -4621,7 +4697,7 @@ function _processTrigger(r, pk, pIdx, isP2std) {
   // der Gesamtzeit mit dem noch nicht gesetzten startTime rechnen — das ergibt
   // eine astronomisch falsche Zeit (Date.now() - null wird als Date.now()
   // ausgewertet).
-  if(r.cTriggered && r.dirOk && !sp.locked && sp.running && sp.sessionActive && !sp.trainingLocked && !sp.falseStartActive) {
+  if(r.cTriggered && r.dirOk && !sp.locked && sp.running && sp.sessionActive && !sp.falseStartActive) {
     sp.locked=true;
     sp._lapTriggerSource = 'red';
     doTriggerFlash(pIdx,isP2std);
@@ -4743,6 +4819,12 @@ function _hideThreshFader(pk) {
   if(wrap) wrap.style.display='none';
 }
 function _updateThreshFader(pk, camR, zx, zy, zw, zh, rotDeg) {
+  // Button-Optik synchron zum tatsächlichen Zustand halten, egal ob per
+  // Klick auf den Button selbst, per Taste M oder über die Einstellungen
+  // umgeschaltet — läuft VOR dem Sichtbarkeits-Check, damit auch das
+  // Ausschalten (nicht nur das Einschalten) den Button korrekt zurücksetzt.
+  var toggleBtn=document.querySelector('.dz-fader-toggle-handle[data-dz="'+pk+'"]');
+  if(toggleBtn) toggleBtn.classList.toggle('active', !!cfg.showThreshBar);
   if(!cfg.showThreshBar) { _hideThreshFader(pk); return; }
   var wrap=document.getElementById('threshFaderWrap'+pk);
   var inp=document.getElementById('threshFader'+pk);
@@ -4763,7 +4845,7 @@ function _updateThreshFader(pk, camR, zx, zy, zw, zh, rotDeg) {
     rotX( zw/2,  zh/2), rotX( zw/2, -zh/2),
     rotX(-zw/2,  zh/2), rotX(-zw/2, -zh/2),
     rotX(0, -(zh/2+46)) + 9,   // Dreh-Griff (+ eigener Radius)
-    rotX(40, -(zh/2+46)) + 14  // Sperr-Griff (+ eigener Radius)
+    rotX(48, -(zh/2+46)) + 14  // Fader-Toggle-Griff rechts (+ eigener Radius) — Sperr-Griff sitzt jetzt links, bedrängt die rechte Seite nicht mehr
   );
   var pivotX=zx+zw/2;
   var left=Math.max(2, Math.min(pivotX+reach+gap, camR.width-FW-2));
@@ -4972,7 +5054,7 @@ function detectMotion(pid) {
 
   // Siehe ausführlichen Kommentar zur selben Absicherung in _processTrigger()
   // weiter oben: sp.falseStartActive muss hier ebenfalls ausgeschlossen werden.
-  if(centerTriggered && dirOk && !sp.locked && sp.running && sp.sessionActive && !sp.trainingLocked && !sp.falseStartActive) {
+  if(centerTriggered && dirOk && !sp.locked && sp.running && sp.sessionActive && !sp.falseStartActive) {
     sp.locked=true;
     sp._lapTriggerSource = 'red';
     doTriggerFlash(pIdx,isP2std);
@@ -5700,6 +5782,19 @@ function _rotVec(vx,vy,rad){
       lockHandle.addEventListener('touchstart',function(e){ e.stopPropagation(); },{passive:false});
       lockHandle.addEventListener('click',onLockToggle);
     }
+
+    // Fader-Toggle: blendet den Empfindlichkeits-Fader ein/aus (dieselbe
+    // Einstellung wie Taste M) — als Button direkt am Messfenster, weil auf
+    // dem iPad keine Tastatur griffbereit ist.
+    var faderToggle=el.querySelector('.dz-fader-toggle-handle');
+    if(faderToggle){
+      faderToggle.addEventListener('mousedown',function(e){ e.stopPropagation(); });
+      faderToggle.addEventListener('touchstart',function(e){ e.stopPropagation(); },{passive:false});
+      faderToggle.addEventListener('click',function(e){
+        tgl('showThreshBar');
+        e.preventDefault(); e.stopPropagation();
+      });
+    }
   });
 
   function onDrag(e){
@@ -6149,10 +6244,11 @@ function openModal(id){
   if(id==='carreraBuildModal') {
     carreraShowTab('build');
     carreraRenderPartTapGrid();
-    carreraPopulatePartTypeSelect && carreraPopulatePartTypeSelect();
     carreraRenderChain();
     carreraRenderSchematic();
     carreraLoadInventoryIntoTable();
+    carreraInitEvents();
+    carreraStartBlinkPreview();
   }
   if(id==='drawTrackModal') {
     // Canvas-Größe initialisieren falls noch kein Bild geladen
@@ -6170,7 +6266,7 @@ function openModal(id){
 
 }
 function closeModal(id){
-  var el=document.getElementById(id); if(el) el.classList.remove('open');
+  var el=document.getElementById(id); if(el) { el.classList.remove('open'); el.classList.remove('fullscreen'); }
   // Laufende Mess-Sensoren stoppen, wenn das jeweilige Modal geschlossen wird
   if(id==='gpsMeasureModal' && typeof gpsTracking!=='undefined' && gpsTracking) {
     try { if(gpsWatchId!==null){ navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId=null; } gpsTracking=false; } catch(e){}
@@ -6257,7 +6353,8 @@ function trackEditSave() {
     length:   isCarrera ? innerLen : simpleLen,
     type:     typ,
     notes:    document.getElementById('teTrackNotes').value.trim(),
-    direction: window._dtPendingDirection || undefined
+    direction: window._dtPendingDirection || undefined,
+    updatedAt: Date.now()
   };
   if(isCarrera) { entry.innerLen = innerLen; entry.outerLen = outerLen; }
   window._dtPendingDirection = null;
@@ -6457,11 +6554,15 @@ function _buildSavePayload() {
   try { carreraLayouts = JSON.parse(localStorage.getItem('apexCarreraLayouts')||'[]'); } catch(e){}
   var drawLayouts = [];
   try { drawLayouts = JSON.parse(localStorage.getItem('apexDrawLayouts')||'[]'); } catch(e){}
+  var vectorLayouts = [];
+  try { vectorLayouts = JSON.parse(localStorage.getItem('apexVectorLayouts')||'[]'); } catch(e){}
   return JSON.stringify({
     db: db,
     records: records,
+    deletedRecords: _getDeletedRecords(),
     carreraLayouts: carreraLayouts,
     drawLayouts: drawLayouts,
+    vectorLayouts: vectorLayouts,
     carreraInventory: carreraGetInventory(),
     carreraInventoryUpdatedAt: carreraGetInventoryUpdatedAt(),
     exportDate: new Date().toISOString()
@@ -6643,6 +6744,19 @@ function renderActiveTrackPreview() {
     return;
   }
 
+  // ── Vektor-Layout ─────────────────────────────────────────────────────
+  var vectorLayouts=[];
+  try{vectorLayouts=JSON.parse(localStorage.getItem('apexVectorLayouts')||'[]');}catch(e){}
+  var vl = vectorLayouts.find(function(l){return l.name===name;});
+  if(vl && vl.points && vl.points.length>1) {
+    cv.style.display='block'; if(emptyEl) emptyEl.style.display='none';
+    var wrap3 = cv.parentElement;
+    cv.width = Math.round((wrap3 && wrap3.offsetWidth) || 280);
+    cv.height = 130;
+    vtRenderPreview(cv.getContext('2d'), vl, cv, dir);
+    return;
+  }
+
   // No preview available
   cv.style.display='none';
   if(emptyEl){
@@ -6657,6 +6771,73 @@ function renderActiveTrackPreview() {
     emptyEl.style.display='block';
     cv.style.display='none';
   }
+}
+
+// Wie renderActiveTrackPreview(), aber parametrisiert statt an feste
+// DOM-IDs gebunden — zeichnet die Vorschau eines Streckennamens (Carrera-
+// Baukasten, Foto-Nachzeichnung oder Vektor-Design, in dieser Reihenfolge
+// geprüft) direkt in ein übergebenes <canvas>. Nutzt dessen bereits per
+// HTML-Attribut gesetzte Breite/Höhe unverändert (kein Resize anhand des
+// Elternelements) — gedacht für viele kleine Thumbnails gleichzeitig, z.B.
+// in der Streckenliste der Aufzeichnungen. Gibt true zurück, wenn eine
+// passende Strecke gefunden und (ggf. asynchron bei Fotos) gezeichnet wurde.
+function _apexRenderTrackPreviewInto(cv, name, dir) {
+  if(!cv || !name) return false;
+  dir = dir || 'cw';
+
+  var carreraLayouts=[];
+  try{carreraLayouts=JSON.parse(localStorage.getItem('apexCarreraLayouts')||'[]');}catch(e){}
+  var cl = carreraLayouts.find(function(l){return l.name===name;});
+  if(cl && cl.chain && cl.chain.length>0) {
+    var savedChain = JSON.parse(JSON.stringify(carreraChain));
+    var savedZoom  = carreraZoomFactor;
+    var savedRot   = carreraRotationDeg;
+    var savedRev   = carreraDirectionReversed;
+    carreraChain = JSON.parse(JSON.stringify(cl.chain));
+    _carreraMigrateChainCoords(carreraChain, cl.rotation || 0);
+    carreraZoomFactor = 1;
+    carreraRotationDeg = cl.rotation || 0;
+    carreraDirectionReversed = (dir === 'ccw');
+    _carreraDrawPreview(cv, carreraChain);
+    carreraChain = savedChain;
+    carreraZoomFactor = savedZoom;
+    carreraRotationDeg = savedRot;
+    carreraDirectionReversed = savedRev;
+    return true;
+  }
+
+  var drawLayouts=[];
+  try{drawLayouts=JSON.parse(localStorage.getItem('apexDrawLayouts')||'[]');}catch(e){}
+  var dl = drawLayouts.find(function(l){return l.name===name;});
+  if(dl && dl.path && dl.path.length>1) {
+    var ctx = cv.getContext('2d');
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.fillStyle='#0a0e12'; ctx.fillRect(0,0,cv.width,cv.height);
+    if(dl.imgData) {
+      var img = new Image();
+      img.onload = function() {
+        var iw=img.width, ih=img.height;
+        var sc=Math.min(cv.width/iw, cv.height/ih)*0.85;
+        var ox=(cv.width-iw*sc)/2, oy=(cv.height-ih*sc)/2;
+        ctx.save(); ctx.drawImage(img, ox, oy, iw*sc, ih*sc); ctx.restore();
+        _dtPreviewDrawPath(ctx, dl, cv, dir, ox, oy, sc, iw, ih, true);
+      };
+      img.src = dl.imgData;
+    } else {
+      _dtPreviewDrawPath(ctx, dl, cv, dir, 0, 0, 1, cv.width, cv.height, false);
+    }
+    return true;
+  }
+
+  var vectorLayouts=[];
+  try{vectorLayouts=JSON.parse(localStorage.getItem('apexVectorLayouts')||'[]');}catch(e){}
+  var vl = vectorLayouts.find(function(l){return l.name===name;});
+  if(vl && vl.points && vl.points.length>1) {
+    vtRenderPreview(cv.getContext('2d'), vl, cv, dir);
+    return true;
+  }
+
+  return false;
 }
 
 function _dtPreviewDrawPath(ctx, dl, cv, dir, imgOX, imgOY, imgSC, imgW, imgH, hasImage) {
@@ -6909,15 +7090,22 @@ function renderTables(){
       var avg = ((parseFloat(t.innerLen)+parseFloat(t.outerLen))/2).toFixed(2);
       lenDisplay = avg+'m <span style="font-size:7px;color:var(--text-dim);">Ø</span>';
     }
-    return `<tr><td>${t.name}</td><td>${t.location||''}</td><td>${lenDisplay}</td><td>${t.type||''}</td><td style="display:flex;gap:4px;"><button class="tbl-btn" onclick="editTrack(${i})">✎</button><button class="tbl-btn del" onclick="delTrack(${i})">✕</button></td></tr>`;
+    var previewAttr = t.name.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    return `<tr><td>${t.name}</td><td><canvas class="track-tbl-thumb" data-track-name="${previewAttr}" width="60" height="34" style="display:block;background:#0a0e12;border:1px solid var(--border);"></canvas></td><td>${t.location||''}</td><td>${lenDisplay}</td><td>${t.type||''}</td><td style="display:flex;gap:4px;"><button class="tbl-btn" onclick="editTrack(${i})">✎</button><button class="tbl-btn del" onclick="delTrack(${i})">✕</button></td></tr>`;
   }).join('');
   db.tracks.forEach(t=>{const o=document.createElement('option');o.value=t.name;o.textContent=t.name;at.appendChild(o);});
   if(prevTrack) at.value=prevTrack;
   onActiveTrackChange(); // Spur-Dropdown aktualisieren
-  // sort indicators
-  ['NAME','ORT','LÄNGE','TYP'].forEach(function(_,i){
-    var ths=document.querySelectorAll('#trackTable thead th');
-    if(ths[i]) ths[i].className=_apexSortState.track.col===i?(_apexSortState.track.dir===1?'sort-asc':'sort-desc'):'';
+  tb.querySelectorAll('.track-tbl-thumb').forEach(function(cv){
+    var tname = cv.getAttribute('data-track-name');
+    if(tname) _apexRenderTrackPreviewInto(cv, tname, 'cw');
+  });
+  // sort indicators — Sortier-Spalten-Index (0=NAME,1=ORT,2=LÄNGE,3=TYP, aus
+  // trackKeys) auf die tatsächliche Kopfzeilen-Position gemappt (VORSCHAU
+  // dazwischen ist nicht sortierbar, verschiebt daher die Positionen ab ORT).
+  var ths=document.querySelectorAll('#trackTable thead th');
+  [0,2,3,4].forEach(function(thIdx, sortCol){
+    if(ths[thIdx]) ths[thIdx].className=_apexSortState.track.col===sortCol?(_apexSortState.track.dir===1?'sort-asc':'sort-desc'):'';
   });
 
   // ── drivers ──
@@ -6983,7 +7171,7 @@ function addTrack(){
   db.tracks.push({name:n,location:document.getElementById('trLocation').value,
     length:document.getElementById('trLength').value,type:type,
     lane: (type==='Carrerabahn' && laneSel) ? laneSel.value : undefined,
-    notes:document.getElementById('trNotes').value});
+    notes:document.getElementById('trNotes').value, updatedAt: Date.now()});
   ['trName','trLocation','trLength','trNotes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('trType').value='Rundkurs';
   onTrackTypeChange();
@@ -6992,6 +7180,8 @@ function addTrack(){
 function delTrack(i){
   var name=(db.tracks[i]&&db.tracks[i].name)||'diese Strecke';
   apexConfirm('Möchtest du "'+name+'" wirklich löschen?',function(){
+    if(!db.deletedEntities) db.deletedEntities={drivers:{},cars:{},tracks:{}};
+    db.deletedEntities.tracks[name]=Date.now();
     db.tracks.splice(i,1);
     _removeLayoutByName(name);
     saveToLS();renderTables();
@@ -7717,7 +7907,8 @@ function driverEditSave() {
     name:  n,
     short: document.getElementById('deDriverShort').value.trim().toUpperCase(),
     team:  document.getElementById('deDriverTeam').value.trim(),
-    nation:document.getElementById('deDriverNation').value.trim()
+    nation:document.getElementById('deDriverNation').value.trim(),
+    updatedAt: Date.now()
   };
   if(idx >= 0 && db.drivers[idx]) {
     var oldName = db.drivers[idx].name;
@@ -7939,6 +8130,9 @@ function openCarEditModal(idx) {
     document.getElementById('deCarNum').value   = car.num   || '';
     document.getElementById('deCarClass').value = car.class || '';
     document.getElementById('deCarColor').value = car.color || '#ff3c00';
+    document.getElementById('deCarPower').value = car.powerKw!=null ? car.powerKw : '';
+    document.getElementById('deCarWeight').value = car.weightKg!=null ? car.weightKg : '';
+    document.getElementById('deCarTopSpeed').value = car.topSpeedKmh!=null ? car.topSpeedKmh : '';
     document.getElementById('deCarNotes').value = car.notes || '';
     _deModalSetPhoto('deCarPhoto','deCarPhotoEmpty', _loadCarPhoto(car.model));
   } else {
@@ -7951,10 +8145,39 @@ function openCarEditModal(idx) {
     document.getElementById('deCarNum').value='';
     document.getElementById('deCarClass').value='';
     document.getElementById('deCarColor').value='#ff3c00';
+    document.getElementById('deCarPower').value='';
+    document.getElementById('deCarWeight').value='';
+    document.getElementById('deCarTopSpeed').value='';
     document.getElementById('deCarNotes').value='';
     _deModalSetPhoto('deCarPhoto','deCarPhotoEmpty', null);
   }
+  deCarUpdatePsHint();
+  deCarUpdatePhysicsVisibility();
   openModal('carEditModal');
+}
+
+// Rein informative Live-Umrechnung kW→PS neben dem Leistungsfeld — PS wird
+// nirgends gespeichert, nur kW ist die kanonische Einheit (vermeidet
+// Doppel-Buchhaltung/Sync-Drift zwischen zwei Werten für dieselbe Größe).
+function deCarUpdatePsHint() {
+  var el = document.getElementById('deCarPower');
+  var hint = document.getElementById('deCarPsHint');
+  if(!el || !hint) return;
+  var kw = parseFloat(el.value);
+  hint.textContent = (kw>0) ? ('≈ '+Math.round(kw*1.35962)+' PS') : '— PS';
+}
+
+// Für Slotcars/Dr!ft-Fahrzeuge gibt es keine sinnvollen Leistungs-/
+// Gewichtsangaben (kein reales Datenblatt) — Felder ausblenden statt mit
+// bedeutungslosen Zahlen zu verwirren; die Simulation nutzt hier ohnehin nur
+// die Kategorie-Standardwerte plus Kalibrierung anhand echter Rundenzeiten.
+function deCarUpdatePhysicsVisibility() {
+  var cat = (document.getElementById('deCarCategory')||{value:'Auto'}).value;
+  var showPhysics = (cat==='Auto' || cat==='Motorrad');
+  var group = document.getElementById('deCarPhysicsGroup');
+  var hint = document.getElementById('deCarPhysicsHint');
+  if(group) group.style.display = showPhysics ? 'contents' : 'none';
+  if(hint) hint.style.display = showPhysics ? 'none' : 'block';
 }
 
 function carEditSave() {
@@ -7969,7 +8192,11 @@ function carEditSave() {
     num:   document.getElementById('deCarNum').value.trim(),
     class: document.getElementById('deCarClass').value.trim(),
     color: document.getElementById('deCarColor').value,
-    notes: document.getElementById('deCarNotes').value.trim()
+    powerKw: parseFloat(document.getElementById('deCarPower').value)||null,
+    weightKg: parseFloat(document.getElementById('deCarWeight').value)||null,
+    topSpeedKmh: parseFloat(document.getElementById('deCarTopSpeed').value)||null,
+    notes: document.getElementById('deCarNotes').value.trim(),
+    updatedAt: Date.now()
   };
   if(idx >= 0 && db.cars[idx]) {
     var oldModel = db.cars[idx].model;
@@ -7996,21 +8223,35 @@ function addDriver(){
   db.drivers.push({name:n,
     short:(document.getElementById('drShort')||{value:''}).value.toUpperCase(),
     team:(document.getElementById('drTeam')||{value:''}).value,
-    nation:(document.getElementById('drNation')||{value:''}).value});
+    nation:(document.getElementById('drNation')||{value:''}).value, updatedAt: Date.now()});
   saveToLS(); renderTables();
 }
 
-function delDriver(i){apexConfirm('Möchtest du "'+(db.drivers[i]&&db.drivers[i].name||'diesen Fahrer')+'" wirklich löschen?',function(){db.drivers.splice(i,1);saveToLS();renderTables();});}
+function delDriver(i){
+  var dName=db.drivers[i]&&db.drivers[i].name;
+  apexConfirm('Möchtest du "'+(dName||'diesen Fahrer')+'" wirklich löschen?',function(){
+    if(!db.deletedEntities) db.deletedEntities={drivers:{},cars:{},tracks:{}};
+    if(dName) db.deletedEntities.drivers[dName]=Date.now();
+    db.drivers.splice(i,1);saveToLS();renderTables();
+  });
+}
 function addCar(){
   const m=document.getElementById('carModel').value.trim();
   if(!m){apexAlert('Modell eingeben.');return;}
   db.cars.push({model:m,num:document.getElementById('carNum').value,
     class:document.getElementById('carClass').value,color:document.getElementById('carColor').value,
-    notes:document.getElementById('carNotes').value});
+    notes:document.getElementById('carNotes').value, updatedAt: Date.now()});
   ['carModel','carNum','carClass','carNotes'].forEach(id=>document.getElementById(id).value='');
   saveToLS(); renderTables();
 }
-function delCar(i){apexConfirm('Möchtest du "'+(db.cars[i]&&db.cars[i].model||'dieses Fahrzeug')+'" wirklich löschen?',function(){db.cars.splice(i,1);saveToLS();renderTables();});}
+function delCar(i){
+  var cModel=db.cars[i]&&db.cars[i].model;
+  apexConfirm('Möchtest du "'+(cModel||'dieses Fahrzeug')+'" wirklich löschen?',function(){
+    if(!db.deletedEntities) db.deletedEntities={drivers:{},cars:{},tracks:{}};
+    if(cModel) db.deletedEntities.cars[cModel]=Date.now();
+    db.cars.splice(i,1);saveToLS();renderTables();
+  });
+}
 
 function applyAssignments(){
   db.assignments.p1Driver=document.getElementById('assignP1').value;
@@ -8397,13 +8638,13 @@ function exportData(p) {
   var suggestedName=parts.join(' - ')+'.txt';
   // Filename dialog
   var NL='\n', SEP='='.repeat(54);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.15 - RUNDENZEITEN'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.1.0 - RUNDENZEITEN'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   STANDARD / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
   if(meta.name) txt+='  Session: '+meta.name+NL;
   if(meta.weather) txt+='  Wetter:  '+meta.weather+NL;
-  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.15'+NL+SEP+NL;
+  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.1.0'+NL+SEP+NL;
   _exportPendingData={type:'single',txt:txt,suggestedName:suggestedName};
   _openExportModal(suggestedName);
 }
@@ -8428,7 +8669,7 @@ function exportVS() {
     else winner='GLEICHSTAND';
   }
   var NL='\n', SEP='='.repeat(colW*2+5);
-  var txt=SEP+NL+'  Apex Timer Pro V1.0.15 - VS ERGEBNISSE'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.1.0 - VS ERGEBNISSE'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   VS / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
@@ -8441,7 +8682,7 @@ function exportVS() {
     var c2=l2&&i2<l2.length?l2[i2]:'';
     txt+=c1+' | '+c2+NL;
   }
-  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.0.15'+NL+SEP+NL;
+  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.1.0'+NL+SEP+NL;
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
   var _s1=ps[1],_s2=ps[2]; var _t1=_s1.totalMs+_s1.penalty,_t2=_s2.totalMs+_s2.penalty; var _l1=_s1.laps.length,_l2=_s2.laps.length;
@@ -8585,6 +8826,7 @@ function _apexLoadPayload(jsonStr) {
     }
     if(d.carreraLayouts) try{localStorage.setItem('apexCarreraLayouts',JSON.stringify(d.carreraLayouts));}catch(e){}
     if(d.drawLayouts)    try{localStorage.setItem('apexDrawLayouts',JSON.stringify(d.drawLayouts));}catch(e){}
+    if(d.vectorLayouts)  try{localStorage.setItem('apexVectorLayouts',JSON.stringify(d.vectorLayouts));}catch(e){}
     saveToLS(); renderTables(); apexAlert('✓ Daten geladen!');
   } catch(e){apexAlert('Laden fehlgeschlagen: '+e.message);}
 }
@@ -8663,6 +8905,13 @@ function onLoadFile(ev){
         var toAddDL=d.drawLayouts.filter(function(l){return !existDLIds.has(l.id);});
         localStorage.setItem('apexDrawLayouts',JSON.stringify(existDL.concat(toAddDL)));
       }
+      // Restore vector layouts
+      if(d.vectorLayouts && Array.isArray(d.vectorLayouts)) {
+        var existVL=[];try{existVL=JSON.parse(localStorage.getItem('apexVectorLayouts')||'[]');}catch(e){}
+        var existVLIds=new Set(existVL.map(function(l){return l.id;}));
+        var toAddVL=d.vectorLayouts.filter(function(l){return !existVLIds.has(l.id);});
+        localStorage.setItem('apexVectorLayouts',JSON.stringify(existVL.concat(toAddVL)));
+      }
       saveToLS(); renderTables();
       apexAlert('✓ Daten erfolgreich geladen!');
     }catch(ex){ apexAlert('Fehler beim Laden: '+ex.message); }
@@ -8715,46 +8964,51 @@ function mergeArrAuto(existArr, incArr, keyFn, tsFn) {
   return {arr:Object.values(map), added:added, updated:updated};
 }
 
-// Automatischer Merge für Fahrer/Autos/Strecken im lokalen Hintergrund-Sync
-// (_localSyncApply) — anders als collectEntityConflicts() weiter unten
-// (manueller Datei-Import, zeigt bei Konflikt einen Dialog) läuft dies ohne
-// jede Nutzerinteraktion: neuer Key wird übernommen, inhaltlich gleicher Key
-// bleibt unverändert, inhaltlich ABWEICHENDER Key wird NICHT überschrieben,
-// sondern der eingehende Eintrag unter angehängtem Namen zusätzlich
-// aufgenommen — kein Datenverlust, gelegentliche Duplikate statt stillem
-// Überschreiben.
-function _mergeEntityArrAuto(existArr, incArr, keyField, fields, sourceLabel) {
-  existArr = existArr || [];
-  var byKey = {};
-  existArr.forEach(function(x){ byKey[x[keyField]] = x; });
-  var added = 0, renamed = 0;
+// Last-Write-Wins-Merge für Fahrer/Autos/Strecken/Aufzeichnungen im lokalen
+// Hintergrund-Sync (_localSyncApply) — löst die frühere _mergeEntityArrAuto
+// ab, die bei abweichenden Daten unter angehängtem Namen ein Duplikat
+// anlegte. Jetzt gewinnt pro Key der Eintrag mit dem neueren `updatedAt`
+// (in-place ersetzt, kein Rename), und Löschungen werden per Grabstein-Map
+// (Key/ID → deletedAt) auf beiden Geräten durchgesetzt statt bei jedem Sync
+// wieder aufzutauchen.
+function mergeEntitiesLWW(existArr, incArr, keyField, existDeleted, incDeleted, tsField) {
+  tsField = tsField || 'updatedAt';
+  var deleted = {};
+  Object.keys(existDeleted||{}).forEach(function(k){ deleted[k]=existDeleted[k]; });
+  Object.keys(incDeleted||{}).forEach(function(k){ deleted[k]=Math.max(deleted[k]||0, incDeleted[k]); });
+  var map = {};
+  (existArr||[]).forEach(function(x){ map[x[keyField]] = x; });
+  var added=0, updated=0, removed=0;
   (incArr||[]).forEach(function(inc){
     var k = inc[keyField];
-    var loc = byKey[k];
-    if(!loc) { existArr.push(inc); byKey[k] = inc; added++; return; }
-    if(_apexShallowEqual(loc, inc, fields)) return; // identisch, nichts zu tun
-    var base = k + ' (' + (sourceLabel||'Sync') + ')';
-    var newKey = base, n = 2;
-    while(byKey[newKey]) { newKey = base + ' ' + n; n++; }
-    var renamedEntry = JSON.parse(JSON.stringify(inc));
-    renamedEntry[keyField] = newKey;
-    existArr.push(renamedEntry); byKey[newKey] = renamedEntry;
-    renamed++;
+    var incTs = inc[tsField]||0;
+    if(deleted[k] && deleted[k] >= incTs) return; // per Grabstein gelöscht, nicht wiederbeleben
+    var loc = map[k];
+    if(!loc) { map[k]=inc; added++; return; }
+    var locTs = loc[tsField]||0;
+    if(incTs > locTs) { map[k]=inc; updated++; }
   });
-  return { arr: existArr, added: added, renamed: renamed };
+  Object.keys(map).forEach(function(k){
+    var ts = map[k][tsField]||0;
+    if(deleted[k]!=null && deleted[k] >= ts) { delete map[k]; removed++; }
+  });
+  return { arr: Object.values(map), deleted: deleted, added: added, updated: updated, removed: removed };
 }
 
 function _apexMerge(incoming) {
   var report = [];
 
-  // ── Aufzeichnungen (Sessions) — können laut Definition nicht kollidieren,
-  //    da jede Session ihre eigene, eindeutige ID hat ─────────────────────
-  if(Array.isArray(incoming.records)) {
+  // ── Aufzeichnungen (Sessions) — eindeutige ID, kein inhaltlicher Konflikt
+  //    möglich, aber Löschungen auf der jeweils anderen Seite müssen per
+  //    Grabstein respektiert werden (kein stilles Wiederauftauchen) ───────
+  if(Array.isArray(incoming.records) || incoming.deletedRecords) {
     var existingRecs = loadRecords();
-    var re = mergeArrAuto(existingRecs, incoming.records, function(x){return x.id;}, 'savedAt');
+    var localDelRec = _getDeletedRecords();
+    var re = mergeEntitiesLWW(existingRecs, incoming.records||[], 'id', localDelRec, incoming.deletedRecords, 'updatedAt');
+    _saveDeletedRecords(re.deleted);
     re.arr.sort(function(a,b){return (a.savedAt||'')>(b.savedAt||'')?-1:1;});
     saveRecords(re.arr);
-    report.push('Aufzeichnungen: +'+re.added+' neu, '+re.updated+' aktualisiert');
+    report.push('Aufzeichnungen: +'+re.added+' neu, '+re.updated+' aktualisiert, '+re.removed+' gelöscht');
   }
 
   // ── Carrera-/Zeichnungs-Layouts — ebenfalls über eindeutige IDs, kein
@@ -8770,6 +9024,12 @@ function _apexMerge(incoming) {
     var dlr = mergeArrAuto(dl, incoming.drawLayouts, function(x){return x.name;}, 'saved');
     localStorage.setItem('apexDrawLayouts', JSON.stringify(dlr.arr));
     report.push('Zeichnungen: +'+dlr.added+' neu, '+dlr.updated+' aktualisiert');
+  }
+  if(Array.isArray(incoming.vectorLayouts)) {
+    var vl = []; try{vl=JSON.parse(localStorage.getItem('apexVectorLayouts')||'[]');}catch(e){}
+    var vlr = mergeArrAuto(vl, incoming.vectorLayouts, function(x){return x.name;}, 'updatedAt');
+    localStorage.setItem('apexVectorLayouts', JSON.stringify(vlr.arr));
+    report.push('Vektor-Strecken: +'+vlr.added+' neu, '+vlr.updated+' aktualisiert');
   }
 
   // ── Schienen-Bestand — reine Mengenangaben ohne Namen/Konfliktpotenzial,
@@ -8801,11 +9061,18 @@ function _apexMerge(incoming) {
   var conflicts = [];   // { type, key, local, incoming }
   var autoAdded = {drivers:0, cars:0, tracks:0, photos:0};
 
+  if(!db.deletedEntities) db.deletedEntities = {drivers:{},cars:{},tracks:{}};
+  var incDelEnt = (incoming.db && incoming.db.deletedEntities) || {};
+
   function collectEntityConflicts(type, existArr, incArr, keyField, fields) {
+    var localDel = db.deletedEntities[type] || {};
+    var incDel = incDelEnt[type] || {};
     var byKey = {};
     (existArr||[]).forEach(function(x){ byKey[x[keyField]] = x; });
     (incArr||[]).forEach(function(inc){
       var k = inc[keyField];
+      var incTs = inc.updatedAt||0;
+      if(localDel[k] && localDel[k] >= incTs) return; // per Grabstein gelöscht, still überspringen
       var loc = byKey[k];
       if(!loc) {
         existArr.push(inc); // neuer Eintrag, kein Konflikt möglich
@@ -8815,13 +9082,19 @@ function _apexMerge(incoming) {
       }
       // Wenn loc existiert und inhaltlich identisch ist: nichts zu tun.
     });
+    // Grabstein-Maps vereinigen (neuerer deletedAt gewinnt), auch wenn die
+    // eingehende Datei keine neuen Einträge für diesen Typ mitbringt.
+    Object.keys(incDel).forEach(function(k){
+      localDel[k] = Math.max(localDel[k]||0, incDel[k]);
+    });
+    db.deletedEntities[type] = localDel;
   }
 
   if(incoming.db && Array.isArray(incoming.db.drivers)) {
     collectEntityConflicts('drivers', db.drivers, incoming.db.drivers, 'name', ['name','short','team','nation']);
   }
   if(incoming.db && Array.isArray(incoming.db.cars)) {
-    collectEntityConflicts('cars', db.cars, incoming.db.cars, 'model', ['model','num','class','color','notes']);
+    collectEntityConflicts('cars', db.cars, incoming.db.cars, 'model', ['model','num','class','color','powerKw','weightKg','topSpeedKmh','notes']);
   }
   if(incoming.db && Array.isArray(incoming.db.tracks)) {
     collectEntityConflicts('tracks', db.tracks, incoming.db.tracks, 'name', ['name','location','length','type','direction']);
@@ -8869,17 +9142,18 @@ function _apexMerge(incoming) {
 function _localSyncApply(incoming) {
   incoming = incoming || {};
   var changed = false;
-  var sourceLabel = (typeof window!=='undefined' && window.apexSyncBridge) ? 'iPad' : 'PC';
 
-  if(Array.isArray(incoming.records)) {
-    var re = mergeArrAuto(loadRecords(), incoming.records, function(r){return r.id;}, 'savedAt');
-    if(re.added || re.updated) { saveRecords(re.arr); changed = true; }
+  if(Array.isArray(incoming.records) || incoming.deletedRecords) {
+    var localDelRec = _getDeletedRecords();
+    var re = mergeEntitiesLWW(loadRecords(), incoming.records||[], 'id', localDelRec, incoming.deletedRecords, 'updatedAt');
+    _saveDeletedRecords(re.deleted);
+    if(re.added || re.updated || re.removed) { saveRecords(re.arr); changed = true; }
   }
-  [['carreraLayouts','apexCarreraLayouts'], ['drawLayouts','apexDrawLayouts']].forEach(function(pair){
-    var key = pair[0], lsKey = pair[1];
+  [['carreraLayouts','apexCarreraLayouts','saved'], ['drawLayouts','apexDrawLayouts','saved'], ['vectorLayouts','apexVectorLayouts','updatedAt']].forEach(function(pair){
+    var key = pair[0], lsKey = pair[1], tsField = pair[2];
     if(!Array.isArray(incoming[key])) return;
     var local = []; try{ local = JSON.parse(localStorage.getItem(lsKey)||'[]'); }catch(e){}
-    var r = mergeArrAuto(local, incoming[key], function(x){return x.name;}, 'saved');
+    var r = mergeArrAuto(local, incoming[key], function(x){return x.name;}, tsField);
     if(r.added || r.updated) { localStorage.setItem(lsKey, JSON.stringify(r.arr)); changed = true; }
   });
 
@@ -8896,17 +9170,22 @@ function _localSyncApply(incoming) {
   }
 
   if(incoming.db) {
+    if(!db.deletedEntities) db.deletedEntities = {drivers:{},cars:{},tracks:{}};
+    var incDel = incoming.db.deletedEntities || {};
     if(Array.isArray(incoming.db.drivers)) {
-      var rd = _mergeEntityArrAuto(db.drivers, incoming.db.drivers, 'name', ['name','short','team','nation'], sourceLabel);
-      db.drivers = rd.arr; if(rd.added || rd.renamed) changed = true;
+      var rd = mergeEntitiesLWW(db.drivers, incoming.db.drivers, 'name', db.deletedEntities.drivers, incDel.drivers);
+      db.drivers = rd.arr; db.deletedEntities.drivers = rd.deleted;
+      if(rd.added || rd.updated || rd.removed) changed = true;
     }
     if(Array.isArray(incoming.db.cars)) {
-      var rc = _mergeEntityArrAuto(db.cars, incoming.db.cars, 'model', ['model','num','class','color','notes'], sourceLabel);
-      db.cars = rc.arr; if(rc.added || rc.renamed) changed = true;
+      var rc = mergeEntitiesLWW(db.cars, incoming.db.cars, 'model', db.deletedEntities.cars, incDel.cars);
+      db.cars = rc.arr; db.deletedEntities.cars = rc.deleted;
+      if(rc.added || rc.updated || rc.removed) changed = true;
     }
     if(Array.isArray(incoming.db.tracks)) {
-      var rt = _mergeEntityArrAuto(db.tracks, incoming.db.tracks, 'name', ['name','location','length','type','direction'], sourceLabel);
-      db.tracks = rt.arr; if(rt.added || rt.renamed) changed = true;
+      var rt = mergeEntitiesLWW(db.tracks, incoming.db.tracks, 'name', db.deletedEntities.tracks, incDel.tracks);
+      db.tracks = rt.arr; db.deletedEntities.tracks = rt.deleted;
+      if(rt.added || rt.updated || rt.removed) changed = true;
     }
     if(incoming.db.assignments) {
       ['p1Driver','p1Car','p2Driver','p2Car'].forEach(function(f){
@@ -9489,6 +9768,48 @@ var carreraRotationDeg = 0; // Gesamtrotation der Schematik in Grad
 var carreraZoomFactor = 1;  // Zoom-Faktor für Schematik-Darstellung
 var carreraDirectionReversed = false; // Fahrtrichtung umgekehrt
 
+// Hover-/Auswahl-Zustand für die Schienen-Interaktion auf dem Schematik-Canvas.
+// carreraSelectedLinkId referenziert bewusst die stabile link.id (nicht einen
+// Array-Index) — überlebt dadurch Einfügen/Löschen/Undo/Redo an anderer
+// Stelle der Kette, ohne dass die Auswahl auf das falsche Teil "springt".
+// carreraHoverSegIdx ist dagegen ein reiner Segment-Array-Index, unkritisch
+// weil er bei jeder Mausbewegung frisch per Hit-Test neu ermittelt wird.
+var carreraSelectedLinkId = null;
+var carreraHoverSegIdx = -1;
+// Zwischenspeicher aus dem letzten carreraRenderSchematic()-Aufruf, damit
+// Hit-Tests (Hover/Klick) dieselbe Geometrie/Skalierung wiederverwenden
+// können, ohne den Turtle-Walk ein zweites Mal nachzubauen.
+var carreraLastSegments = [];
+var carreraLastFitScale = 0;
+var carreraLastOffX = 0;
+var carreraLastOffY = 0;
+// true zwischen "STRECKE VERVOLLSTÄNDIGEN" geklickt und der Ziel-Auswahl per
+// Klick/Touch auf dem Canvas — der nächste Klick wird dann nicht als normale
+// Auswahl behandelt, sondern startet carreraCloseTrackTo().
+var carreraAwaitingCloseTarget = false;
+// Blinkende "Geister"-Schienen-Vorschau (Baurichtung) — carreraBlinkOpacity
+// wird per requestAnimationFrame moderat (ca. 1.6s Periode) auf/ab pulsiert.
+var carreraBlinkAnimId = null;
+var carreraBlinkOpacity = 0.15;
+var carreraBlinkLastRender = 0;
+
+function _carreraBlinkStep(ts) {
+  var modal = document.getElementById('carreraBuildModal');
+  if(!modal || !modal.classList.contains('open')) { carreraBlinkAnimId = null; return; }
+  var period = 1600; // ms — moderate Geschwindigkeit
+  var phase = (ts % period) / period * Math.PI * 2;
+  carreraBlinkOpacity = 0.15 + 0.35 * (0.5 + 0.5*Math.sin(phase));
+  if(ts - carreraBlinkLastRender > 70) {
+    carreraBlinkLastRender = ts;
+    carreraRenderSchematic();
+  }
+  carreraBlinkAnimId = requestAnimationFrame(_carreraBlinkStep);
+}
+function carreraStartBlinkPreview() {
+  if(carreraBlinkAnimId != null) return;
+  carreraBlinkAnimId = requestAnimationFrame(_carreraBlinkStep);
+}
+
 function carreraToggleDirection() {
   carreraDirectionReversed = !carreraDirectionReversed;
   var btn = document.getElementById('carreraDirBtn');
@@ -9509,7 +9830,33 @@ function carreraZoom(factor, mode) {
 
 function carreraRotate(dir) {
   // dir: +1 = 30° im Uhrzeigersinn, -1 = 30° gegen Uhrzeigersinn
-  carreraRotationDeg = (carreraRotationDeg + dir * 30 + 360) % 360;
+  // Da jede Schiene ihre eigenen festen Koordinaten trägt (nicht mehr aus
+  // einem gemeinsamen Start-Heading abgeleitet), muss die Ansicht hier
+  // aktiv gedreht werden — jede Schiene (und jeder Verbinder) wird um den
+  // Ursprung rotiert. carreraRotationDeg dient danach nur noch als
+  // Ausgangsrichtung für das allererste Teil einer leeren Kette.
+  var deltaDeg = dir * 30;
+  carreraRotationDeg = (carreraRotationDeg + deltaDeg + 360) % 360;
+  var rad = deltaDeg * Math.PI/180;
+  var cos_ = Math.cos(rad), sin_ = Math.sin(rad);
+  carreraChain.forEach(function(link){
+    if(link.key === '_connector') {
+      if(link.connectorData && link.connectorData.bezier) {
+        ['p0','p1','p2','p3'].forEach(function(k){
+          var p = link.connectorData.bezier[k];
+          var nx = p.x*cos_ - p.y*sin_, ny = p.x*sin_ + p.y*cos_;
+          p.x = nx; p.y = ny;
+        });
+        if(link.connectorData.fromHeading != null) link.connectorData.fromHeading = (link.connectorData.fromHeading + deltaDeg + 360) % 360;
+        if(link.connectorData.toHeading != null) link.connectorData.toHeading = (link.connectorData.toHeading + deltaDeg + 360) % 360;
+      }
+      return;
+    }
+    var lx = link.x||0, ly = link.y||0;
+    link.x = lx*cos_ - ly*sin_;
+    link.y = lx*sin_ + ly*cos_;
+    link.heading = ((link.heading||0) + deltaDeg + 360) % 360;
+  });
   carreraRenderSchematic();
 }
 
@@ -9527,8 +9874,65 @@ function carreraPushUndo() {
   if(rbtn) { rbtn.disabled = true; rbtn.style.opacity = '.5'; }
 }
 
+// Berechnet die Endposition/-richtung einer Schiene direkt aus ihren
+// eigenen Koordinaten (ohne carreraLastSegments) — wird für den
+// Undo/Redo-Auswahlabgleich gebraucht, da dort teils mit einer NOCH NICHT
+// gerenderten (alten) Kette gerechnet werden muss.
+function _carreraForwardEndPose(link) {
+  var pd = CARRERA_PROFI_PARTS[link.key];
+  if(!pd) return null;
+  var x=link.x||0, y=link.y||0, heading=link.heading||0;
+  for(var c=0;c<(link.count||1);c++){
+    if(pd.type==='straight' || pd.type==='lanechange'){
+      var rad=heading*Math.PI/180; x+=Math.cos(rad)*pd.length; y+=Math.sin(rad)*pd.length;
+    } else {
+      var dir=pd.dir||1, r=pd.radius;
+      var rad0=heading*Math.PI/180;
+      var cx=x+Math.cos(rad0+dir*Math.PI/2)*r, cy=y+Math.sin(rad0+dir*Math.PI/2)*r;
+      var sa=rad0-dir*Math.PI/2, ea=sa+dir*pd.angle*Math.PI/180;
+      x=cx+Math.cos(ea)*r; y=cy+Math.sin(ea)*r; heading+=dir*pd.angle;
+    }
+  }
+  return { x:x, y:y, heading:((heading%360)+360)%360 };
+}
+
+// Hält die Auswahl (und damit den Anbaupunkt fürs Weiterbauen) beim
+// Sprung zu einem älteren/neueren Kettenstand (Undo/Redo) am SELBEN
+// offenen Ende — sonst würde das nächste Teil unerwartet ans andere Ende
+// der Kette springen, sobald die zuvor angewählte/zuletzt platzierte
+// Schiene durch den Sprung verschwindet. Nur eindeutig auflösbar, wenn
+// GENAU eine reale Schiene verschwunden ist (der übliche Einzelschritt-
+// Fall) — sonst sicherer Fallback auf "keine Auswahl".
+function _carreraUpdateSelectionAfterHistoryJump(oldChain, newChain) {
+  var oldIds = {};
+  oldChain.forEach(function(l){ oldIds[l.id] = true; });
+  var newIds = {};
+  newChain.forEach(function(l){ newIds[l.id] = true; });
+  // Redo bringt typischerweise genau ein zuvor entferntes Teil zurück —
+  // das ist dann der natürliche neue Anbaupunkt.
+  var added = newChain.filter(function(l){ return l.key !== '_connector' && !oldIds[l.id]; });
+  if(added.length === 1) { carreraSelectedLinkId = added[0].id; return; }
+  if(carreraSelectedLinkId != null && newIds[carreraSelectedLinkId]) return; // Auswahl weiterhin gültig
+  var removed = oldChain.filter(function(l){ return l.key !== '_connector' && !newIds[l.id]; });
+  if(removed.length !== 1) { carreraSelectedLinkId = null; return; }
+  var gone = removed[0];
+  var goneStart = { x:gone.x||0, y:gone.y||0, heading:gone.heading||0 };
+  var goneEnd = _carreraForwardEndPose(gone);
+  var found = null;
+  newChain.some(function(l){
+    if(l.key === '_connector') return false;
+    var lStart = { x:l.x||0, y:l.y||0, heading:l.heading||0 };
+    var lEnd = _carreraForwardEndPose(l);
+    if(lEnd && _carreraPoseNear(lEnd, goneStart)) { found = l; return true; }
+    if(goneEnd && _carreraPoseNear(lStart, goneEnd)) { found = l; return true; }
+    return false;
+  });
+  carreraSelectedLinkId = found ? found.id : null;
+}
+
 function carreraUndo() {
   if(carreraUndoStack.length === 0) return;
+  var oldChain = carreraChain;
   carreraRedoStack.push({
     chain: JSON.parse(JSON.stringify(carreraChain)),
     rotation: carreraRotationDeg
@@ -9536,6 +9940,7 @@ function carreraUndo() {
   var snap = carreraUndoStack.pop();
   carreraChain = snap.chain !== undefined ? snap.chain : snap; // Rückwärtskompatibel
   if(snap.rotation !== undefined) carreraRotationDeg = snap.rotation;
+  _carreraUpdateSelectionAfterHistoryJump(oldChain, carreraChain);
   carreraRenderChain();
   carreraRenderSchematic();
   carreraRefreshAllInventoryRows();
@@ -9547,6 +9952,7 @@ function carreraUndo() {
 
 function carreraRedo() {
   if(carreraRedoStack.length === 0) return;
+  var oldChain = carreraChain;
   carreraUndoStack.push({
     chain: JSON.parse(JSON.stringify(carreraChain)),
     rotation: carreraRotationDeg
@@ -9554,6 +9960,7 @@ function carreraRedo() {
   var snap = carreraRedoStack.pop();
   carreraChain = snap.chain !== undefined ? snap.chain : snap;
   if(snap.rotation !== undefined) carreraRotationDeg = snap.rotation;
+  _carreraUpdateSelectionAfterHistoryJump(oldChain, carreraChain);
   carreraRenderChain();
   carreraRenderSchematic();
   carreraRefreshAllInventoryRows();
@@ -9770,13 +10177,13 @@ function carreraRenderChain() {
       if(link.key === '_connector') {
         var cd = link.connectorData;
         var lenM = cd && cd.lengthMm ? (cd.lengthMm/1000).toFixed(2)+'m' : '?';
-        return '<span class="carrera-chain-chip" style="border-color:rgba(0,255,136,.4);color:#00ff88;">'
+        return '<span class="carrera-chain-chip" data-carrera-link-id="'+link.id+'" style="border-color:rgba(0,255,136,.4);color:#00ff88;">'
           + '<span class="ccc-num">'+(idx+1)+'</span>⬡ Verbinder ≈'+lenM+'</span>';
       }
       var partDef = CARRERA_PROFI_PARTS[link.key];
       if(!partDef) return '';
       var label = (link.count > 1 ? link.count + '× ' : '') + partDef.name;
-      return '<span class="carrera-chain-chip" onclick="carreraRemoveFromChainByIdx('+idx+')">'
+      return '<span class="carrera-chain-chip" data-carrera-link-id="'+link.id+'" onclick="carreraRemoveFromChainByIdx('+idx+')">'
         + '<span class="ccc-num">'+(idx+1)+'</span>' + label + ' ✕</span>';
     }).join('');
   }
@@ -9842,11 +10249,30 @@ function carreraRenderChain() {
     closedEl.textContent = '—'; closedEl.style.color = 'var(--text-dim)';
   }
 
+  if(typeof _carreraSyncSelectedChip === 'function') _carreraSyncSelectedChip();
+  if(typeof _carreraUpdateSelectionBar === 'function') _carreraUpdateSelectionBar();
 }
 
+// Entfernt eine Schiene aus der Kette. Jede Schiene trägt ihre eigenen
+// festen Koordinaten (link.x/y/heading) — das Löschen einer Schiene hat
+// daher KEINEN Einfluss auf Position/Ausrichtung irgendeiner anderen
+// Schiene, unabhängig davon, wo in der Kette gelöscht wird. Ein evtl.
+// daran hängender Verbinder (Streckenschluss zu/von genau dieser Schiene)
+// wird mitentfernt, da er sonst ins Leere zeigen würde.
 function carreraRemoveFromChainByIdx(idx) {
+  var link = carreraChain[idx];
+  if(!link) return;
   carreraPushUndo();
+  var oldChain = carreraChain.slice();
   carreraChain.splice(idx, 1);
+  carreraChain = carreraChain.filter(function(l){
+    return l.key !== '_connector' || (l.fromLinkId !== link.id && l.toLinkId !== link.id);
+  });
+  // Auswahl über die tatsächliche geometrische Nachbarschaft ermitteln (wie
+  // bei Undo/Redo) — NICHT einfach die vorherige Array-Position, da eine
+  // Schiene je nach Baurichtung auch am ANFANG der Kette (Index 0) stehen
+  // kann. Bleibt sonst am selben Ende, statt ans andere Ende zu springen.
+  _carreraUpdateSelectionAfterHistoryJump(oldChain, carreraChain);
   carreraRenderChain();
   carreraRenderSchematic();
   carreraRefreshAllInventoryRows();
@@ -9888,68 +10314,22 @@ function carreraUndoLastPart() {
 // Richtungen. Die Kurve ist eine "erfundene" Schiene ohne Entsprechung
 // im Carrera-Katalog, dient aber zur realistischen Längenabschätzung
 // und visuellen Vervollständigung der Schematik.
-function carreraCloseTrack() {
-  if(carreraChain.length < 1) {
-    apexAlert('Mindestens 1 Teil in der Kette nötig.');
-    return;
-  }
-
-  // Bereits ein Connector vorhanden? Erst entfernen, dann neu berechnen.
-  carreraChain = carreraChain.filter(function(l){ return l.key !== '_connector'; });
-
-  // Endposition und Endrichtung der aktuellen Kette berechnen
-  var x=0, y=0, heading=0;
-  carreraChain.forEach(function(link){
-    if(link.key === '_connector') return;
-    var pd = CARRERA_PROFI_PARTS[link.key];
-    if(!pd) return;
-    for(var c=0;c<(link.count||1);c++){
-      if(pd.type==='straight'){
-        var rad=heading*Math.PI/180;
-        x+=Math.cos(rad)*pd.length; y+=Math.sin(rad)*pd.length;
-      } else {
-        var dir=pd.dir||1, r=pd.radius;
-        var rad0=heading*Math.PI/180;
-        var cx=x+Math.cos(rad0+dir*Math.PI/2)*r;
-        var cy=y+Math.sin(rad0+dir*Math.PI/2)*r;
-        var sa=rad0-dir*Math.PI/2, ea=sa+dir*pd.angle*Math.PI/180;
-        x=cx+Math.cos(ea)*r; y=cy+Math.sin(ea)*r;
-        heading+=dir*pd.angle;
-      }
-    }
-  });
-
-  var distToStart = Math.hypot(x, y);
-  if(distToStart < 1) {
-    apexAlert('Die Strecke ist bereits geschlossen!');
-    return;
-  }
-  if(distToStart > 150) {
-    apexAlert('Die letzte Schiene ist noch '+distToStart.toFixed(0)+'mm vom Start entfernt (max. 150mm / ±15cm). Bitte mehr Teile hinzufügen bis die Strecke nahe am Startpunkt endet.');
-    return;
-  }
-
-  // ── Kubische Bézier-Verbindung berechnen ──────────────────────────
-  // P0 = aktuelles Ende, Tangente T0 = aktuelle Fahrtrichtung
-  // P3 = Startpunkt (0,0), Tangente T3 = Start-Eingangsrichtung (0°)
-  // Kontrollpunkte: P1 = P0 + t*T0, P2 = P3 - t*T3
-  // t = dist/3 (klassische Faustregel für natürliche kubische Bézier)
+// Baut ein freies Bézier-Verbinder-Kettenglied von (x0,y0,heading0) nach
+// (x3,y3,heading3) — genutzt von carreraCloseTrackTo() (manuelle
+// Streckenschließung zu einer angewählten Schiene).
+function _carreraBuildConnectorLink(x0, y0, heading0, x3, y3, heading3, idPrefix) {
   function deg2rad(d){ return d*Math.PI/180; }
-  var t0x = Math.cos(deg2rad(heading)), t0y = Math.sin(deg2rad(heading));
-  var startHeading = 0; // Startrichtung der Strecke ist immer 0°
-  var t3x = Math.cos(deg2rad(startHeading)), t3y = Math.sin(deg2rad(startHeading));
-
-  var t = distToStart / 3;
+  var dist = Math.hypot(x3-x0, y3-y0);
+  var t0x = Math.cos(deg2rad(heading0)), t0y = Math.sin(deg2rad(heading0));
+  var t3x = Math.cos(deg2rad(heading3)), t3y = Math.sin(deg2rad(heading3));
+  var t = dist / 3;
   var bez = {
-    p0: {x:x, y:y},
-    p1: {x:x + t*t0x, y:y + t*t0y},
-    p2: {x:0 - t*t3x, y:0 - t*t3y},
-    p3: {x:0, y:0}
+    p0: {x:x0, y:y0},
+    p1: {x:x0 + t*t0x, y:y0 + t*t0y},
+    p2: {x:x3 - t*t3x, y:y3 - t*t3y},
+    p3: {x:x3, y:y3}
   };
-
-  // Kurvenlänge via Sampling (100 Schritte)
-  var bezLen = 0;
-  var prev = bez.p0;
+  var bezLen = 0, prev = bez.p0;
   for(var i=1;i<=100;i++){
     var ti=i/100, mt=1-ti;
     var pt = {
@@ -9959,22 +10339,227 @@ function carreraCloseTrack() {
     bezLen += Math.hypot(pt.x-prev.x, pt.y-prev.y);
     prev = pt;
   }
+  return {
+    id: (idPrefix||'conn_') + Date.now() + Math.random(),
+    key: '_connector', count: 1, type: 'connector', manual: true,
+    connectorData: { bezier: bez, lengthMm: bezLen, fromHeading: heading0, toHeading: heading3 }
+  };
+}
 
-  // Als Connector-Eintrag in die Kette einfügen
-  carreraPushUndo();
-  carreraChain.push({
-    id: 'close_'+Date.now(),
-    key: '_connector',
-    count: 1,
-    type: 'connector',
-    manual: true,
-    connectorData: {
-      bezier: bez,
-      lengthMm: bezLen,
-      fromHeading: heading
+// Einmalige Migration für Ketten aus Speicherständen von VOR dieser
+// Umstellung auf feste Pro-Schiene-Koordinaten: fehlt der ersten echten
+// Schiene x/y/heading, wird die komplette Kette einmalig mit dem alten
+// sequenziellen Verfahren durchgerechnet und die Werte fest auf jedes
+// Kettenglied geschrieben. Bereits migrierte Ketten (x/y/heading vorhanden)
+// bleiben unverändert.
+function _carreraMigrateChainCoords(chain, startHeading) {
+  var firstReal = chain.find(function(l){ return l.key !== '_connector'; });
+  if(!firstReal || (firstReal.x != null && firstReal.y != null && firstReal.heading != null)) return chain;
+  var x=0, y=0, heading=startHeading||0;
+  chain.forEach(function(link){
+    if(link.key === '_connector') {
+      if(link.connectorData && link.connectorData.bezier) {
+        x = link.connectorData.bezier.p3.x; y = link.connectorData.bezier.p3.y;
+        if(link.connectorData.toHeading != null) heading = link.connectorData.toHeading;
+      }
+      return;
+    }
+    var pd = CARRERA_PROFI_PARTS[link.key];
+    if(!pd) return;
+    link.x = x; link.y = y; link.heading = heading;
+    for(var c=0;c<(link.count||1);c++){
+      if(pd.type==='straight' || pd.type==='lanechange'){
+        var rad=heading*Math.PI/180; x+=Math.cos(rad)*pd.length; y+=Math.sin(rad)*pd.length;
+      } else {
+        var dir=pd.dir||1, r=pd.radius;
+        var rad0=heading*Math.PI/180;
+        var cx=x+Math.cos(rad0+dir*Math.PI/2)*r, cy=y+Math.sin(rad0+dir*Math.PI/2)*r;
+        var sa=rad0-dir*Math.PI/2, ea=sa+dir*pd.angle*Math.PI/180;
+        x=cx+Math.cos(ea)*r; y=cy+Math.sin(ea)*r; heading+=dir*pd.angle;
+      }
     }
   });
+  return chain;
+}
 
+// Startet den Ziel-Auswahlmodus: der nächste Klick/Touch auf eine Schiene im
+// Canvas (carreraOnCanvasClick) legt fest, WOHIN geschlossen werden soll —
+// nicht mehr fest immer zum absoluten Kettenanfang. Dadurch beliebig oft
+// wiederholbar (z.B. nach weiteren Bearbeitungen erneut zu einer anderen
+// Schiene schließen), statt nur ein einziges Mal zum Start.
+function carreraCloseTrack() {
+  if(carreraChain.length < 1) {
+    apexAlert('Mindestens 1 Teil in der Kette nötig.');
+    return;
+  }
+  carreraAwaitingCloseTarget = true;
+  var cv = document.getElementById('carreraSchematicCanvas');
+  if(cv) cv.style.cursor = 'crosshair';
+  apexAlert('Tippe/klicke jetzt auf die Schiene, zu der die Strecke geschlossen werden soll.');
+}
+
+// Liefert Endposition/-richtung einer bereits gerenderten Schiene (Segment
+// aus carreraLastSegments) — Geraden: x2/y2/heading, Kurven: Bogenende.
+function _carreraSegEndPose(seg) {
+  if(seg.type === 'straight') return { x:seg.x2, y:seg.y2, heading:seg.heading };
+  return {
+    x: seg.cx + Math.cos(seg.endAngle)*seg.r,
+    y: seg.cy + Math.sin(seg.endAngle)*seg.r,
+    heading: seg.startHeading + seg.dir*seg.sweepDeg
+  };
+}
+// Liefert Startposition/-richtung einer bereits gerenderten Schiene.
+function _carreraSegStartPose(seg) {
+  if(seg.type === 'straight') return { x:seg.x1, y:seg.y1, heading:seg.heading };
+  return { x:seg.startX, y:seg.startY, heading:seg.startHeading };
+}
+// Letztes gerendertes Segment einer Schiene (bei count>1 das letzte der
+// gruppierten Teilstücke) — bzw. null, falls (noch) nicht gerendert.
+function _carreraLastSegForLink(linkId) {
+  var segs = carreraLastSegments.filter(function(s){ return s.linkId===linkId && s.type!=='connector'; });
+  return segs.length ? segs[segs.length-1] : null;
+}
+
+// Inverse Platzierung: berechnet die Start-Koordinaten (x0,y0,heading0),
+// mit denen ein Teil des gegebenen Typs GENAU am angegebenen Ziel
+// (targetX,targetY,targetHeading) endet — für das Anfügen VOR der
+// bisherigen ersten Schiene (umgekehrte Baurichtung). Keine Spiegelung
+// nötig: die Schiene behält ihre echte Form, nur ihre Position wird
+// passend dazu berechnet.
+function _carreraInversePlacement(pd, targetX, targetY, targetHeading) {
+  var dHeading = (pd.type === 'curve') ? (pd.dir||1)*pd.angle : 0;
+  var heading0 = targetHeading - dHeading;
+  var localDx, localDy;
+  if(pd.type === 'straight' || pd.type === 'lanechange') {
+    localDx = pd.length; localDy = 0;
+  } else {
+    var dir = pd.dir||1, r = pd.radius;
+    var cx = Math.cos(dir*Math.PI/2)*r, cy = Math.sin(dir*Math.PI/2)*r;
+    var ea = -dir*Math.PI/2 + dir*pd.angle*Math.PI/180;
+    localDx = cx+Math.cos(ea)*r; localDy = cy+Math.sin(ea)*r;
+  }
+  var rad0 = heading0*Math.PI/180;
+  var worldDx = localDx*Math.cos(rad0) - localDy*Math.sin(rad0);
+  var worldDy = localDx*Math.sin(rad0) + localDy*Math.cos(rad0);
+  return { x: targetX-worldDx, y: targetY-worldDy, heading: ((heading0%360)+360)%360 };
+}
+
+// Prüft, ob zwei Posen (x/y/heading) am selben Steckpunkt liegen — Toleranz
+// bewusst eng, da alle Platzierungen dieser App exakt berechnet werden statt
+// freihändig gezogen (kleine Abweichungen sind daher immer "kein Treffer",
+// keine echten Wackelkontakte).
+function _carreraPoseNear(a, b) {
+  if(Math.hypot(a.x-b.x, a.y-b.y) > 1) return false;
+  var d = ((a.heading-b.heading)%360+360)%360;
+  return d < 1 || d > 359;
+}
+// Ist das ENDE der Schiene bereits mit einer anderen Schiene belegt?
+function _carreraIsEndOccupied(link) {
+  var seg = _carreraLastSegForLink(link.id);
+  if(!seg) return false;
+  var end = _carreraSegEndPose(seg);
+  return carreraChain.some(function(l){
+    if(l.id === link.id) return false;
+    // Ein Streckenschluss-Verbinder, der GENAU von dieser Schiene ausgeht,
+    // belegt ihr Ende ebenso wie eine echte angedockte Schiene — ist die
+    // Strecke komplett geschlossen, darf hier keine Geister-Schiene mehr
+    // vorgeschlagen werden.
+    if(l.key === '_connector') return l.fromLinkId === link.id;
+    return _carreraPoseNear({x:l.x||0, y:l.y||0, heading:l.heading||0}, end);
+  });
+}
+// Ist der ANFANG der Schiene bereits mit einer anderen Schiene (oder einem
+// dort ankommenden Streckenschluss-Verbinder) belegt?
+function _carreraIsStartOccupied(link) {
+  var start = { x:link.x||0, y:link.y||0, heading:link.heading||0 };
+  return carreraChain.some(function(l){
+    if(l.id === link.id) return false;
+    if(l.key === '_connector') return l.toLinkId === link.id;
+    var seg = _carreraLastSegForLink(l.id);
+    if(!seg) return false;
+    return _carreraPoseNear(_carreraSegEndPose(seg), start);
+  });
+}
+
+// Ermittelt EINHEITLICH (für Weiterbauen-Button, Palette-Klick UND die
+// blinkende Vorschau-Schiene) den freien Steckpunkt, an dem als Nächstes
+// gebaut würde: an einer angewählten Schiene, sonst an der letzten/ersten
+// Schiene der Kette (je nach Baurichtung). "Richtung umkehren" bestimmt
+// dabei, ob am ENDE oder am ANFANG der Referenz-Schiene angebaut wird — ist
+// die per Taste gewünschte Seite bereits belegt (reale physische Schienen
+// können nur EINEN Anschluss pro Steckpunkt haben), wird automatisch auf die
+// andere, noch freie Seite ausgewichen; sind beide Seiten belegt, wird kein
+// Anbaupunkt geliefert (null).
+function _carreraGetBuildAttachPoint() {
+  var refLink = null;
+  if(carreraSelectedLinkId != null) {
+    refLink = carreraChain.find(function(l){ return l.id===carreraSelectedLinkId && l.key!=='_connector'; }) || null;
+  }
+  if(!refLink) {
+    if(carreraDirectionReversed) {
+      refLink = carreraChain.find(function(l){ return l.key !== '_connector'; }) || null;
+    } else {
+      for(var i=carreraChain.length-1;i>=0;i--){ if(carreraChain[i].key!=='_connector'){ refLink=carreraChain[i]; break; } }
+    }
+  }
+  if(!refLink) {
+    return { pose:{x:0,y:0,heading:carreraRotationDeg}, refLink:null, mode:'end', refKey:null };
+  }
+  var seg = _carreraLastSegForLink(refLink.id);
+  if(!seg) return null;
+  var wantEnd = !carreraDirectionReversed;
+  var endFree = !_carreraIsEndOccupied(refLink);
+  var startFree = !_carreraIsStartOccupied(refLink);
+  var useEnd;
+  if(wantEnd && endFree) useEnd = true;
+  else if(!wantEnd && startFree) useEnd = false;
+  else if(endFree) useEnd = true;
+  else if(startFree) useEnd = false;
+  else return null; // beide Steckpunkte belegt
+  var pose = useEnd ? _carreraSegEndPose(seg) : _carreraSegStartPose(seg);
+  return { pose:pose, refLink:refLink, mode: useEnd?'end':'start', refKey:refLink.key };
+}
+
+// Berechnet eine kubische Bézierkurve, die das Ende der letzten Schiene der
+// Kette glatt mit dem ANFANG der per Klick/Touch gewählten Ziel-Schiene
+// verbindet — tangential anschließend in beide Richtungen. Die Kurve ist
+// eine "erfundene" Schiene ohne Entsprechung im Carrera-Katalog, dient aber
+// zur realistischen Längenabschätzung und visuellen Vervollständigung der
+// Schematik. Ersetzt einen evtl. vorhandenen Streckenschluss-Verbinder, ist
+// also beliebig oft mit wechselndem Ziel wiederholbar. Da jede Schiene ihre
+// eigenen festen Koordinaten trägt, genügt ein direkter Blick auf die
+// letzte Schiene der Kette — kein erneutes Durchlaufen der ganzen Kette nötig.
+function carreraCloseTrackTo(targetLinkId) {
+  var targetSeg = carreraLastSegments.find(function(s){ return s.linkId === targetLinkId && s.type !== 'connector'; });
+  if(!targetSeg) { apexAlert('Ziel-Schiene nicht gefunden.'); return; }
+  var target = _carreraSegStartPose(targetSeg);
+
+  var lastLink = null;
+  for(var i=carreraChain.length-1; i>=0; i--){
+    if(carreraChain[i].key !== '_connector') { lastLink = carreraChain[i]; break; }
+  }
+  if(!lastLink) { apexAlert('Keine Schiene zum Schließen vorhanden.'); return; }
+  var lastSeg = carreraLastSegments.find(function(s){ return s.linkId === lastLink.id && s.type !== 'connector'; });
+  if(!lastSeg) { apexAlert('Ende der Kette nicht gefunden.'); return; }
+  var from = _carreraSegEndPose(lastSeg);
+
+  var distToTarget = Math.hypot(target.x-from.x, target.y-from.y);
+  if(distToTarget < 1) {
+    apexAlert('Die Strecke ist an dieser Stelle bereits geschlossen!');
+    return;
+  }
+  if(distToTarget > 1000) {
+    apexAlert('Die letzte Schiene ist noch '+distToTarget.toFixed(0)+'mm von der Ziel-Schiene entfernt (max. 1000mm / 1m). Bitte mehr Teile hinzufügen oder eine näher gelegene Ziel-Schiene wählen.');
+    return;
+  }
+
+  carreraPushUndo();
+  // Nur einen evtl. vorhandenen ALTEN Streckenschluss-Verbinder ersetzen.
+  carreraChain = carreraChain.filter(function(l){ return l.key !== '_connector' || l.id.indexOf('close_') !== 0; });
+  var connLink = _carreraBuildConnectorLink(from.x, from.y, from.heading, target.x, target.y, target.heading, 'close_');
+  connLink.fromLinkId = lastLink.id;
+  connLink.toLinkId = targetLinkId;
+  carreraChain.push(connLink);
   carreraRenderChain();
   carreraRenderSchematic();
 }
@@ -9986,7 +10571,12 @@ function carreraCloseTrack() {
 function carreraRenderSchematic() {
   var canvas = document.getElementById('carreraSchematicCanvas');
   if(!canvas) return;
-  var cssW = 660, cssH = 420;
+  // An die Wrapper-Breite angepasst (statt fest 660px) — damit z.B. der
+  // Vollbild-Modus (F10) tatsächlich mehr sichtbare Fläche bringt, nicht nur
+  // eine hochskalierte/unschärfere Version derselben 660px-Zeichnung.
+  var wrap = document.getElementById('carreraSchematicWrap');
+  var cssW = wrap ? Math.round(wrap.offsetWidth || 660) : 660;
+  var cssH = Math.round(cssW * (420/660));
   canvas.width = cssW; canvas.height = cssH;
   var ctx = canvas.getContext('2d');
   ctx.fillStyle = '#0a0e12';
@@ -9998,6 +10588,7 @@ function carreraRenderSchematic() {
     ctx.textAlign = 'center';
     ctx.fillText('Noch keine Streckenteile erkannt', cssW/2, cssH/2);
     ctx.textAlign = 'left';
+    carreraLastSegments = []; carreraLastFitScale = 0;
     return;
   }
 
@@ -10017,16 +10608,20 @@ function carreraRenderSchematic() {
   var LANE_W    = (TRACK_W - 2*BORDER_W) / 2; // Fahrbahnbreite je Spur
   var HALF      = TRACK_W / 2;
 
-  var x=0, y=0, heading=carreraRotationDeg; // Startrichtung = Rotation
+  // Jede Schiene trägt ihre eigenen festen Koordinaten (link.x/y/heading),
+  // einmal beim Platzieren gesetzt und danach nie mehr neu berechnet — im
+  // Gegensatz zum früheren Turtle-Walk (Position jedes Teils aus ALLEN
+  // vorherigen abgeleitet) bleibt hier jede Schiene unabhängig von
+  // Änderungen an anderer Stelle der Kette exakt an ihrer Position/Richtung.
   var segments = []; // jedes Segment mit allen nötigen Zeichendaten
-  var points   = [{x:0,y:0}];
-  var swapCount = 0; // für Spurwechsel-Visualisierung
+  var points   = [];
+  var swapCount = 0; // für Spurwechsel-Visualisierung (Reihenfolge in der Kette zählt weiterhin)
 
   carreraChain.forEach(function(link){
     // Bézierkurve (Verbinder)
     if(link.key === '_connector' && link.connectorData && link.connectorData.bezier) {
       var bez = link.connectorData.bezier;
-      segments.push({type:'connector', bezier:bez, lengthMm:link.connectorData.lengthMm});
+      segments.push({type:'connector', bezier:bez, lengthMm:link.connectorData.lengthMm, linkId:link.id});
       for(var si=0;si<=20;si++){
         var t=si/20, mt=1-t;
         points.push({
@@ -10034,18 +10629,19 @@ function carreraRenderSchematic() {
           y: mt*mt*mt*bez.p0.y+3*mt*mt*t*bez.p1.y+3*mt*t*t*bez.p2.y+t*t*t*bez.p3.y
         });
       }
-      x=bez.p3.x; y=bez.p3.y;
       return;
     }
     var pd = CARRERA_PROFI_PARTS[link.key];
     if(!pd) return;
+    var x = link.x||0, y = link.y||0, heading = link.heading||0;
+    if(!points.length) points.push({x:x, y:y});
     for(var c=0;c<(link.count||1);c++){
       if(pd.type === 'straight' || pd.type === 'lanechange') {
         var rad = heading*Math.PI/180;
         var nx = x+Math.cos(rad)*pd.length, ny = y+Math.sin(rad)*pd.length;
         segments.push({type:'straight', x1:x,y1:y, x2:nx,y2:ny,
                        heading:heading, length:pd.length, key:link.key, pd:pd,
-                       swapState:swapCount});
+                       swapState:swapCount, linkId:link.id});
         if(pd.type === 'lanechange') swapCount++;
         x=nx; y=ny; points.push({x:x,y:y});
       } else if(pd.type === 'curve') {
@@ -10058,8 +10654,9 @@ function carreraRenderSchematic() {
         var nx2=cx+Math.cos(ea)*r, ny2=cy+Math.sin(ea)*r;
         segments.push({type:'curve', cx:cx,cy:cy,r:r,
                        startAngle:sa, endAngle:ea, dir:dir,
+                       startX:x, startY:y,
                        startHeading:heading, sweepDeg:pd.angle, key:link.key, pd:pd,
-                       swapState:swapCount});
+                       swapState:swapCount, linkId:link.id});
         x=nx2; y=ny2; heading+=dir*pd.angle;
         // Sample Bogenpunkte für Bounding-Box
         var steps = Math.ceil(pd.angle/10);
@@ -10091,6 +10688,13 @@ function carreraRenderSchematic() {
 
   function tx(v){ return v*fitScale+offX; }
   function ty(v){ return v*fitScale+offY; }
+
+  // Für Hover-/Klick-Hit-Tests außerhalb dieser Funktion zwischenspeichern
+  // (siehe carreraCanvasToMm/carreraHitTestSegment weiter unten).
+  carreraLastSegments = segments;
+  carreraLastFitScale = fitScale;
+  carreraLastOffX = offX;
+  carreraLastOffY = offY;
 
   // ── Hilfsfunktionen für den Querschnitt ────────────────────────────
   // Zeichnet eine "Schicht" längs des Pfads mit gegebener Breite,
@@ -10323,6 +10927,69 @@ function carreraRenderSchematic() {
     ctx.textAlign = 'left';
   });
 
+  // ── Hover-/Auswahl-Hervorhebung ──────────────────────────────────────
+  // carreraSelectedLinkId wirkt über link.id, daher heben sich bei
+  // gruppierten Teilen (count>1) automatisch ALLE zugehörigen Segmente
+  // gemeinsam hervor — genau die Einheit, die auch carreraRemoveFromChainByIdx
+  // gemeinsam löschen würde. Der Hover-Zustand ist reiner Segment-Index und
+  // hebt bewusst nur das exakte Teil unter dem Cursor hervor.
+  segments.forEach(function(seg, idx){
+    var isSel = carreraSelectedLinkId != null && seg.linkId === carreraSelectedLinkId;
+    var isHover = idx === carreraHoverSegIdx;
+    if(!isSel && !isHover) return;
+    ctx.save();
+    if(seg.type === 'connector' && seg.bezier) {
+      var bz = seg.bezier;
+      function strokeBez(widthMm, color, dash){
+        ctx.strokeStyle = color; ctx.lineWidth = Math.max(1, widthMm*fitScale); ctx.lineCap = 'round';
+        if(dash) ctx.setLineDash(dash.map(function(d){return d*fitScale;})); else ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(tx(bz.p0.x), ty(bz.p0.y));
+        ctx.bezierCurveTo(tx(bz.p1.x), ty(bz.p1.y), tx(bz.p2.x), ty(bz.p2.y), tx(bz.p3.x), ty(bz.p3.y));
+        ctx.stroke(); ctx.setLineDash([]);
+      }
+      if(isSel){ ctx.shadowColor='rgba(255,214,0,.9)'; ctx.shadowBlur=14; strokeBez(TRACK_W+8, 'rgba(255,214,0,.55)'); }
+      if(isHover){ ctx.shadowBlur=0; strokeBez(TRACK_W+4, 'rgba(0,229,255,.55)', [6,4]); }
+    } else if(seg.type !== 'connector') {
+      if(isSel){ ctx.shadowColor='rgba(255,214,0,.9)'; ctx.shadowBlur=14; drawBand(seg, 0, TRACK_W+8, 'rgba(255,214,0,.55)', null); }
+      if(isHover){ ctx.shadowBlur=0; drawBand(seg, 0, TRACK_W+4, 'rgba(0,229,255,.55)', [6,4]); }
+    }
+    ctx.restore();
+  });
+
+  // ── Baurichtung-Vorschau: halbtransparente, blinkende "Geister"-Schiene ──
+  // Zeigt (Planet-Coaster-Prinzip), wo und in welcher Form als Nächstes
+  // angebaut würde — Standardvorschlag ist immer dieselbe Form wie die
+  // Referenz-Schiene, an die angebaut wird. Berücksichtigt "Richtung
+  // umkehren" UND ob der eigentlich gewünschte Steckpunkt schon belegt ist
+  // (siehe _carreraGetBuildAttachPoint).
+  (function(){
+    var attach = _carreraGetBuildAttachPoint();
+    if(!attach || !attach.refKey) return;
+    var gpd = CARRERA_PROFI_PARTS[attach.refKey];
+    if(!gpd) return;
+    var gx, gy, gheading;
+    if(attach.mode === 'end') { gx=attach.pose.x; gy=attach.pose.y; gheading=attach.pose.heading; }
+    else {
+      var gp = _carreraInversePlacement(gpd, attach.pose.x, attach.pose.y, attach.pose.heading);
+      gx=gp.x; gy=gp.y; gheading=gp.heading;
+    }
+    var ghostSeg;
+    if(gpd.type === 'straight' || gpd.type === 'lanechange') {
+      var grad = gheading*Math.PI/180;
+      ghostSeg = {type:'straight', x1:gx, y1:gy, x2:gx+Math.cos(grad)*gpd.length, y2:gy+Math.sin(grad)*gpd.length, heading:gheading};
+    } else {
+      var gdir = gpd.dir||1, gr = gpd.radius;
+      var grad0 = gheading*Math.PI/180;
+      var gcx = gx+Math.cos(grad0+gdir*Math.PI/2)*gr, gcy = gy+Math.sin(grad0+gdir*Math.PI/2)*gr;
+      ghostSeg = {type:'curve', cx:gcx, cy:gcy, r:gr, startAngle:grad0-gdir*Math.PI/2, endAngle:(grad0-gdir*Math.PI/2)+gdir*gpd.angle*Math.PI/180, dir:gdir};
+    }
+    ctx.save();
+    ctx.globalAlpha = carreraBlinkOpacity;
+    drawBand(ghostSeg, 0, TRACK_W, gpd.color || '#fff', [10,6]);
+    ctx.restore();
+  })();
+
   // ── Start/Ziel-Markierung + Fahrtrichtungspfeil ───────────────────────
   var sp = points[0];
   ctx.fillStyle = '#00ff88';
@@ -10334,8 +11001,21 @@ function carreraRenderSchematic() {
   ctx.fillText('S/Z', tx(sp.x)+8, ty(sp.y)+3);
 
   // ── Aktives Bauende (wo nächstes Teil eingefügt wird) ────────────────
+  // Nutzt dieselbe Ermittlung wie carreraRenderPartTapGrid() (letzte bzw.
+  // erste REALE Schiene, Verbinder werden übersprungen), damit der Marker
+  // immer exakt dort sitzt, wo ein neues Teil tatsächlich angehängt würde.
   if(points.length > 0) {
-    var activeEnd = carreraDirectionReversed ? points[0] : points[points.length-1];
+    var activeEnd = points[0];
+    var refLink = null;
+    if(carreraDirectionReversed) {
+      refLink = carreraChain.find(function(l){ return l.key !== '_connector'; });
+    } else {
+      for(var ali=carreraChain.length-1; ali>=0; ali--){ if(carreraChain[ali].key !== '_connector'){ refLink = carreraChain[ali]; break; } }
+    }
+    if(refLink) {
+      var refSeg = _carreraLastSegForLink(refLink.id);
+      if(refSeg) activeEnd = carreraDirectionReversed ? _carreraSegStartPose(refSeg) : _carreraSegEndPose(refSeg);
+    }
     var aex = tx(activeEnd.x), aey = ty(activeEnd.y);
     ctx.save();
     ctx.strokeStyle = carreraDirectionReversed ? '#ffd600' : '#00e5ff';
@@ -10523,6 +11203,210 @@ function carreraRenderSchematic() {
 
 }
 
+// ═══════════════════════════════════════════════════════
+// CARRERA-BAUKASTEN — Hover-/Klick-Auswahl einzelner Schienen auf dem
+// Schematik-Canvas. Erlaubt es, auch in einer bereits fertigen Strecke
+// gezielt ein Teil zu erkennen (Hover) und anzuwählen (Klick/Touch), um es
+// z.B. über die bestehende Kettenliste (#carreraChainList) zu löschen.
+// Nutzt dieselben tx/ty-Transformationsdaten wie carreraRenderSchematic
+// (in carreraLastFitScale/-OffX/-OffY zwischengespeichert), rechnet also in
+// mm-Koordinaten statt in Canvas-Pixeln.
+// ═══════════════════════════════════════════════════════
+function carreraGetPos(e) {
+  var cv = document.getElementById('carreraSchematicCanvas');
+  var rect = cv.getBoundingClientRect();
+  var sx = cv.width/rect.width, sy = cv.height/rect.height;
+  var src = e.touches ? (e.touches[0]||e.changedTouches[0]) : e;
+  return { x:(src.clientX-rect.left)*sx, y:(src.clientY-rect.top)*sy };
+}
+
+function carreraCanvasToMm(cx, cy) {
+  if(!carreraLastFitScale) return null;
+  return { x:(cx-carreraLastOffX)/carreraLastFitScale, y:(cy-carreraLastOffY)/carreraLastFitScale };
+}
+
+// Tastet ein Segment in eine Punktfolge ab (Geraden: Endpunkte, Kurven/
+// Verbinder: gesampelte Bogen-/Bézierpunkte) — Grundlage für eine robuste
+// Punkt-zu-Polylinie-Distanz statt fehleranfälliger Winkelbereichs-Mathematik.
+function _carreraSegSamplePoints(seg) {
+  if(seg.type === 'straight' || seg.type === 'lanechange') {
+    return [{x:seg.x1,y:seg.y1},{x:seg.x2,y:seg.y2}];
+  }
+  if(seg.type === 'curve') {
+    var steps = Math.max(2, Math.ceil(Math.abs(seg.endAngle-seg.startAngle)*180/Math.PI/10));
+    var pts=[];
+    for(var i=0;i<=steps;i++){
+      var a = seg.startAngle + (seg.endAngle-seg.startAngle)*(i/steps);
+      pts.push({x:seg.cx+Math.cos(a)*seg.r, y:seg.cy+Math.sin(a)*seg.r});
+    }
+    return pts;
+  }
+  if(seg.type === 'connector' && seg.bezier) {
+    var bez=seg.bezier, bpts=[];
+    for(var si=0;si<=20;si++){
+      var t=si/20, mt=1-t;
+      bpts.push({
+        x: mt*mt*mt*bez.p0.x+3*mt*mt*t*bez.p1.x+3*mt*t*t*bez.p2.x+t*t*t*bez.p3.x,
+        y: mt*mt*mt*bez.p0.y+3*mt*mt*t*bez.p1.y+3*mt*t*t*bez.p2.y+t*t*t*bez.p3.y
+      });
+    }
+    return bpts;
+  }
+  return [];
+}
+
+function _carreraDistPointToPolyline(mx, my, pts) {
+  var best = Infinity;
+  for(var i=0;i<pts.length-1;i++){
+    var a=pts[i], b=pts[i+1];
+    var dx=b.x-a.x, dy=b.y-a.y;
+    var len2=dx*dx+dy*dy;
+    var t = len2>0 ? ((mx-a.x)*dx+(my-a.y)*dy)/len2 : 0;
+    t = Math.max(0, Math.min(1, t));
+    var px=a.x+t*dx, py=a.y+t*dy;
+    var d = Math.hypot(mx-px, my-py);
+    if(d<best) best=d;
+  }
+  return best;
+}
+
+// Liefert den Segment-Array-Index (in carreraLastSegments) unter den
+// gegebenen Canvas-Pixel-Koordinaten, oder -1. Toleranz = halbe
+// Schienenbreite (~90mm) — trifft also die ganze sichtbare Schiene.
+function carreraHitTestSegment(cx, cy) {
+  if(!carreraLastSegments.length || !carreraLastFitScale) return -1;
+  var mm = carreraCanvasToMm(cx, cy);
+  if(!mm) return -1;
+  var HALF_MM = 90;
+  var best=-1, bestDist=Infinity;
+  carreraLastSegments.forEach(function(seg, idx){
+    var pts = _carreraSegSamplePoints(seg);
+    if(pts.length<2) return;
+    var d = _carreraDistPointToPolyline(mm.x, mm.y, pts);
+    if(d < HALF_MM && d < bestDist) { bestDist=d; best=idx; }
+  });
+  return best;
+}
+
+function carreraOnHoverMove(e) {
+  var pos = carreraGetPos(e);
+  var hit = carreraHitTestSegment(pos.x, pos.y);
+  if(hit !== carreraHoverSegIdx) {
+    carreraHoverSegIdx = hit;
+    var cv = document.getElementById('carreraSchematicCanvas');
+    if(cv && !carreraAwaitingCloseTarget) cv.style.cursor = hit>=0 ? 'pointer' : '';
+    carreraRenderSchematic();
+  }
+}
+
+// Hebt die zum aktuell gewählten Teil gehörende Zeile in der Kettenliste
+// hervor, damit ersichtlich ist, welcher Eintrag bei einer Aktion (z.B.
+// Löschen über den bestehenden Kettenlisten-Button) betroffen wäre.
+function _carreraSyncSelectedChip() {
+  var list = document.getElementById('carreraChainList');
+  if(!list) return;
+  var chips = list.querySelectorAll('[data-carrera-link-id]');
+  chips.forEach(function(chip){
+    var isSel = carreraSelectedLinkId != null && chip.getAttribute('data-carrera-link-id') === carreraSelectedLinkId;
+    chip.classList.toggle('carrera-chip-selected', isSel);
+    if(isSel && typeof chip.scrollIntoView === 'function') chip.scrollIntoView({block:'nearest'});
+  });
+}
+
+function carreraOnCanvasClick(e) {
+  e.preventDefault();
+  var pos = carreraGetPos(e);
+  var hit = carreraHitTestSegment(pos.x, pos.y);
+  if(carreraAwaitingCloseTarget) {
+    carreraAwaitingCloseTarget = false;
+    var cv0 = document.getElementById('carreraSchematicCanvas');
+    if(cv0) cv0.style.cursor = '';
+    if(hit >= 0 && carreraLastSegments[hit].type !== 'connector') {
+      carreraCloseTrackTo(carreraLastSegments[hit].linkId);
+    }
+    return;
+  }
+  if(hit < 0) { carreraSelectedLinkId = null; }
+  else {
+    var linkId = carreraLastSegments[hit].linkId;
+    carreraSelectedLinkId = (carreraSelectedLinkId === linkId) ? null : linkId;
+  }
+  carreraRenderSchematic();
+  _carreraSyncSelectedChip();
+  _carreraUpdateSelectionBar();
+}
+
+// Zeigt/versteckt die Hinweisleiste unter dem Canvas mit dem Namen der
+// angewählten Schiene + Löschen-/Aufheben-Buttons. Wird bei jedem
+// carreraRenderChain()-Aufruf mit aufgerufen, damit sie nach JEDER
+// Ketten-Mutation (Undo/Redo/Laden/Löschen/...) automatisch konsistent
+// bleibt, statt an jeder Mutationsstelle einzeln synchronisiert zu werden.
+function _carreraUpdateSelectionBar() {
+  var bar = document.getElementById('carreraSelectionBar');
+  if(!bar) return;
+  if(carreraSelectedLinkId == null) { bar.style.display = 'none'; return; }
+  var link = carreraChain.find(function(l){ return l.id === carreraSelectedLinkId; });
+  if(!link) { carreraSelectedLinkId = null; bar.style.display = 'none'; return; }
+  var name = link.key === '_connector' ? 'Verbinder' : ((CARRERA_PROFI_PARTS[link.key]||{}).name || link.key);
+  var label = document.getElementById('carreraSelectionLabel');
+  if(label) label.textContent = 'ANGEWÄHLT: ' + name + ' — neue Teile werden hier angefügt';
+  bar.style.display = 'flex';
+}
+
+// Löscht die aktuell angewählte Schiene über die zentrale
+// carreraRemoveFromChainByIdx() — die Auswahl springt danach immer auf das
+// vorherige Teil in der Kette.
+function carreraDeleteSelected() {
+  if(carreraSelectedLinkId == null) return;
+  var idx = carreraChain.findIndex(function(l){ return l.id === carreraSelectedLinkId; });
+  if(idx < 0) { carreraSelectedLinkId = null; _carreraUpdateSelectionBar(); return; }
+  carreraRemoveFromChainByIdx(idx);
+  _carreraUpdateSelectionBar();
+}
+
+function carreraDeselect() {
+  carreraSelectedLinkId = null;
+  carreraRenderSchematic();
+  _carreraSyncSelectedChip();
+  _carreraUpdateSelectionBar();
+}
+
+function carreraInitEvents() {
+  var cv = document.getElementById('carreraSchematicCanvas');
+  if(!cv || cv._carreraEvt) return;
+  cv.addEventListener('mousemove', carreraOnHoverMove);
+  cv.addEventListener('mouseleave', function(){
+    if(carreraHoverSegIdx !== -1) {
+      carreraHoverSegIdx = -1;
+      if(!carreraAwaitingCloseTarget) cv.style.cursor='';
+      carreraRenderSchematic();
+    }
+  });
+  cv.addEventListener('click', carreraOnCanvasClick);
+  cv.addEventListener('touchend', function(e){
+    if(e.changedTouches && e.changedTouches.length) carreraOnCanvasClick(e);
+  }, {passive:false});
+  cv._carreraEvt = true;
+
+  if(!window._carreraKeyEvt) {
+    window._carreraKeyEvt = true;
+    document.addEventListener('keydown', function(e){
+      var modal = document.getElementById('carreraBuildModal');
+      if(!modal || !modal.classList.contains('open')) return;
+      var bPane = document.getElementById('cbPane-build');
+      if(!bPane || bPane.style.display === 'none') return;
+      if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if(e.key === 'Delete' || e.key === 'Backspace') { carreraDeleteSelected(); e.preventDefault(); }
+      if(e.key === 'Escape' && carreraAwaitingCloseTarget) {
+        carreraAwaitingCloseTarget = false;
+        var cv1 = document.getElementById('carreraSchematicCanvas');
+        if(cv1) cv1.style.cursor = '';
+        e.preventDefault();
+      }
+    });
+  }
+}
+
 // Verknüpfte Strecke für diesen Baukasten-Plan (Name)
 var _carreraLinkedTrackName = null;
 
@@ -10551,13 +11435,13 @@ function carreraApplyToLength() {
       }
       var entry = {
         name: name, location: '', length: innerM, type: 'Carrerabahn',
-        innerLen: innerM, outerLen: outerM,
+        innerLen: innerM, outerLen: outerM, updatedAt: Date.now(),
         notes: 'Aus Carrerabahn-Baukasten'
       };
       if(idx >= 0) {
         // Vorhandene Felder erhalten (lane, activeLane, notes etc.) und nur Längen updaten
         db.tracks[idx] = Object.assign({}, db.tracks[idx], {
-          length: innerM, innerLen: innerM, outerLen: outerM
+          length: innerM, innerLen: innerM, outerLen: outerM, updatedAt: Date.now()
         });
       } else {
         db.tracks.push(entry);
@@ -10628,6 +11512,9 @@ function onTrackLaneChange() {
 
 function carreraReset() {
   carreraChain = [];
+  carreraSelectedLinkId = null; carreraHoverSegIdx = -1;
+  var selBar = document.getElementById('carreraSelectionBar');
+  if(selBar) selBar.style.display = 'none';
   var listEl = document.getElementById('carreraChainList');
   if(listEl) listEl.innerHTML = '';
   var emptyEl = document.getElementById('carreraChainEmpty');
@@ -11160,19 +12047,21 @@ function dtGetLayouts(){ try{ return JSON.parse(localStorage.getItem(DT_LAYOUTS_
 function dtSaveLayouts(arr){ try{ localStorage.setItem(DT_LAYOUTS_KEY,JSON.stringify(arr)); }catch(e){} }
 
 function dtShowTab(tab) {
-  var dPane=document.getElementById('dtPane-draw'), sPane=document.getElementById('dtPane-saved');
-  var dTab=document.getElementById('dtTab-draw'),   sTab=document.getElementById('dtTab-saved');
-  var isD=(tab==='draw');
+  var dPane=document.getElementById('dtPane-draw'), sPane=document.getElementById('dtPane-saved'), vPane=document.getElementById('dtPane-vector');
+  var dTab=document.getElementById('dtTab-draw'),   sTab=document.getElementById('dtTab-saved'),   vTab=document.getElementById('dtTab-vector');
+  var isD=(tab==='draw'), isV=(tab==='vector'), isS=(tab==='saved');
   if(dPane) dPane.style.display=isD?'':'none';
-  if(sPane) sPane.style.display=isD?'none':'';
-  [dTab,sTab].forEach(function(t,i){
+  if(sPane) sPane.style.display=isS?'':'none';
+  if(vPane) vPane.style.display=isV?'':'none';
+  [[dTab,isD],[sTab,isS],[vTab,isV]].forEach(function(pair){
+    var t=pair[0], act=pair[1];
     if(!t) return;
-    var act=(i===0)===isD;
     t.style.background=act?'rgba(0,229,255,.1)':'transparent';
     t.style.borderBottomColor=act?'var(--accent)':'transparent';
     t.style.color=act?'var(--accent)':'var(--text-dim)';
   });
-  if(!isD) dtRenderLayoutList();
+  if(isS) dtRenderLayoutList();
+  if(isV) { vtSetupCanvas(); vtInitEvents(); vtSetMode('draw'); vtRender(); vtUpdateSelectedPointPanel(); vtPopulateVehicleSelect(); vtAutoLocateIfNeeded(); }
 }
 
 function dtSaveAsTrack() {
@@ -11191,10 +12080,14 @@ function dtSaveAsTrack() {
         apexAlert('Der Name "'+name+'" ist bereits von einer anderen Strecke vergeben. Bitte einen anderen Namen wählen.');
         return;
       }
+      if(typeof vtGetLayouts==='function' && vtGetLayouts().some(function(l){ return l.name===name; })) {
+        apexAlert('Der Name "'+name+'" ist bereits von einer Vektor-Strecke vergeben. Bitte einen anderen Namen wählen.');
+        return;
+      }
       var entry = {
         name: name, location: '', length: lenM, type: 'Rundkurs',
         direction: _dt.detectedDirection || 'cw',
-        notes: 'Aus Strecke zeichnen'
+        notes: 'Aus Strecke zeichnen', updatedAt: Date.now()
       };
       if(existing >= 0) db.tracks[existing] = entry; else db.tracks.push(entry);
       if(typeof saveToLS==='function') saveToLS();
@@ -11267,11 +12160,14 @@ function dtRenderLayoutList() {
   var list=document.getElementById('dtLayoutList');
   var empty=document.getElementById('dtLayoutEmpty');
   if(!list) return;
-  var layouts=dtGetLayouts();
+  var layouts=dtGetLayouts().map(function(l){ return {kind:'draw', data:l}; });
+  var vecLayouts=vtGetLayouts().map(function(l){ return {kind:'vector', data:l}; });
+  var all = layouts.concat(vecLayouts);
   list.innerHTML='';
-  if(!layouts.length){ if(empty) empty.style.display='block'; return; }
+  if(!all.length){ if(empty) empty.style.display='block'; return; }
   if(empty) empty.style.display='none';
-  layouts.forEach(function(layout){
+  all.forEach(function(entry){
+    var layout=entry.data, isVec=(entry.kind==='vector');
     var card=document.createElement('div');
     card.style.cssText='background:var(--bg3);border:1px solid var(--border);padding:12px 14px;margin-bottom:4px;';
     var hdr=document.createElement('div');
@@ -11280,9 +12176,17 @@ function dtRenderLayoutList() {
     var nameEl=document.createElement('div');
     nameEl.style.cssText="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text);font-weight:bold;margin-bottom:4px;";
     nameEl.textContent=layout.name;
+    if(isVec) {
+      var badge=document.createElement('span');
+      badge.textContent='VEKTOR';
+      badge.style.cssText='font-size:7px;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:1px 5px;margin-left:8px;letter-spacing:1px;';
+      nameEl.appendChild(badge);
+    }
     var meta=document.createElement('div');
     meta.style.cssText="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);";
-    meta.innerHTML='<b style="color:var(--accent)">'+(layout.length||'—')+' m</b> &nbsp;&middot;&nbsp; '+(layout.saved||'');
+    var vtGeo = isVec && layout.points && layout.points.length>1 ? vtComputeGeometry(layout.points, !!layout.closed, layout.widthM, layout.tension) : null;
+    var lenTxt = isVec ? (vtGeo ? vtGeo.stats.totalLengthM.toFixed(1) : '—') : (layout.length||'—');
+    meta.innerHTML='<b style="color:var(--accent)">'+lenTxt+' m</b> &nbsp;&middot;&nbsp; '+(layout.saved||'');
     info.appendChild(nameEl); info.appendChild(meta);
     var btns=document.createElement('div');
     btns.style.cssText='display:flex;gap:4px;flex-shrink:0;align-items:center;';
@@ -11291,15 +12195,28 @@ function dtRenderLayoutList() {
       b.style.cssText='font-size:7px;padding:5px 9px;color:'+col+';border-color:'+col+'55;';
       b.onclick=fn; return b;
     }
-    btns.appendChild(mkBtn('▶ LADEN','var(--accent)',function(){ dtLoadLayout(layout.id); }));
-    btns.appendChild(mkBtn('✕','var(--red)',function(){ dtDeleteLayout(layout.id); }));
+    btns.appendChild(mkBtn('▶ LADEN','var(--accent)',function(){ isVec ? vtLoadLayout(layout.id) : dtLoadLayout(layout.id); }));
+    btns.appendChild(mkBtn('✕','var(--red)',function(){ isVec ? vtDeleteLayout(layout.id) : dtDeleteLayout(layout.id); }));
     hdr.appendChild(info); hdr.appendChild(btns);
     card.appendChild(hdr);
-    if(layout.imgData){
+    if(!isVec && layout.imgData){
       var img=document.createElement('img');
       img.src=layout.imgData;
       img.style.cssText='width:100%;margin-top:8px;max-height:100px;object-fit:cover;border:1px solid var(--border);opacity:.7;';
       card.appendChild(img);
+    } else if(isVec && layout.points && layout.points.length>1) {
+      // Vektor-Layouts haben kein Foto (imgData) — Vorschau stattdessen aus
+      // der Geometrie gezeichnet, per bereits vorhandener vtRenderPreview()
+      // (sonst nur für die "aktive Strecke"-Vorschau genutzt).
+      var pvCanvas=document.createElement('canvas');
+      // Pixelbreite an die tatsächliche Listenbreite anpassen (nicht fix
+      // 280px) — sonst zieht CSS width:100% das Bild bei einer breiteren
+      // Liste sichtbar in die Breite, da ein <canvas> (anders als <img>
+      // mit object-fit) keine verzerrungsfreie Skalierung kennt.
+      pvCanvas.width=Math.max(200, Math.round(list.clientWidth||300)-4); pvCanvas.height=100;
+      pvCanvas.style.cssText='width:100%;margin-top:8px;height:100px;border:1px solid var(--border);opacity:.85;display:block;';
+      card.appendChild(pvCanvas);
+      try { vtRenderPreview(pvCanvas.getContext('2d'), layout, pvCanvas); } catch(e) {}
     }
     list.appendChild(card);
   });
@@ -11390,6 +12307,1143 @@ function dtInitEvents() {
   }
 }
 
+// ═══════════════════════════════════════════════════════
+// VEKTOR-STRECKENDESIGNER — Punkte setzen, automatisch mit Geraden/
+// Kreisbögen verbunden (CAD-"Fillet"-Prinzip), Streckenbreite,
+// physikbasierte Rundenzeit-Simulation. Dritter Modus im
+// "STRECKE ZEICHNEN"-Modal, unabhängig vom Foto-Nachzeichnen (_dt) und
+// dem Baukasten (carrera*) — eigene Funktionsfamilie vt*.
+// ═══════════════════════════════════════════════════════
+var _vt = {
+  points: [],           // [{x,y,t}] Weltkoordinaten in Metern; t = Spannungs-Override für diesen Punkt (null = globale tension)
+  closed: false,
+  mode: 'draw',          // 'draw' | 'pan'
+  selectedIdx: -1,
+  dragIdx: -1,
+  widthM: 5,
+  pitWidthM: null,
+  tension: 1,             // globale Spannung (Catmull-Rom-Bézier-Anfasserlänge) — 1=Standard, <1 schärfer, >1 weicher
+  zoom: 6,               // Pixel pro Meter
+  panX: 0, panY: 0,
+  undoStack: [], redoStack: [],
+  drawing: false,
+  lastCX: 0, lastCY: 0,
+  currentLayoutId: null,
+  currentLayoutName: null,
+  calibration: { Auto:1, Motorrad:1, Slotcar:1, 'Dr!ft':1 },
+  lastStats: null,
+  hoverWorld: null,  // Cursor-Position in Weltkoordinaten für die Live-Vorschau des nächsten Segments
+  mapAnchor: null    // {lat,lon} — Weltkoordinate (0,0) entspricht dieser Position, für die Satellitenkarte
+};
+
+function vtGetCanvas(){ return document.getElementById('vtCanvas'); }
+function vtGetCtx(){ var c=vtGetCanvas(); return c?c.getContext('2d'):null; }
+
+function vtWorldToCanvas(wx, wy) { return { x: _vt.panX + wx*_vt.zoom, y: _vt.panY + wy*_vt.zoom }; }
+function vtCanvasToWorld(cx, cy) { return { x: (cx-_vt.panX)/_vt.zoom, y: (cy-_vt.panY)/_vt.zoom }; }
+
+function vtGetPos(e) {
+  var cv=vtGetCanvas(), rect=cv.getBoundingClientRect();
+  var sx=cv.width/rect.width, sy=cv.height/rect.height;
+  var src=e.touches?e.touches[0]:e;
+  return { x:(src.clientX-rect.left)*sx, y:(src.clientY-rect.top)*sy };
+}
+
+function vtSetupCanvas() {
+  var wrap = document.getElementById('vtCanvasWrap');
+  var cv = vtGetCanvas(); if(!cv) return;
+  var cw = wrap ? Math.round(wrap.offsetWidth || 660) : 660;
+  var ch = Math.round(cw * 0.56);
+  cv.width = cw; cv.height = ch;
+  if(!_vt.points.length && _vt.panX===0 && _vt.panY===0) { _vt.panX = cw/2; _vt.panY = ch/2; }
+}
+
+// ── Satellitenkarte (Esri World Imagery, kein API-Key nötig) ──────────────
+// Weltkoordinaten (Meter) werden über eine einfache äquirektangulare
+// Näherung auf Lat/Lon abgebildet — für Streckenmaßstäbe (wenige hundert
+// Meter) mehr als genau genug, keine Geodäsie-Bibliothek nötig. Nur im
+// LIVE-Editor sichtbar (braucht Internet) — gespeicherte Layouts speichern
+// nur den Anker (lat/lon), keine Kachelbilder, die Vorschau bleibt daher
+// offline nutzbar.
+var _vtTileCache = {};
+var VT_TILE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+
+function vtWorldToLonLat(wx, wy) {
+  if(!_vt.mapAnchor) return null;
+  var latRad = _vt.mapAnchor.lat*Math.PI/180;
+  return { lon: _vt.mapAnchor.lon + wx/(111320*Math.cos(latRad)), lat: _vt.mapAnchor.lat - wy/110540 };
+}
+function vtLonLatToWorld(lon, lat) {
+  if(!_vt.mapAnchor) return {x:0,y:0};
+  var latRad = _vt.mapAnchor.lat*Math.PI/180;
+  return { x:(lon-_vt.mapAnchor.lon)*111320*Math.cos(latRad), y:(_vt.mapAnchor.lat-lat)*110540 };
+}
+function _vtLonLatToTilePx(lon, lat, z) {
+  var latRad = lat*Math.PI/180;
+  var n = Math.pow(2,z);
+  return { x:(lon+180)/360*n*256, y:(1-Math.log(Math.tan(latRad)+1/Math.cos(latRad))/Math.PI)/2*n*256 };
+}
+function _vtTilePxToLonLat(px, py, z) {
+  var n = Math.pow(2,z);
+  var lon = px/(n*256)*360-180;
+  var latRad = Math.atan(Math.sinh(Math.PI*(1-2*py/(n*256))));
+  return { lon:lon, lat:latRad*180/Math.PI };
+}
+
+function vtGeocodeSearch() {
+  var inp = document.getElementById('vtGeoSearchInput');
+  if(!inp || !inp.value.trim()) return;
+  vtGeocodeAddress(inp.value.trim());
+}
+
+// Gemeinsame Adresssuche — von der manuellen Suche UND der automatischen
+// Standortermittlung (vtAutoLocateIfNeeded) genutzt. statusPrefix wird bei
+// Erfolg nicht angezeigt (dort zählt der gefundene Ortsname), nur bei einem
+// eigenen Vorab-Status (z.B. "Ermittle Standort…") separat gesetzt.
+function vtGeocodeAddress(query, onFail) {
+  var status = document.getElementById('vtGeoSearchStatus');
+  if(status) status.textContent = 'Suche…';
+  fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(query))
+    .then(function(r){ return r.json(); })
+    .then(function(results){
+      if(!results || !results.length) { if(status) status.textContent='Nichts gefunden.'; if(onFail) onFail(); return; }
+      var r = results[0];
+      var lat=parseFloat(r.lat), lon=parseFloat(r.lon);
+      vtSetMapAnchorAndCenter(lat, lon);
+      if(status) status.textContent = '✓ '+(r.display_name||'').slice(0,70);
+      vtRender();
+    })
+    .catch(function(){ if(status) status.textContent='Suche fehlgeschlagen (keine Internetverbindung?).'; if(onFail) onFail(); });
+}
+
+// Setzt den Karten-Anker per lat/lon direkt (ohne Geokodierung) — genutzt
+// von der Geolocation-Auto-Erkennung. Erste Zuweisung legt die Koordinaten-
+// Zuordnung fest und zentriert; jede weitere schwenkt nur die Ansicht
+// dorthin, ohne bereits gesetzte Punkte relativ zur Karte zu verschieben.
+function vtSetMapAnchorAndCenter(lat, lon) {
+  if(!_vt.mapAnchor) {
+    _vt.mapAnchor = { lat:lat, lon:lon };
+    var cv0=vtGetCanvas();
+    if(cv0) { _vt.panX=cv0.width/2; _vt.panY=cv0.height/2; }
+  } else {
+    var w = vtLonLatToWorld(lon, lat);
+    var cv1=vtGetCanvas();
+    if(cv1) { _vt.panX = cv1.width/2 - w.x*_vt.zoom; _vt.panY = cv1.height/2 - w.y*_vt.zoom; }
+  }
+}
+
+// Zeigt die Karte sofort ohne manuelle Adresseingabe: versucht zuerst den
+// echten Gerätestandort (Browser-Geolocation), fällt bei Ablehnung/Fehler/
+// fehlender Unterstützung auf eine feste Adresse zurück. Läuft nur einmal
+// pro Sitzung und nur, solange noch kein Anker gesetzt ist (überschreibt
+// weder eine manuelle Suche noch eine geladene Strecke mit eigenem Anker).
+var VT_FALLBACK_ADDRESS = 'In den Ziegelwiesen 9, 71229 Leonberg';
+function vtAutoLocateIfNeeded() {
+  if(_vt.mapAnchor || _vt._autoLocateTried) return;
+  _vt._autoLocateTried = true;
+  var status = document.getElementById('vtGeoSearchStatus');
+  var fallback = function(){ vtGeocodeAddress(VT_FALLBACK_ADDRESS); };
+  if(!navigator.geolocation) { fallback(); return; }
+  if(status) status.textContent = 'Ermittle Standort…';
+  navigator.geolocation.getCurrentPosition(function(pos){
+    if(_vt.mapAnchor) return; // inzwischen anders gesetzt (z.B. manuelle Suche war schneller)
+    vtSetMapAnchorAndCenter(pos.coords.latitude, pos.coords.longitude);
+    if(status) status.textContent = '✓ Aktueller Standort';
+    vtRender();
+  }, function(){
+    if(!_vt.mapAnchor) fallback();
+  }, { timeout: 8000 });
+}
+
+function vtClearSatellite() {
+  _vt.mapAnchor = null;
+  var status = document.getElementById('vtGeoSearchStatus');
+  if(status) status.textContent = '';
+  vtRender();
+}
+
+function _vtLoadTileImg(z,x,y) {
+  var key=z+'_'+x+'_'+y;
+  if(_vtTileCache[key]) return _vtTileCache[key];
+  var img = new Image();
+  var entry = { img:img, loaded:false, failed:false };
+  img.onload = function(){ entry.loaded=true; vtRender(); };
+  img.onerror = function(){ entry.failed=true; };
+  img.src = VT_TILE_URL.replace('{z}',z).replace('{y}',y).replace('{x}',x);
+  _vtTileCache[key] = entry;
+  return entry;
+}
+
+// Zeichnet die sichtbaren Kachel-Tiles als Hintergrund; gibt true zurück,
+// falls mindestens eine Kachel gezeichnet wurde (dann überspringt
+// vtDrawGeometry seinen sonst üblichen dunklen Hintergrund-Fill).
+function vtDrawSatelliteTiles(ctx, cv) {
+  if(!_vt.mapAnchor) return false;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#0a0e12'; ctx.fillRect(0,0,cv.width,cv.height);
+
+  var latRad = _vt.mapAnchor.lat*Math.PI/180;
+  var metersPerTilePxAtZ0 = 156543.03392*Math.cos(latRad);
+  var z = Math.max(3, Math.min(19, Math.round(Math.log2(metersPerTilePxAtZ0 * _vt.zoom))));
+
+  var wTL = vtCanvasToWorld(0,0), wBR = vtCanvasToWorld(cv.width, cv.height);
+  var llTL = vtWorldToLonLat(wTL.x, wTL.y), llBR = vtWorldToLonLat(wBR.x, wBR.y);
+  var pxTL = _vtLonLatToTilePx(llTL.lon, llTL.lat, z), pxBR = _vtLonLatToTilePx(llBR.lon, llBR.lat, z);
+
+  var tileX0=Math.floor(Math.min(pxTL.x,pxBR.x)/256)-1, tileX1=Math.floor(Math.max(pxTL.x,pxBR.x)/256)+1;
+  var tileY0=Math.floor(Math.min(pxTL.y,pxBR.y)/256)-1, tileY1=Math.floor(Math.max(pxTL.y,pxBR.y)/256)+1;
+  var nTiles=Math.pow(2,z), drewAny=false;
+  for(var tx=tileX0; tx<=tileX1; tx++){
+    for(var ty=tileY0; ty<=tileY1; ty++){
+      if(ty<0||ty>=nTiles) continue;
+      var wrappedX=((tx%nTiles)+nTiles)%nTiles;
+      var entry=_vtLoadTileImg(z, wrappedX, ty);
+      if(!entry.loaded) continue;
+      var llC0=_vtTilePxToLonLat(tx*256, ty*256, z), llC1=_vtTilePxToLonLat((tx+1)*256, (ty+1)*256, z);
+      var w0=vtLonLatToWorld(llC0.lon, llC0.lat), w1=vtLonLatToWorld(llC1.lon, llC1.lat);
+      var c0=vtWorldToCanvas(w0.x, w0.y), c1=vtWorldToCanvas(w1.x, w1.y);
+      ctx.drawImage(entry.img, c0.x, c0.y, c1.x-c0.x, c1.y-c0.y);
+      drewAny=true;
+    }
+  }
+  ctx.save(); ctx.font='8px monospace'; ctx.fillStyle='rgba(255,255,255,.6)';
+  ctx.fillText('© Esri World Imagery · Suche © OpenStreetMap Nominatim', 6, cv.height-6);
+  ctx.restore();
+  return true; // Hintergrund wurde in jedem Fall behandelt (Fallback-Fill oder Kacheln)
+}
+
+// ── Geometrie-Engine (reine Funktionen, kein DOM) ─────────────────────────
+// ═══════════════════════════════════════════════════════
+// GEOMETRIE-ENGINE — zentripetaler Catmull-Rom-Spline → kubische Bézier-
+// Segmente, dieselbe Technik wie racetrackdesign.com (Referenzcode dort
+// eingesehen: alpha=0.5 vermeidet Schleifen/Überschwinger bei engen bzw.
+// ungleichmäßig verteilten Punkten). Tangenten an jedem Punkt werden
+// automatisch aus den Nachbarpunkten berechnet — kein manuelles Ziehen von
+// Anfassern nötig (anders als Illustrators Pen-Tool, aber vom Ergebnis her
+// vergleichbar: ein "glatter Anker" pro Punkt). Die Tangentenformel bezieht
+// die Distanz zu den Nachbarn mit ein, wodurch sich kurze Teilstücke von
+// selbst weniger auf die Kurve auswirken — kein separater Clamp nötig.
+// "Spannung" (tension, Standard 1) skaliert die Bézier-Anfasserlänge pro
+// Punkt und ersetzt den früheren Kreisbogen-Radius als Rundungs-Regler.
+function vtDist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+
+function vtCatmullRomToBezier(points, closed, alpha) {
+  if(alpha==null) alpha=0.5;
+  var segs=[], n=points.length;
+  if(n<2) return segs;
+  var pts = closed
+    ? [points[n-1]].concat(points, [points[0], points[1]])
+    : [points[0]].concat(points, [points[n-1]]);
+  for(var i=0;i<pts.length-3;i++){
+    var p0=pts[i], p1=pts[i+1], p2=pts[i+2], p3=pts[i+3];
+    var d01=Math.pow(vtDist(p0,p1),alpha)||1e-6;
+    var d12=Math.pow(vtDist(p1,p2),alpha)||1e-6;
+    var d23=Math.pow(vtDist(p2,p3),alpha)||1e-6;
+    var m1x=d12*((p1.x-p0.x)/d01-(p2.x-p0.x)/(d01+d12)+(p2.x-p1.x)/d12);
+    var m1y=d12*((p1.y-p0.y)/d01-(p2.y-p0.y)/(d01+d12)+(p2.y-p1.y)/d12);
+    var m2x=d12*((p2.x-p1.x)/d12-(p3.x-p1.x)/(d12+d23)+(p3.x-p2.x)/d23);
+    var m2y=d12*((p2.y-p1.y)/d12-(p3.y-p1.y)/(d12+d23)+(p3.y-p2.y)/d23);
+    segs.push({
+      p0:{x:p1.x,y:p1.y},
+      cp1:{x:p1.x+m1x/3, y:p1.y+m1y/3},
+      cp2:{x:p2.x-m2x/3, y:p2.y-m2y/3},
+      p3:{x:p2.x,y:p2.y}
+    });
+  }
+  return segs;
+}
+
+// Skaliert die Bézier-Anfasserlänge pro Segmentende anhand der "Spannung"
+// (t) des jeweiligen Ankerpunkts — 1 = unverändert, <1 = schärfer, >1 =
+// weicher. Punkt-eigener Wert (falls gesetzt) schlägt den globalen Standard.
+function vtApplyTensions(bezierSegs, points, closed, globalTension) {
+  var n=points.length;
+  var gt=(globalTension!=null && globalTension>0) ? globalTension : 1;
+  for(var i=0;i<bezierSegs.length;i++){
+    var seg=bezierSegs[i];
+    var startIdx=i, endIdx = closed ? (i+1)%n : Math.min(i+1,n-1);
+    var tStart=(points[startIdx] && points[startIdx].t!=null) ? points[startIdx].t : gt;
+    var tEnd=(points[endIdx] && points[endIdx].t!=null) ? points[endIdx].t : gt;
+    if(tStart!==1) seg.cp1={x:seg.p0.x+(seg.cp1.x-seg.p0.x)*tStart, y:seg.p0.y+(seg.cp1.y-seg.p0.y)*tStart};
+    if(tEnd!==1) seg.cp2={x:seg.p3.x+(seg.cp2.x-seg.p3.x)*tEnd, y:seg.p3.y+(seg.cp2.y-seg.p3.y)*tEnd};
+  }
+}
+
+function vtBezierPoint(seg, t) {
+  var mt=1-t, mt2=mt*mt, t2=t*t;
+  return {
+    x: mt2*mt*seg.p0.x + 3*mt2*t*seg.cp1.x + 3*mt*t2*seg.cp2.x + t2*t*seg.p3.x,
+    y: mt2*mt*seg.p0.y + 3*mt2*t*seg.cp1.y + 3*mt*t2*seg.cp2.y + t2*t*seg.p3.y
+  };
+}
+function vtSampleBezierPath(bezierSegs, samplesPerSegment) {
+  samplesPerSegment = samplesPerSegment||20;
+  var pts=[];
+  for(var s=0;s<bezierSegs.length;s++){
+    var seg=bezierSegs[s];
+    for(var t=0;t<samplesPerSegment;t++) pts.push(vtBezierPoint(seg, t/samplesPerSegment));
+  }
+  if(bezierSegs.length) pts.push(vtBezierPoint(bezierSegs[bezierSegs.length-1], 1));
+  return pts;
+}
+
+// Krümmung an jedem abgetasteten Punkt (Drei-Punkt-Formel, wie bei
+// racetrackdesign.com) — Kurvenradius ist hier kein Eingabewert mehr,
+// sondern eine aus der fertigen Kurve GEMESSENE Größe (Radius = 1/Krümmung).
+function vtCalculateCurvature(points) {
+  var out=[];
+  for(var i=1;i<points.length-1;i++){
+    var p0=points[i-1], p1=points[i], p2=points[i+1];
+    var dx1=p1.x-p0.x, dy1=p1.y-p0.y, dx2=p2.x-p1.x, dy2=p2.y-p1.y;
+    var cross=dx1*dy2-dy1*dx2;
+    var d1=Math.hypot(dx1,dy1), d2=Math.hypot(dx2,dy2), d3=Math.hypot(p2.x-p0.x, p2.y-p0.y);
+    var denom=d1*d2*d3;
+    var k = denom>0.001 ? (2*Math.abs(cross))/denom : 0;
+    out.push({point:p1, curvature:k});
+  }
+  return out;
+}
+
+// Streckenband: versetzt jeden abgetasteten Punkt entlang seiner lokalen
+// Normalen (aus den Nachbarpunkten) — funktioniert einheitlich für beliebig
+// gekrümmte Kurvenabschnitte, kein Sonderfall für Geraden/Bögen nötig.
+function vtOffsetCurve(points, distance) {
+  var left=[], right=[];
+  for(var i=0;i<points.length;i++){
+    var nx,ny;
+    if(i===0){ nx=-(points[1].y-points[0].y); ny=points[1].x-points[0].x; }
+    else if(i===points.length-1){ nx=-(points[i].y-points[i-1].y); ny=points[i].x-points[i-1].x; }
+    else { nx=-(points[i+1].y-points[i-1].y); ny=points[i+1].x-points[i-1].x; }
+    var len=Math.hypot(nx,ny);
+    if(len>0.001){ nx/=len; ny/=len; }
+    left.push({x:points[i].x+nx*distance, y:points[i].y+ny*distance});
+    right.push({x:points[i].x-nx*distance, y:points[i].y-ny*distance});
+  }
+  return {left:left, right:right};
+}
+
+// Shoelace-Formel (wie bei _dt) — positiv = im Uhrzeigersinn in Bildschirmkoordinaten
+function vtShoelaceDirection(points) {
+  if(points.length < 3) return null;
+  var area=0;
+  for(var i=0;i<points.length;i++){
+    var a=points[i], b=points[(i+1)%points.length];
+    area += (a.x*b.y - b.x*a.y);
+  }
+  return area < 0 ? 'cw' : 'ccw';
+}
+
+// Vereinfachte Geraden/Kurven-Klassifikation aus dem geglätteten
+// Krümmungsprofil (racetrackdesign.com hat dafür einen deutlich
+// aufwendigeren Klassifikator inkl. Ecken-Benennung — hier reicht eine
+// simple Schwelle für die Kennzahlen LÄNGSTE GERADE / ENGSTE KURVE).
+// Radius < 200m gilt als Kurve, alles flachere als "gerade".
+function vtComputeStatsFromCurvature(sampled, curvatures) {
+  var n=sampled.length;
+  if(n<3) return { totalLengthM:0, longestStraightM:0, tightestCorner:null };
+  var kAt=new Array(n).fill(0);
+  for(var j=0;j<curvatures.length && j+1<n;j++) kAt[j+1]=curvatures[j].curvature||0;
+  kAt[0]=kAt[1]||0; kAt[n-1]=kAt[n-2]||0;
+  var smoothed = kAt.map(function(_,i){
+    var lo=Math.max(0,i-2), hi=Math.min(n-1,i+2), sum=0,c=0;
+    for(var k=lo;k<=hi;k++){ sum+=kAt[k]; c++; }
+    return sum/c;
+  });
+  var CORNER_K_THRESHOLD = 1/200;
+  var segLen=new Array(n).fill(0), totalLen=0;
+  for(var i=1;i<n;i++){ var d=Math.hypot(sampled[i].x-sampled[i-1].x, sampled[i].y-sampled[i-1].y); segLen[i]=d; totalLen+=d; }
+  var longestStraight=0, curStraightLen=0, tightestRadius=Infinity;
+  var cornerMask=new Array(n).fill(false);
+  for(var i=0;i<n;i++){
+    if(smoothed[i] > CORNER_K_THRESHOLD) {
+      cornerMask[i]=true;
+      var r = smoothed[i]>0.0001 ? 1/smoothed[i] : Infinity;
+      if(r<tightestRadius) tightestRadius=r;
+      if(curStraightLen>longestStraight) longestStraight=curStraightLen;
+      curStraightLen=0;
+    } else {
+      curStraightLen += segLen[i]||0;
+    }
+  }
+  if(curStraightLen>longestStraight) longestStraight=curStraightLen;
+  return {
+    totalLengthM: totalLen,
+    longestStraightM: longestStraight,
+    tightestCorner: isFinite(tightestRadius) ? {radius:tightestRadius} : null,
+    cornerMask: cornerMask
+  };
+}
+
+// Gesamte Pipeline: Punkte → Bézier → Sampling → Krümmung → Streckenband +
+// Kennzahlen. Wird von Editor-Render, Vorschau UND Simulation gleichermaßen
+// genutzt, damit alle drei garantiert dieselbe Geometrie sehen.
+function vtComputeGeometry(points, closed, widthM, tension) {
+  if(!points || points.length<2) return null;
+  var bez = vtCatmullRomToBezier(points, closed, 0.5);
+  if(!bez.length) return null;
+  vtApplyTensions(bez, points, closed, tension);
+  var sampled = vtSampleBezierPath(bez, 20);
+  var curvatures = vtCalculateCurvature(sampled);
+  var ribbon = vtOffsetCurve(sampled, Math.max(0.1, widthM||5)/2);
+  var stats = vtComputeStatsFromCurvature(sampled, curvatures);
+  var direction = vtShoelaceDirection(points);
+  return { bezier:bez, sampled:sampled, curvatures:curvatures, ribbon:ribbon, stats:stats, direction:direction };
+}
+
+// Gemeinsames Zeichnen (Editor UND schreibgeschützte Vorschau nutzen dies) —
+// zeichnet Asphaltband, Mittellinie, Start/Ziel-Markierung, Richtungspfeil.
+// Normale an einem abgetasteten Punkt — dieselbe Formel wie in vtOffsetCurve
+// (zentrale Differenz zu den Nachbarn), damit Curbs exakt auf der
+// Streckenband-Kante sitzen statt leicht daneben.
+function vtNormalAt(sampled, i) {
+  var n=sampled.length, nx,ny;
+  if(i===0){ nx=-(sampled[1].y-sampled[0].y); ny=sampled[1].x-sampled[0].x; }
+  else if(i===n-1){ nx=-(sampled[i].y-sampled[i-1].y); ny=sampled[i].x-sampled[i-1].x; }
+  else { nx=-(sampled[i+1].y-sampled[i-1].y); ny=sampled[i+1].x-sampled[i-1].x; }
+  var len=Math.hypot(nx,ny);
+  if(len>0.001){ nx/=len; ny/=len; }
+  return {x:nx,y:ny};
+}
+
+// Rot/weiße Curbs entlang der Kurvenabschnitte (dort, wo geo.stats.cornerMask
+// gesetzt ist — dieselbe Krümmungs-Klassifikation wie bei den Kennzahlen),
+// auf beiden Streckenrändern, als schmales Band nach innen versetzt.
+function vtDrawCurbs(ctx, geo, toCv, widthM) {
+  var sampled=geo.sampled, mask=geo.stats && geo.stats.cornerMask;
+  if(!mask) return;
+  var half = Math.max(0.1, widthM||5)/2;
+  var curbW = Math.min(0.6, Math.max(0.175, half*0.125));
+  var stripeLenM = 2.5;
+  var distAcc = 0;
+  ctx.save();
+  for(var i=1;i<sampled.length;i++){
+    var d = Math.hypot(sampled[i].x-sampled[i-1].x, sampled[i].y-sampled[i-1].y);
+    if(mask[i] || mask[i-1]) {
+      var stripeIdx = Math.floor(distAcc/stripeLenM);
+      ctx.fillStyle = (stripeIdx%2===0) ? '#e02020' : '#f5f5f5';
+      [-1,1].forEach(function(side){ // -1 = links, 1 = rechts
+        var nA=vtNormalAt(sampled,i-1), nB=vtNormalAt(sampled,i);
+        var aOuter={x:sampled[i-1].x+nA.x*side*half, y:sampled[i-1].y+nA.y*side*half};
+        var bOuter={x:sampled[i].x+nB.x*side*half, y:sampled[i].y+nB.y*side*half};
+        var aInner={x:sampled[i-1].x+nA.x*side*(half-curbW), y:sampled[i-1].y+nA.y*side*(half-curbW)};
+        var bInner={x:sampled[i].x+nB.x*side*(half-curbW), y:sampled[i].y+nB.y*side*(half-curbW)};
+        var c0=toCv(aOuter.x,aOuter.y), c1=toCv(bOuter.x,bOuter.y), c2=toCv(bInner.x,bInner.y), c3=toCv(aInner.x,aInner.y);
+        ctx.beginPath(); ctx.moveTo(c0.x,c0.y); ctx.lineTo(c1.x,c1.y); ctx.lineTo(c2.x,c2.y); ctx.lineTo(c3.x,c3.y); ctx.closePath(); ctx.fill();
+      });
+    }
+    distAcc += d;
+  }
+  ctx.restore();
+}
+
+// Karierte Ziellinie an der Verbindungsstelle (Startpunkt), quer über die
+// gesamte Streckenbreite — läuft immer automatisch am ersten Punkt mit,
+// da dort Anfang und Ende der Runde zusammentreffen.
+function vtDrawFinishLine(ctx, geo, toCv, widthM) {
+  if(!geo || !geo.sampled.length) return;
+  var half = Math.max(0.1, widthM||5)/2;
+  var n0=vtNormalAt(geo.sampled,0);
+  var tangent = geo.sampled.length>1 ? {x:geo.sampled[1].x-geo.sampled[0].x, y:geo.sampled[1].y-geo.sampled[0].y} : {x:1,y:0};
+  var tl=Math.hypot(tangent.x,tangent.y)||1; tangent.x/=tl; tangent.y/=tl;
+  var rowDepth = Math.min(1.2, Math.max(0.3, half*0.18));
+  var cols=8, rows=2;
+  var base=geo.sampled[0];
+  ctx.save();
+  for(var row=0; row<rows; row++){
+    for(var col=0; col<cols; col++){
+      var f0=(col/cols)*2-1, f1=((col+1)/cols)*2-1; // -1..1 über die Breite
+      var isWhite = (col+row)%2===0;
+      ctx.fillStyle = isWhite ? '#f5f5f5' : '#111';
+      var off0 = row*rowDepth, off1=(row+1)*rowDepth;
+      function pt(fw, fl){ return { x: base.x+n0.x*fw*half+tangent.x*fl, y: base.y+n0.y*fw*half+tangent.y*fl }; }
+      var p0=toCv(pt(f0,off0).x,pt(f0,off0).y), p1=toCv(pt(f1,off0).x,pt(f1,off0).y),
+          p2=toCv(pt(f1,off1).x,pt(f1,off1).y), p3=toCv(pt(f0,off1).x,pt(f0,off1).y);
+      ctx.beginPath(); ctx.moveTo(p0.x,p0.y); ctx.lineTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.lineTo(p3.x,p3.y); ctx.closePath(); ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+function vtDrawGeometry(ctx, cv, points, closed, widthM, tension, toCv, scale, skipBg) {
+  if(!skipBg) {
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.fillStyle='#0a0e12'; ctx.fillRect(0,0,cv.width,cv.height);
+  }
+  var geo = vtComputeGeometry(points, closed, widthM, tension);
+  if(!geo) return { geo:null, stats:null, direction:null };
+
+  var ribbon = geo.ribbon;
+  if(ribbon.left.length>1) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(88,94,104,.6)'; // 40% Transparenz — Untergrund (Satellitenkarte) bleibt sichtbar
+    ctx.beginPath();
+    var p0=toCv(ribbon.left[0].x, ribbon.left[0].y); ctx.moveTo(p0.x,p0.y);
+    for(var i=1;i<ribbon.left.length;i++){ var p=toCv(ribbon.left[i].x,ribbon.left[i].y); ctx.lineTo(p.x,p.y); }
+    for(var j=ribbon.right.length-1;j>=0;j--){ var q=toCv(ribbon.right[j].x,ribbon.right[j].y); ctx.lineTo(q.x,q.y); }
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); var o0=toCv(ribbon.left[0].x,ribbon.left[0].y); ctx.moveTo(o0.x,o0.y);
+    for(var k=1;k<ribbon.left.length;k++){ var o=toCv(ribbon.left[k].x,ribbon.left[k].y); ctx.lineTo(o.x,o.y); }
+    ctx.stroke();
+    ctx.beginPath(); var n0=toCv(ribbon.right[0].x,ribbon.right[0].y); ctx.moveTo(n0.x,n0.y);
+    for(var m=1;m<ribbon.right.length;m++){ var nn=toCv(ribbon.right[m].x,ribbon.right[m].y); ctx.lineTo(nn.x,nn.y); }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  vtDrawCurbs(ctx, geo, toCv, widthM);
+
+  ctx.save();
+  ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.lineWidth=1.5; ctx.setLineDash([8,6]);
+  ctx.beginPath();
+  geo.sampled.forEach(function(p,i){
+    var c=toCv(p.x,p.y);
+    if(i===0) ctx.moveTo(c.x,c.y); else ctx.lineTo(c.x,c.y);
+  });
+  ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+
+  vtDrawFinishLine(ctx, geo, toCv, widthM);
+
+  if(points.length) {
+    var sp2 = toCv(points[0].x, points[0].y);
+    ctx.fillStyle='#00ff88'; ctx.beginPath(); ctx.arc(sp2.x,sp2.y,4,0,2*Math.PI); ctx.fill();
+    if(geo.direction && points.length>2 && geo.sampled.length>1) {
+      var p0s=geo.sampled[0], p1s=geo.sampled[1];
+      var dv={x:p1s.x-p0s.x, y:p1s.y-p0s.y};
+      var dl=Math.hypot(dv.x,dv.y)||1; dv.x/=dl; dv.y/=dl;
+      var col = geo.direction==='cw' ? '#00e5ff' : '#ffd600';
+      var ex=sp2.x+dv.x*32, ey=sp2.y+dv.y*32;
+      ctx.save(); ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=3; ctx.font='bold 10px monospace';
+      ctx.beginPath(); ctx.moveTo(sp2.x,sp2.y); ctx.lineTo(ex,ey); ctx.stroke();
+      ctx.fillText(geo.direction==='cw'?'↻ CW':'↺ CCW', ex+6, ey);
+      ctx.restore();
+    }
+  }
+  return { geo:geo, stats:geo.stats, direction:geo.direction };
+}
+
+function vtRenderPreview(ctx, layout, cv, dirIgnored) {
+  var pts = layout.points||[];
+  if(pts.length<2) return;
+  var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  pts.forEach(function(p){ if(p.x<minX)minX=p.x; if(p.x>maxX)maxX=p.x; if(p.y<minY)minY=p.y; if(p.y>maxY)maxY=p.y; });
+  var pad=(layout.widthM||5);
+  minX-=pad;minY-=pad;maxX+=pad;maxY+=pad;
+  var bw=Math.max(1,maxX-minX), bh=Math.max(1,maxY-minY);
+  var scale=Math.min(cv.width/bw, cv.height/bh)*0.92;
+  var offX=(cv.width-bw*scale)/2 - minX*scale;
+  var offY=(cv.height-bh*scale)/2 - minY*scale;
+  var toCv=function(wx,wy){ return {x:offX+wx*scale, y:offY+wy*scale}; };
+  vtDrawGeometry(ctx, cv, pts, !!layout.closed, layout.widthM, layout.tension, toCv, scale);
+}
+
+function vtRender() {
+  var cv=vtGetCanvas(), ctx=vtGetCtx(); if(!cv||!ctx) return;
+  var toCv=function(wx,wy){ return vtWorldToCanvas(wx,wy); };
+  var tilesDrawn = vtDrawSatelliteTiles(ctx, cv);
+  var res = vtDrawGeometry(ctx, cv, _vt.points, _vt.closed, _vt.widthM, _vt.tension, toCv, _vt.zoom, tilesDrawn);
+  _vt.lastStats = res.stats;
+  // Punkt-Handles + Auswahl (nur im Editor, nicht in der Vorschau)
+  _vt.points.forEach(function(pt, i){
+    var c = vtWorldToCanvas(pt.x, pt.y);
+    ctx.save();
+    var isSel = (i===_vt.selectedIdx);
+    ctx.fillStyle = isSel ? '#ffd600' : (i===0 ? '#00ff88' : '#00e5ff');
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(c.x,c.y, isSel?8:6, 0, 2*Math.PI); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  });
+  // Live-Vorschau des nächsten Segments unter dem Cursor: rechnet die
+  // komplette Spline-Pipeline testweise mit dem Cursor als zusätzlichem
+  // Punkt durch und zeichnet nur das Ende (letzte ~2 Bézier-Segmente) davon
+  // gestrichelt — deckt auch den Fall ab, dass sich der vorletzte Abschnitt
+  // durch den neuen Punkt noch leicht ändert (Catmull-Rom-Tangenten hängen
+  // von den Nachbarn ab).
+  if(_vt.hoverWorld && _vt.mode==='draw' && !_vt.closed && _vt.points.length) {
+    var tempPts = _vt.points.concat([{x:_vt.hoverWorld.x, y:_vt.hoverWorld.y, t:null}]);
+    var ghostGeo = vtComputeGeometry(tempPts, false, _vt.widthM, _vt.tension);
+    if(ghostGeo && ghostGeo.sampled.length) {
+      var tailCount = Math.min(ghostGeo.sampled.length, 41);
+      var tailPts = ghostGeo.sampled.slice(ghostGeo.sampled.length-tailCount);
+      ctx.save();
+      ctx.strokeStyle='rgba(0,229,255,.6)'; ctx.lineWidth=2; ctx.setLineDash([5,5]);
+      ctx.beginPath();
+      tailPts.forEach(function(p,idx){
+        var c=vtWorldToCanvas(p.x,p.y);
+        if(idx===0) ctx.moveTo(c.x,c.y); else ctx.lineTo(c.x,c.y);
+      });
+      ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+    }
+    var hc = vtWorldToCanvas(_vt.hoverWorld.x, _vt.hoverWorld.y);
+    ctx.save(); ctx.fillStyle='rgba(0,229,255,.6)'; ctx.beginPath(); ctx.arc(hc.x,hc.y,5,0,2*Math.PI); ctx.fill(); ctx.restore();
+  }
+  vtUpdateStatsPanel();
+}
+
+function vtUpdateStatsPanel() {
+  var s = _vt.lastStats;
+  var lenEl=document.getElementById('vtStatLength');
+  var straightEl=document.getElementById('vtStatStraight');
+  var tightEl=document.getElementById('vtStatTight');
+  if(!s) {
+    if(lenEl) lenEl.textContent='—';
+    if(straightEl) straightEl.textContent='—';
+    if(tightEl) tightEl.textContent='—';
+    return;
+  }
+  if(lenEl) lenEl.textContent = s.totalLengthM.toFixed(1)+' m';
+  if(straightEl) straightEl.textContent = s.longestStraightM.toFixed(1)+' m';
+  if(tightEl) tightEl.textContent = s.tightestCorner ? ('R '+s.tightestCorner.radius.toFixed(1)+' m') : '—';
+}
+
+// ── Interaktion: Punkte setzen/verschieben/einfügen/löschen ──────────────
+function vtSetMode(mode) {
+  _vt.mode = mode;
+  var cv=vtGetCanvas(); if(cv) cv.style.cursor = mode==='pan'?'grab':'crosshair';
+  var styles = { draw:{id:'vtDrawBtn',active:'rgba(0,255,136,.25)',border:'rgba(0,255,136,.8)'},
+                 pan:{id:'vtPanBtn',active:'rgba(0,229,255,.2)',border:'rgba(0,229,255,.6)'} };
+  ['draw','pan'].forEach(function(m){
+    var s=styles[m]; var btn=document.getElementById(s.id); if(!btn) return;
+    if(m===mode){ btn.style.background=s.active; btn.style.borderColor=s.border; }
+    else { btn.style.background=''; btn.style.borderColor=''; }
+  });
+}
+
+function vtPushUndo() {
+  _vt.undoStack.push({points:JSON.parse(JSON.stringify(_vt.points)), closed:_vt.closed});
+  _vt.redoStack = [];
+  if(_vt.undoStack.length>100) _vt.undoStack.shift();
+}
+function vtUndo() {
+  if(!_vt.undoStack.length) return;
+  _vt.redoStack.push({points:JSON.parse(JSON.stringify(_vt.points)), closed:_vt.closed});
+  var s=_vt.undoStack.pop(); _vt.points=s.points; _vt.closed=s.closed; _vt.selectedIdx=-1;
+  vtRender(); vtUpdateSelectedPointPanel();
+}
+function vtRedo() {
+  if(!_vt.redoStack.length) return;
+  _vt.undoStack.push({points:JSON.parse(JSON.stringify(_vt.points)), closed:_vt.closed});
+  var s=_vt.redoStack.pop(); _vt.points=s.points; _vt.closed=s.closed; _vt.selectedIdx=-1;
+  vtRender(); vtUpdateSelectedPointPanel();
+}
+
+function _vtHitTestPoint(cx, cy) {
+  for(var i=0;i<_vt.points.length;i++){
+    var c = vtWorldToCanvas(_vt.points[i].x, _vt.points[i].y);
+    if(Math.hypot(cx-c.x, cy-c.y) < 16) return i;
+  }
+  return -1;
+}
+
+// Position eines Spannungs-"Ziehpunkts" für Punkt idx — liegt auf der
+// Winkelhalbierenden der Ecke, in Richtung der Kurveninnenseite, Abstand
+// proportional zu dessen Spannungswert. Offene Endpunkte oder fast gerade
+// Punkte (keine echte Ecke) liefern null.
+// Trifft der Klick die gezeichnete Streckenfläche (nicht exakt einen Punkt),
+// wird der NÄCHSTGELEGENE Kontrollpunkt zur Feinabstimmung ausgewählt, ohne
+// die Geometrie zu verändern — exakt wie racetrackdesign.com's Edit-Werkzeug
+// ("Klick auf die Fahrbahn wählt aus, fügt NIE einen neuen Punkt ein"; dort
+// über das Referenz-JS nachvollzogen). Macht die Auswahl deutlich verzeihender
+// als der kleine Punkt-Marker allein — Spannung wird danach über das
+// Zahlenfeld im Seitenpanel gesetzt, kein eigenes Zieh-Handle mehr nötig.
+function _vtHitTestTrack(cx, cy) {
+  if(_vt.points.length < 2) return -1;
+  var geo = vtComputeGeometry(_vt.points, _vt.closed, _vt.widthM, _vt.tension);
+  if(!geo || !geo.sampled.length) return -1;
+  var w = vtCanvasToWorld(cx, cy);
+  var halfW = Math.max(0.1, _vt.widthM||5)/2;
+  var threshold = halfW + 3;
+  var bestDist=Infinity, bestSampleIdx=-1;
+  for(var i=0;i<geo.sampled.length;i++){
+    var d = Math.hypot(geo.sampled[i].x-w.x, geo.sampled[i].y-w.y);
+    if(d<bestDist){ bestDist=d; bestSampleIdx=i; }
+  }
+  if(bestSampleIdx<0 || bestDist>threshold) return -1;
+  var samplesPerSeg=20, n=_vt.points.length;
+  var segIdx = Math.floor(bestSampleIdx/samplesPerSeg);
+  var a = segIdx, b = _vt.closed ? (segIdx+1)%n : Math.min(segIdx+1, n-1);
+  var pa=_vt.points[a], pb=_vt.points[b];
+  var da=Math.hypot(pa.x-w.x,pa.y-w.y), db=Math.hypot(pb.x-w.x,pb.y-w.y);
+  return da<=db ? a : b;
+}
+
+function vtPointerDown(e) {
+  e.preventDefault();
+  var pos = vtGetPos(e);
+  if(_vt.mode==='pan') { _vt.drawing=true; _vt.lastCX=pos.x; _vt.lastCY=pos.y; return; }
+
+  var hit = _vtHitTestPoint(pos.x, pos.y);
+  if(hit >= 0) {
+    // Auf ersten Punkt bei bereits >=3 Punkten und noch offener Linie → Schleife schließen
+    if(hit===0 && _vt.points.length>=3 && !_vt.closed) {
+      vtPushUndo(); _vt.closed = true; vtRender(); return;
+    }
+    vtPushUndo();
+    _vt.dragIdx = hit; _vt.selectedIdx = hit; _vt.drawing = true;
+    vtUpdateSelectedPointPanel();
+    vtRender();
+    return;
+  }
+
+  var trackHit = _vtHitTestTrack(pos.x, pos.y);
+  if(trackHit >= 0) {
+    _vt.selectedIdx = trackHit;
+    vtUpdateSelectedPointPanel();
+    vtRender();
+    return;
+  }
+
+  if(_vt.closed) return; // Schleife fertig — neue Punkte nur über "Einfügen" oder nach "Löschen"
+  vtPushUndo();
+  var w = vtCanvasToWorld(pos.x, pos.y);
+  // Shift = 15°-Winkel-Snap relativ zum letzten Punkt
+  if(e.shiftKey && _vt.points.length) {
+    var last = _vt.points[_vt.points.length-1];
+    var dx=w.x-last.x, dy=w.y-last.y, dist=Math.hypot(dx,dy);
+    var ang = Math.atan2(dy,dx);
+    var snapped = Math.round(ang/(Math.PI/12))*(Math.PI/12);
+    w = { x:last.x+Math.cos(snapped)*dist, y:last.y+Math.sin(snapped)*dist };
+  }
+  _vt.points.push({x:w.x, y:w.y, t:null});
+  _vt.selectedIdx = _vt.points.length-1;
+  vtUpdateSelectedPointPanel();
+  vtRender();
+}
+
+function vtPointerMove(e) {
+  if(!_vt.drawing) return; e.preventDefault();
+  var pos = vtGetPos(e);
+  if(_vt.mode==='pan') {
+    _vt.panX += pos.x-_vt.lastCX; _vt.panY += pos.y-_vt.lastCY;
+    _vt.lastCX=pos.x; _vt.lastCY=pos.y; vtRender(); return;
+  }
+  if(_vt.dragIdx >= 0) {
+    var w = vtCanvasToWorld(pos.x, pos.y);
+    if(e.shiftKey && _vt.points.length>1) {
+      var neighborIdx = _vt.dragIdx>0 ? _vt.dragIdx-1 : (_vt.closed ? _vt.points.length-1 : -1);
+      if(neighborIdx>=0) {
+        var nb=_vt.points[neighborIdx];
+        var dx=w.x-nb.x, dy=w.y-nb.y, dist=Math.hypot(dx,dy);
+        var ang=Math.atan2(dy,dx);
+        var snapped=Math.round(ang/(Math.PI/12))*(Math.PI/12);
+        w = { x:nb.x+Math.cos(snapped)*dist, y:nb.y+Math.sin(snapped)*dist };
+      }
+    }
+    _vt.points[_vt.dragIdx].x = w.x; _vt.points[_vt.dragIdx].y = w.y;
+    vtRender();
+  }
+}
+
+function vtPointerUp(e) {
+  _vt.drawing = false; _vt.dragIdx = -1;
+}
+
+// Live-Vorschau: verfolgt die Cursor-Position, solange im Zeichen-Modus kein
+// Punkt gerade gezogen wird — vtRender() zeichnet daraus eine gestrichelte
+// "So würde es weitergehen"-Linie vom letzten gesetzten Punkt zum Cursor.
+function vtOnHoverMove(e) {
+  if(_vt.mode!=='draw' || _vt.drawing || _vt.closed || !_vt.points.length) {
+    if(_vt.hoverWorld) { _vt.hoverWorld=null; vtRender(); }
+    return;
+  }
+  var pos = vtGetPos(e);
+  _vt.hoverWorld = vtCanvasToWorld(pos.x, pos.y);
+  vtRender();
+}
+
+// Fügt einen neuen Punkt in das Segment ein, das dem Klickpunkt am
+// nächsten liegt (Doppelklick auf eine Gerade/einen Bogen zwischen zwei
+// bestehenden Punkten).
+function vtInsertPointAtNearest(cx, cy) {
+  if(_vt.points.length < 2) return;
+  var w = vtCanvasToWorld(cx, cy);
+  var n = _vt.points.length;
+  var bestIdx=-1, bestDist=Infinity;
+  var count = _vt.closed ? n : n-1;
+  for(var i=0;i<count;i++){
+    var a=_vt.points[i], b=_vt.points[(i+1)%n];
+    var abx=b.x-a.x, aby=b.y-a.y, ab2=abx*abx+aby*aby;
+    var tproj = ab2>1e-9 ? Math.max(0,Math.min(1, ((w.x-a.x)*abx+(w.y-a.y)*aby)/ab2)) : 0;
+    var px=a.x+abx*tproj, py=a.y+aby*tproj;
+    var d=Math.hypot(w.x-px, w.y-py);
+    if(d<bestDist){ bestDist=d; bestIdx=i; }
+  }
+  if(bestIdx<0) return;
+  vtPushUndo();
+  var a=_vt.points[bestIdx], b=_vt.points[(bestIdx+1)%n];
+  _vt.points.splice(bestIdx+1, 0, {x:(a.x+b.x)/2, y:(a.y+b.y)/2, t:null});
+  vtRender();
+}
+
+function vtDeleteSelectedPoint() {
+  if(_vt.selectedIdx < 0 || _vt.selectedIdx >= _vt.points.length) return;
+  vtPushUndo();
+  _vt.points.splice(_vt.selectedIdx, 1);
+  _vt.selectedIdx = -1;
+  if(_vt.points.length < 3) _vt.closed = false;
+  vtUpdateSelectedPointPanel();
+  vtRender();
+}
+
+function vtClearAll() {
+  if(!_vt.points.length) return;
+  apexConfirm('Vektor-Strecke löschen?', function(){
+    vtPushUndo(); _vt.points=[]; _vt.closed=false; _vt.selectedIdx=-1;
+    vtUpdateSelectedPointPanel(); vtRender();
+  });
+}
+
+function vtUpdateSelectedPointPanel() {
+  var wrap = document.getElementById('vtPointPanel');
+  var inp = document.getElementById('vtPointTension');
+  if(!wrap) return;
+  if(_vt.selectedIdx<0 || !_vt.points[_vt.selectedIdx]) { wrap.style.display='none'; return; }
+  wrap.style.display='flex';
+  if(inp) inp.value = _vt.points[_vt.selectedIdx].t!=null ? _vt.points[_vt.selectedIdx].t : '';
+}
+function vtOnPointTensionChange() {
+  if(_vt.selectedIdx<0) return;
+  var inp=document.getElementById('vtPointTension');
+  var v = parseFloat(inp.value);
+  _vt.points[_vt.selectedIdx].t = (v>0) ? v : null;
+  vtRender();
+}
+function vtOnGlobalFieldChange() {
+  var w=document.getElementById('vtWidthInput'), pw=document.getElementById('vtPitWidthInput'),
+      ts=document.getElementById('vtTensionInput');
+  if(w) _vt.widthM = parseFloat(w.value)||5;
+  if(pw) _vt.pitWidthM = pw.value ? (parseFloat(pw.value)||null) : null;
+  if(ts) _vt.tension = Math.max(0.1, Math.min(3, parseFloat(ts.value)||1));
+  vtRender();
+}
+
+function vtZoomBy(factor, cx, cy) {
+  var cv=vtGetCanvas(); if(!cv) return;
+  if(cx==null){ cx=cv.width/2; cy=cv.height/2; }
+  var before = vtCanvasToWorld(cx,cy);
+  _vt.zoom = Math.max(1, Math.min(60, _vt.zoom*factor));
+  var after = vtWorldToCanvas(before.x, before.y);
+  _vt.panX += cx-after.x; _vt.panY += cy-after.y;
+  vtRender();
+}
+
+function vtInitEvents() {
+  var cv=vtGetCanvas(); if(!cv||cv._vtEvt) return;
+  cv.addEventListener('mousedown', function(e){
+    if(e.button===2){ e.preventDefault(); _vt._prevMode=_vt.mode; vtSetMode('pan'); vtPointerDown(e); }
+    else vtPointerDown(e);
+  });
+  cv.addEventListener('mousemove', function(e){ vtPointerMove(e); vtOnHoverMove(e); });
+  cv.addEventListener('mouseleave', function(){ if(_vt.hoverWorld){ _vt.hoverWorld=null; vtRender(); } });
+  cv.addEventListener('mouseup', function(e){
+    vtPointerUp(e);
+    if(e.button===2 && _vt._prevMode!==undefined){ vtSetMode(_vt._prevMode); _vt._prevMode=undefined; }
+  });
+  cv.addEventListener('dblclick', function(e){
+    e.preventDefault();
+    var pos=vtGetPos(e);
+    if(_vtHitTestPoint(pos.x,pos.y) < 0) vtInsertPointAtNearest(pos.x,pos.y);
+  });
+  cv.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  cv.addEventListener('wheel', function(e){
+    e.preventDefault();
+    var pos=vtGetPos(e);
+    vtZoomBy(e.deltaY<0?1.1:(1/1.1), pos.x, pos.y);
+  }, {passive:false});
+  cv.addEventListener('touchstart', vtPointerDown, {passive:false});
+  cv.addEventListener('touchmove', vtPointerMove, {passive:false});
+  cv.addEventListener('touchend', vtPointerUp);
+  cv._vtEvt = true;
+
+  if(!window._vtKeyEvt) {
+    window._vtKeyEvt = true;
+    document.addEventListener('keydown', function(e){
+      var modal=document.getElementById('drawTrackModal');
+      if(!modal || !modal.classList.contains('open')) return;
+      var vTabEl = document.getElementById('dtTab-vector');
+      if(!vTabEl || vTabEl.style.color!=='var(--accent)') return;
+      if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+      if(e.key==='Delete'||e.key==='Backspace'){ vtDeleteSelectedPoint(); e.preventDefault(); }
+      else if(e.key==='.') { vtZoomBy(1.1); e.preventDefault(); }
+      else if(e.key===',') { vtZoomBy(1/1.1); e.preventDefault(); }
+      else if((e.ctrlKey||e.metaKey) && e.shiftKey && (e.key==='z'||e.key==='Z')) { vtRedo(); e.preventDefault(); }
+      else if((e.ctrlKey||e.metaKey) && !e.shiftKey && (e.key==='z'||e.key==='Z')) { vtUndo(); e.preventDefault(); }
+    });
+  }
+}
+
+// ── Speicherung ────────────────────────────────────────────────────────
+var VT_LAYOUTS_KEY = 'apexVectorLayouts';
+function vtGetLayouts(){ try{ return JSON.parse(localStorage.getItem(VT_LAYOUTS_KEY)||'[]'); }catch(e){ return []; } }
+function vtSaveLayouts(arr){ try{ localStorage.setItem(VT_LAYOUTS_KEY, JSON.stringify(arr)); }catch(e){} }
+
+// Prüft alle drei Layout-Arten (Foto-Trace, Baukasten, Vektor) auf einen
+// bereits vergebenen Namen — verhindert, dass renderActiveTrackPreview()
+// bei gleichem Namen die falsche Geometrie zeigt.
+function _vtNameTakenElsewhere(name, excludeVectorId) {
+  var draw=[]; try{draw=JSON.parse(localStorage.getItem('apexDrawLayouts')||'[]');}catch(e){}
+  var carrera=[]; try{carrera=JSON.parse(localStorage.getItem('apexCarreraLayouts')||'[]');}catch(e){}
+  if(draw.some(function(l){return l.name===name;})) return true;
+  if(carrera.some(function(l){return l.name===name;})) return true;
+  var vec = vtGetLayouts();
+  return vec.some(function(l){return l.name===name && l.id!==excludeVectorId;});
+}
+
+function vtSaveAsTrack() {
+  if(_vt.points.length < 2) { apexAlert('Bitte zuerst eine Strecke zeichnen (mind. 2 Punkte).'); return; }
+  apexPrompt('Name für diese Strecke:', _vt.currentLayoutName||'', function(name){
+    if(!name || !name.trim()) return;
+    name = name.trim();
+    if(_vtNameTakenElsewhere(name, _vt.currentLayoutId)) {
+      apexAlert('Der Name "'+name+'" ist bereits von einer anderen Strecke vergeben. Bitte einen anderen Namen wählen.');
+      return;
+    }
+    var geo = vtComputeGeometry(_vt.points, _vt.closed, _vt.widthM, _vt.tension);
+    var stats = geo ? geo.stats : {totalLengthM:0};
+    var direction = (geo && geo.direction) || 'cw';
+
+    if(typeof db !== 'undefined') {
+      var existingIdx = db.tracks.findIndex(function(t){ return t.name===name && t.type==='Rundkurs'; });
+      var entry = { name:name, location:'', length:stats.totalLengthM.toFixed(2), type:'Rundkurs', direction:direction, notes:'Aus Vektor-Editor', updatedAt: Date.now() };
+      if(existingIdx>=0) db.tracks[existingIdx]=entry; else db.tracks.push(entry);
+      if(typeof saveToLS==='function') saveToLS();
+      if(typeof renderTables==='function') renderTables();
+    }
+
+    var layouts = vtGetLayouts();
+    var layout = {
+      id: _vt.currentLayoutId || ('vt'+Date.now()),
+      name: name, closed: _vt.closed,
+      points: JSON.parse(JSON.stringify(_vt.points)),
+      widthM: _vt.widthM, pitWidthM: _vt.pitWidthM, tension: _vt.tension,
+      direction: direction,
+      mapAnchor: _vt.mapAnchor ? JSON.parse(JSON.stringify(_vt.mapAnchor)) : null,
+      calibration: JSON.parse(JSON.stringify(_vt.calibration)),
+      saved: new Date().toLocaleDateString('de-DE'),
+      updatedAt: Date.now()
+    };
+    var ei = layouts.findIndex(function(l){ return l.id===layout.id || l.name===name; });
+    if(ei>=0) layouts[ei]=layout; else layouts.push(layout);
+    vtSaveLayouts(layouts);
+    _vt.currentLayoutId = layout.id; _vt.currentLayoutName = name;
+    apexAlert('Strecke "'+name+'" gespeichert!');
+    dtRenderLayoutList();
+  });
+}
+
+function vtLoadLayout(id) {
+  var layout = vtGetLayouts().find(function(l){ return l.id===id; });
+  if(!layout) return;
+  apexConfirm('Strecke "'+layout.name+'" laden? Die aktuelle Zeichnung wird ersetzt.', function(){
+    _vt.points = JSON.parse(JSON.stringify(layout.points||[]));
+    _vt.closed = !!layout.closed;
+    _vt.widthM = layout.widthM||5;
+    _vt.pitWidthM = layout.pitWidthM||null;
+    _vt.tension = layout.tension!=null ? layout.tension : 1;
+    _vt.mapAnchor = layout.mapAnchor ? JSON.parse(JSON.stringify(layout.mapAnchor)) : null;
+    _vt.calibration = layout.calibration ? JSON.parse(JSON.stringify(layout.calibration)) : {Auto:1,Motorrad:1,Slotcar:1,'Dr!ft':1};
+    _vt.currentLayoutId = layout.id; _vt.currentLayoutName = layout.name;
+    _vt.selectedIdx = -1; _vt.undoStack = []; _vt.redoStack = [];
+    dtShowTab('vector');
+    var wI=document.getElementById('vtWidthInput'), pI=document.getElementById('vtPitWidthInput'),
+        tI=document.getElementById('vtTensionInput');
+    if(wI) wI.value=_vt.widthM; if(pI) pI.value=_vt.pitWidthM||''; if(tI) tI.value=_vt.tension;
+    vtSetupCanvas(); vtInitEvents(); vtSetMode('draw'); vtRender(); vtUpdateSelectedPointPanel();
+    vtPopulateVehicleSelect();
+  });
+}
+
+function vtDeleteLayout(id) {
+  var layout = vtGetLayouts().find(function(l){ return l.id===id; });
+  if(!layout) return;
+  apexConfirm('Strecke "'+layout.name+'" löschen?', function(){
+    vtSaveLayouts(vtGetLayouts().filter(function(l){ return l.id!==id; }));
+    dtRenderLayoutList();
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// PHYSIKBASIERTE RUNDENZEIT-SIMULATION
+// ═══════════════════════════════════════════════════════
+// Bewusst ein einfaches Punktmasse-Modell (kein Gewichtstransfer, keine
+// Aero) — angemessen für ein Hobby-Zeitmessungstool, nicht für ein
+// Fahrzeugdynamik-Forschungsprojekt. Die Startwerte sind Platzhalter, die
+// über die Kalibrierung (vtAutoCalibrate) anhand echter Rundenzeiten
+// nachgeschärft werden, statt vorab endlos Annahmen zu diskutieren.
+var VT_PHYSICS_DEFAULTS = {
+  'Auto':     { muLateral:1.1,  accelLimitMs2:6,  brakeLimitMs2:9,  defaultPowerKw:150, defaultWeightKg:1200, defaultTopSpeedKmh:220 },
+  'Motorrad': { muLateral:0.9,  accelLimitMs2:7,  brakeLimitMs2:8,  defaultPowerKw:80,  defaultWeightKg:200,  defaultTopSpeedKmh:250 },
+  'Slotcar':  { muLateral:1.4,  accelLimitMs2:15, brakeLimitMs2:20, defaultPowerKw:0.15,defaultWeightKg:0.09, defaultTopSpeedKmh:60  },
+  'Dr!ft':    { muLateral:0.55, accelLimitMs2:5,  brakeLimitMs2:7,  defaultPowerKw:200, defaultWeightKg:1400, defaultTopSpeedKmh:200 }
+};
+
+// Läuft direkt auf dem abgetasteten Spline-Pfad statt auf diskreten
+// Geraden-/Bogen-Segmenten — dieselbe racetrackdesign.com-Formel
+// (v = √(g·μ·radius)) je Punkt, hier zusätzlich mit Vorwärts-/
+// Rückwärtspass für Beschleunigung/Bremsen ergänzt.
+function vtSimulateLap(sampled, curvatures, vehicle, calibrationMultiplier) {
+  var n = sampled ? sampled.length : 0;
+  if(n < 3) return null;
+  var cat = (vehicle && vehicle.category) || 'Auto';
+  var def = VT_PHYSICS_DEFAULTS[cat] || VT_PHYSICS_DEFAULTS['Auto'];
+  var powerKw = (vehicle && vehicle.powerKw>0) ? vehicle.powerKw : def.defaultPowerKw;
+  var weightKg = (vehicle && vehicle.weightKg>0) ? vehicle.weightKg : def.defaultWeightKg;
+  var topSpeedKmh = (vehicle && vehicle.topSpeedKmh>0) ? vehicle.topSpeedKmh : def.defaultTopSpeedKmh;
+  var topSpeedMs = topSpeedKmh/3.6;
+  var mult = calibrationMultiplier>0 ? calibrationMultiplier : 1;
+  var powerW = powerKw*1000;
+
+  // Krümmung pro Punkt ausrichten (calculateCurvature überspringt die beiden
+  // Randpunkte) — gleiche Index-Verschiebung wie in vtComputeStatsFromCurvature.
+  var kAt = new Array(n).fill(0);
+  for(var j=0;j<curvatures.length && j+1<n;j++) kAt[j+1] = curvatures[j].curvature||0;
+  kAt[0]=kAt[1]||0; kAt[n-1]=kAt[n-2]||0;
+
+  var segLen = new Array(n).fill(0);
+  for(var i=1;i<n;i++) segLen[i] = Math.hypot(sampled[i].x-sampled[i-1].x, sampled[i].y-sampled[i-1].y);
+
+  // Kurvengeschwindigkeits-Obergrenze je Punkt (Geraden nur durch V-Max begrenzt)
+  var vMax = kAt.map(function(k){
+    if(k<=0.00001) return topSpeedMs;
+    return Math.min(topSpeedMs, Math.sqrt((1/k)*9.81*def.muLateral*mult));
+  });
+
+  var vProfile = vMax.slice();
+  // Vorwärts-Beschleunigungspass, begrenzt durch Leistung/Gewicht
+  for(var a1=1;a1<n;a1++){
+    var prevV = vProfile[a1-1];
+    var dl = segLen[a1]||0.01;
+    var aTraction = def.accelLimitMs2;
+    var aPower = prevV>0.5 ? (powerW/(weightKg*prevV)) : aTraction;
+    var acc = Math.min(aTraction, aPower);
+    var vNext = Math.sqrt(Math.max(0, prevV*prevV + 2*acc*dl));
+    vProfile[a1] = Math.min(vProfile[a1], vNext);
+  }
+  // Rückwärts-Bremspass, damit rechtzeitig vor einer Kurve abgebremst wird
+  for(var b1=n-2;b1>=0;b1--){
+    var nextV = vProfile[b1+1];
+    var dl2 = segLen[b1+1]||0.01;
+    var vBack = Math.sqrt(Math.max(0, nextV*nextV + 2*def.brakeLimitMs2*dl2));
+    vProfile[b1] = Math.min(vProfile[b1], vBack);
+  }
+
+  var lapTimeMs=0, topSpeedReached=0;
+  for(var k2=1;k2<n;k2++){
+    var vAvg = Math.max(1, (vProfile[k2]+vProfile[k2-1])/2);
+    lapTimeMs += (segLen[k2]/vAvg)*1000;
+    if(vProfile[k2]>topSpeedReached) topSpeedReached=vProfile[k2];
+  }
+  return { lapTimeMs: lapTimeMs, topSpeedKmh: topSpeedReached*3.6, speedProfile: vProfile };
+}
+
+function vtPopulateVehicleSelect() {
+  var sel = document.getElementById('vtVehicleSelect');
+  if(!sel || typeof db==='undefined') return;
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">— nur Kategorie-Standardwerte —</option>';
+  (db.cars||[]).forEach(function(c){
+    var o=document.createElement('option'); o.value=c.model; o.textContent=c.model+' ('+(c.category||'Auto')+')';
+    sel.appendChild(o);
+  });
+  if(cur && (db.cars||[]).some(function(c){return c.model===cur;})) sel.value=cur;
+}
+
+function vtGetRecordsForLayout(name) {
+  var recs = (typeof loadRecords==='function') ? loadRecords() : [];
+  var byCategory = {};
+  recs.filter(function(r){ return r.track===name; }).forEach(function(r){
+    var carObj = (typeof db!=='undefined' && db.cars) ? db.cars.find(function(c){return c.model===r.car;}) : null;
+    var cat = carObj ? (carObj.category||'Auto') : 'Auto';
+    if(!byCategory[cat]) byCategory[cat] = [];
+    byCategory[cat].push(r);
+  });
+  var result = {};
+  Object.keys(byCategory).forEach(function(cat){
+    var list = byCategory[cat];
+    var bestMsArr = list.map(function(r){return r.bestMs;}).filter(function(x){return x>0;});
+    result[cat] = { count:list.length, bestMs: bestMsArr.length?Math.min.apply(null,bestMsArr):null };
+  });
+  return result;
+}
+
+function vtRunSimulation() {
+  if(!_vt.points.length) return;
+  var geo = vtComputeGeometry(_vt.points, _vt.closed, _vt.widthM, _vt.tension);
+  var sel = document.getElementById('vtVehicleSelect');
+  var vehicle = null, category = 'Auto';
+  if(sel && sel.value && typeof db!=='undefined') {
+    vehicle = (db.cars||[]).find(function(c){ return c.model===sel.value; });
+    if(vehicle) category = vehicle.category||'Auto';
+  }
+  var mult = (_vt.calibration && _vt.calibration[category]) || 1;
+  var result = geo ? vtSimulateLap(geo.sampled, geo.curvatures, vehicle, mult) : null;
+  var lapEl=document.getElementById('vtSimLapTime'), spdEl=document.getElementById('vtSimTopSpeed');
+  var cmpEl=document.getElementById('vtSimCompare'), calEl=document.getElementById('vtCalibrationValue');
+  if(!result) { if(lapEl) lapEl.textContent='—'; return; }
+  var totalSec = result.lapTimeMs/1000;
+  var mm = Math.floor(totalSec/60), ss=(totalSec%60).toFixed(2);
+  if(lapEl) lapEl.textContent = mm+':'+(ss<10?'0':'')+ss;
+  if(spdEl) spdEl.textContent = result.topSpeedKmh.toFixed(0)+' km/h';
+  if(calEl) calEl.value = mult.toFixed(2);
+
+  if(cmpEl) {
+    var name = _vt.currentLayoutName;
+    if(!name) { cmpEl.textContent='— Strecke zuerst speichern, um mit echten Zeiten zu vergleichen'; }
+    else {
+      var byCat = vtGetRecordsForLayout(name);
+      var real = byCat[category];
+      if(real && real.bestMs) {
+        var rs = real.bestMs/1000; var rmm=Math.floor(rs/60), rss=(rs%60).toFixed(2);
+        cmpEl.textContent = 'Echte Bestzeit ('+category+', '+real.count+' Runde(n)): '+rmm+':'+(rss<10?'0':'')+rss;
+      } else {
+        cmpEl.textContent = 'Keine aufgezeichneten Runden für "'+name+'" ('+category+') vorhanden.';
+      }
+    }
+  }
+}
+
+function vtOnCalibrationChange() {
+  var sel=document.getElementById('vtVehicleSelect');
+  var category = 'Auto';
+  if(sel && sel.value && typeof db!=='undefined') {
+    var v=(db.cars||[]).find(function(c){return c.model===sel.value;});
+    if(v) category=v.category||'Auto';
+  }
+  var calEl=document.getElementById('vtCalibrationValue');
+  var val = parseFloat(calEl.value)||1;
+  if(!_vt.calibration) _vt.calibration={Auto:1,Motorrad:1,Slotcar:1,'Dr!ft':1};
+  _vt.calibration[category] = val;
+  vtRunSimulation();
+}
+
+// Grober, transparenter Korrekturvorschlag aus der Differenz zwischen
+// simulierter und echter Bestzeit — bewusst KEIN Regressions-/ML-System
+// (zu wenige echte Runden pro Strecke+Kategorie, um sowas zu stützen).
+// Rundenzeit ist im kurvenlimitierten Fall ~ 1/√multiplier, daher der Ansatz.
+function vtAutoCalibrate() {
+  var name = _vt.currentLayoutName;
+  if(!name) { apexAlert('Bitte zuerst die Strecke speichern.'); return; }
+  var sel=document.getElementById('vtVehicleSelect');
+  var vehicle=null, category='Auto';
+  if(sel && sel.value && typeof db!=='undefined') {
+    vehicle=(db.cars||[]).find(function(c){return c.model===sel.value;});
+    if(vehicle) category=vehicle.category||'Auto';
+  }
+  var byCat = vtGetRecordsForLayout(name);
+  var real = byCat[category];
+  if(!real || !real.bestMs) { apexAlert('Keine aufgezeichneten Runden für diese Strecke/Kategorie vorhanden — Kalibrierung nicht möglich.'); return; }
+  var geo = vtComputeGeometry(_vt.points, _vt.closed, _vt.widthM, _vt.tension);
+  var baseline = geo ? vtSimulateLap(geo.sampled, geo.curvatures, vehicle, 1) : null;
+  if(!baseline || !baseline.lapTimeMs) return;
+  var ratio = baseline.lapTimeMs / real.bestMs; // >1: Simulation zu langsam → Multiplikator erhöhen
+  var suggested = Math.max(0.3, Math.min(3, ratio*ratio));
+  if(!_vt.calibration) _vt.calibration={Auto:1,Motorrad:1,Slotcar:1,'Dr!ft':1};
+  _vt.calibration[category] = Math.round(suggested*100)/100;
+  var calEl=document.getElementById('vtCalibrationValue');
+  if(calEl) calEl.value = _vt.calibration[category];
+  vtRunSimulation();
+  apexAlert('Kalibrierung angepasst auf '+_vt.calibration[category]+'× (grobe Schätzung basierend auf '+real.count+' gespeicherter Runde(n)).');
+}
 
 // ═══════════════════════════════════════════════════════
 // CARRERABAHN: TABS + STRECKENPLAN-SPEICHERUNG
@@ -11435,7 +13489,7 @@ function carreraSaveLayout() {
         name:name, location:'', length:spur1m, type:'Carrerabahn', lane:laneVal,
         innerLen: spur1m,
         outerLen: (lengths.spur2/1000).toFixed(2),
-        notes:'Aus Carrerabahn-Baukasten'
+        notes:'Aus Carrerabahn-Baukasten', updatedAt: Date.now()
       };
       if(existing >= 0) {
         db.tracks[existing] = trackEntry;
@@ -11467,6 +13521,7 @@ function carreraLoadLayout(id){
     carreraChain=JSON.parse(JSON.stringify(l.chain));
     // Gespeicherte Rotation wiederherstellen
     carreraRotationDeg = l.rotation || 0;
+    _carreraMigrateChainCoords(carreraChain, carreraRotationDeg);
     carreraSetLinkedTrack(l.name);
     carreraShowTab('build');
     carreraRenderChain(); carreraRenderSchematic(); carreraRefreshAllInventoryRows();
@@ -11528,46 +13583,23 @@ function carreraRenderLayoutList(){
     btns.appendChild(mkBtn('✕','var(--red)',function(){carreraDeleteLayout(layout.id);}));
     hdr.appendChild(info); hdr.appendChild(btns);
     card.appendChild(hdr);
-    // Preview canvas
+    // Preview canvas — nutzt die eigenständige _carreraDrawPreview() (rechnet
+    // direkt anhand von cv.width/cv.height, ganz ohne Umweg über den echten
+    // Bau-Canvas). Der vorherige Ansatz über carreraDrawSchematicOnCanvas()
+    // scheiterte grundsätzlich daran, dass carreraRenderSchematic() die
+    // Canvas-Maße IMMER anhand von #carreraSchematicWrap überschreibt (dem
+    // sichtbaren Bau-Canvas) — die Vorschau wurde dadurch nie tatsächlich in
+    // ihrer eigenen Zielgröße gerendert, sondern nur nachträglich beim Kopieren
+    // in ein völlig anderes Seitenverhältnis hineingequetscht.
     var cv=document.createElement('canvas');
     cv.style.cssText='width:100%;display:block;margin-top:8px;border:1px solid var(--border);background:#0a0e12;';
-    cv.width=500; cv.height=180;
+    cv.width = Math.max(200, Math.round((list.clientWidth||528) - 28));
+    cv.height=180;
     card.appendChild(cv);
     list.appendChild(card);
-    setTimeout(function(){carreraDrawSchematicOnCanvas(cv,layout.chain);},30);
+    _carreraDrawPreview(cv, layout.chain);
   });
 }
-
-// Zeichnet eine Schematik auf einen beliebigen Canvas (für Vorschau in gespeicherten Strecken)
-// Kein ID-Swap — stattdessen werden die Render-Variablen direkt gesetzt
-// Zeichnet eine Schematik-Vorschau auf einen beliebigen Canvas
-// Verwendet einen Off-screen-Canvas Ansatz ohne DOM-Manipulation
-function carreraDrawSchematicOnCanvas(canvas, chain) {
-  if(!canvas || !chain || chain.length === 0) return;
-  var savedChain = carreraChain;
-  carreraChain = chain;
-  // Canvas-ID temporär sichern und tauschen (nur ID-Attribut, nicht das DOM)
-  var schemaCanvas = document.getElementById('carreraSchematicCanvas');
-  if(!schemaCanvas) { carreraChain = savedChain; return; }
-  // Dimensionen sichern und setzen
-  var ow = schemaCanvas.width, oh = schemaCanvas.height;
-  schemaCanvas.width  = canvas.width  || 500;
-  schemaCanvas.height = canvas.height || 180;
-  // Schematik auf echtem Canvas zeichnen
-  try { carreraRenderSchematic(); } catch(e) {}
-  // Pixel auf Preview-Canvas kopieren
-  try {
-    var pctx = canvas.getContext('2d');
-    pctx.drawImage(schemaCanvas, 0, 0, canvas.width, canvas.height);
-  } catch(e) {}
-  // Echten Canvas wiederherstellen
-  schemaCanvas.width  = ow;
-  schemaCanvas.height = oh;
-  carreraChain = savedChain;
-  try { carreraRenderSchematic(); } catch(e) {}
-}
-
-
 
 function carreraGetInventory() {
   try { return JSON.parse(localStorage.getItem('apexCarreraInventory') || '{}'); } catch(e) { return {}; }
@@ -11719,32 +13751,52 @@ function carreraRenderPartTapGrid() {
       btn.style.cssText = 'font-size:9px;padding:8px 10px;border-color:'+pd.color+'55;color:'+pd.color+';min-width:64px;min-height:36px;cursor:pointer;user-select:none;-webkit-user-select:none;active:opacity:.7;';
       btn.onclick = function(){
         carreraPushUndo();
-        // Rotation vor dem Einfügen merken
-        var rotBefore = carreraRotationDeg;
-        if(carreraDirectionReversed) {
-          // Bei umgekehrter Baurichtung: Teil vorne einfügen
-          // Kurven müssen gespiegelt werden (L↔R), da wir von der anderen Seite anfügen
-          var mirrorKey = key;
-          var mirrorPd  = pd;
+        // Einheitliche Anbaupunkt-Ermittlung (angewählte Schiene, sonst
+        // letzte/erste Schiene je nach Baurichtung) — weicht automatisch auf
+        // die noch freie Seite aus, falls die per "Richtung umkehren"
+        // gewünschte Seite schon belegt ist (siehe _carreraGetBuildAttachPoint).
+        var attach = _carreraGetBuildAttachPoint();
+        if(!attach) {
+          apexAlert('An dieser Schiene sind bereits beide Enden belegt — bitte eine andere Schiene anwählen oder die Baurichtung umkehren.');
+          return;
+        }
+        // Ein vorhandener Streckenschluss-Verbinder wird ungültig, da sich
+        // die Kette verändert.
+        carreraChain = carreraChain.filter(function(l){ return l.key !== '_connector' || l.id.indexOf('close_') !== 0; });
+        var newLink;
+        if(attach.mode === 'end') {
+          newLink = { id:'m'+Date.now()+Math.random(), key:key, count:1, type:pd.type, manual:true,
+                      x:attach.pose.x, y:attach.pose.y, heading:attach.pose.heading };
+        } else {
+          // Am ANFANG der Referenz-Schiene anbauen: das ist die "rückwärts"
+          // gebaute Richtung — die tatsächliche spätere Fahrtrichtung führt
+          // durchs neue Teil HINEIN in die Referenz-Schiene. Eine hier per
+          // Taste gewählte Linkskurve soll sich auch beim späteren Durchfahren
+          // wie eine Linkskurve anfühlen; da die Steckpunkt-Mathematik aber
+          // immer "vorwärts" rechnet, muss die Kurvenrichtung dafür gespiegelt
+          // werden (L↔R) — die Schienen-FORM bleibt dabei unverändert, nur
+          // welches Palette-Symbol das gewünschte Ergebnis liefert, dreht sich um.
+          var buildKey = key, buildPd = pd;
           if(pd.type === 'curve') {
             var mk = key.endsWith('R') ? key.slice(0,-1)+'L'
                    : key.endsWith('L') ? key.slice(0,-1)+'R'
                    : key;
-            if(CARRERA_PROFI_PARTS[mk]) { mirrorKey = mk; mirrorPd = CARRERA_PROFI_PARTS[mk]; }
+            if(CARRERA_PROFI_PARTS[mk]) { buildKey = mk; buildPd = CARRERA_PROFI_PARTS[mk]; }
           }
-          var revLink = { id:'m'+Date.now()+Math.random(), key:mirrorKey, count:1, type:mirrorPd.type, manual:true };
-          carreraChain.unshift(revLink);
-          // Rotation kompensieren: das neue Teil dreht den Heading, wir subtrahieren das
-          // damit die bestehende Strecke optisch an ihrer Position bleibt
-          if(mirrorPd.type === 'curve') {
-            carreraRotationDeg = ((carreraRotationDeg - mirrorPd.dir * mirrorPd.angle) + 360) % 360;
-          }
-          // Gerade: kein Heading-Einfluss → keine Rotation nötig
-        } else {
-          var newLink = { id:'m'+Date.now()+Math.random(), key:key, count:1, type:pd.type, manual:true };
-          carreraChain.push(newLink);
-          // push: neues Teil am Ende → Heading-Änderung betrifft nur künftige Teile → keine Kompensation nötig
+          var placement = _carreraInversePlacement(buildPd, attach.pose.x, attach.pose.y, attach.pose.heading);
+          newLink = { id:'m'+Date.now()+Math.random(), key:buildKey, count:1, type:buildPd.type, manual:true,
+                      x:placement.x, y:placement.y, heading:placement.heading };
         }
+        if(attach.refLink) {
+          var refIdx = carreraChain.findIndex(function(l){ return l.id===attach.refLink.id; });
+          carreraChain.splice(attach.mode==='end' ? refIdx+1 : refIdx, 0, newLink);
+        } else {
+          carreraChain.push(newLink);
+        }
+        carreraSelectedLinkId = newLink.id;
+        // Die Ansicht (carreraRotationDeg) bleibt bewusst unverändert — sie
+        // darf sich nur per explizitem Rotations-Button ändern, nicht als
+        // automatische Nebenwirkung des Teile-Hinzufügens.
         carreraRenderChain();
         carreraRenderSchematic();
         carreraUpdateInventoryTable(); // Tabelle aktualisieren statt Badges
@@ -11780,6 +13832,22 @@ function saveRecords(records) {
   try { localStorage.setItem('apexRecords', JSON.stringify(records)); } catch(e) {}
 }
 
+// Grabsteine für gelöschte Aufzeichnungen (Map id → Löschzeitpunkt in ms) —
+// Records sind kein Teil von db, daher eigener localStorage-Key. Verhindert,
+// dass eine Löschung durch den Sync mit einem noch nicht aktualisierten
+// Gerät wiederbelebt wird (analog db.deletedEntities für Fahrer/Fahrzeuge/Strecken).
+function _getDeletedRecords() {
+  try { return JSON.parse(localStorage.getItem('apexDeletedRecords')||'{}'); } catch(e) { return {}; }
+}
+function _saveDeletedRecords(map) {
+  try { localStorage.setItem('apexDeletedRecords', JSON.stringify(map)); } catch(e) {}
+}
+function _addRecordTombstone(id) {
+  var map = _getDeletedRecords();
+  map[id] = Date.now();
+  _saveDeletedRecords(map);
+}
+
 // Build a session record object from current state
 function buildSessionRecord(p) {
   var s = ps[p];
@@ -11803,6 +13871,7 @@ function buildSessionRecord(p) {
     id: Date.now() + '_' + p,
     fp: trackName + '|' + driverName + '|' + carName + '|' + times.join(','),
     savedAt: new Date().toISOString(),
+    updatedAt: Date.now(),
     track: trackName,
     driver: driverName,
     car: carName,
@@ -11970,6 +14039,7 @@ function deleteRecord(id) {
     var toDelete = records.find(function(r){ return r.id === id; });
     records = records.filter(function(r){ return r.id !== id; });
     saveRecords(records);
+    _addRecordTombstone(id);
     if (toDelete && toDelete.replayClips) {
       _replayDeleteClips(Object.values(toDelete.replayClips));
     }
@@ -11994,6 +14064,10 @@ function deleteTrackRecords(trackName) {
       return isNoTrack ? !!r.track : (r.track !== trackName);
     });
     saveRecords(filtered);
+    var delMap = _getDeletedRecords();
+    var delTs = Date.now();
+    toRemove.forEach(function(r){ delMap[r.id] = delTs; });
+    _saveDeletedRecords(delMap);
     var allClipIds = [];
     toRemove.forEach(function(r){ if(r.replayClips) allClipIds = allClipIds.concat(Object.values(r.replayClips)); });
     if(allClipIds.length) _replayDeleteClips(allClipIds);
@@ -12077,6 +14151,7 @@ function editRecord(id) {
     rec.car    = document.getElementById('erf_car_'+id).value || rec.car;
     rec.track  = document.getElementById('erf_track_'+id).value || rec.track;
     rec.notes  = document.getElementById('erf_notes_'+id).value;
+    rec.updatedAt = Date.now();
     saveRecords(records);
     cleanup();
     renderRecordsModal();
@@ -12117,19 +14192,32 @@ function renderRecordsModal() {
     var cnt = countMap[name]||0;
     var isAct = name === _recActiveTrack;
     var esc = name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    var attrEsc = name.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
     var activeBtnStyle = isAct
       ? 'background:rgba(0,229,255,.12);border-color:var(--accent);color:var(--accent);'
       : 'background:var(--bg3);border-color:var(--border);color:var(--text-dim);';
-    return '<div style="display:inline-flex;align-items:stretch;margin-right:6px;margin-bottom:6px;">'
+    var borderCol = isAct ? 'var(--accent)' : 'var(--border)';
+    return '<div style="display:flex;align-items:stretch;">'
       + '<button class="rec-track-btn'+(isAct?' active':'')+'" style="border-right:none;margin:0;'+activeBtnStyle+'" onclick="selectRecTrack(\''+esc+'\')">'
       + name + '<span class="rtb-count">'+cnt+' SESSION'+(cnt!==1?'S':'')+'</span>'
       + '</button>'
+      + '<canvas class="rec-track-thumb" data-track-name="'+attrEsc+'" width="120" height="52" '
+      + 'style="flex-shrink:0;display:block;border-top:1px solid '+borderCol+';border-bottom:1px solid '+borderCol+';background:#0a0e12;"></canvas>'
       + '<button onclick="deleteTrackRecords(\''+esc+'\')" title="Strecke+Sessions löschen" '
       + 'style="padding:4px 10px;border-left:none;cursor:pointer;font-size:10px;line-height:1;'+activeBtnStyle+'"'
       + ' onmouseover="this.style.color=\'var(--red)\';this.style.borderColor=\'rgba(255,23,68,.5)\'"'
       + ' onmouseout="this.style.color=\''+(isAct?'var(--accent)':'var(--text-dim)')+'\';this.style.borderColor=\''+(isAct?'var(--accent)':'var(--border)')+'\'">🗑</button>'
       + '</div>';
   }).join('');
+
+  // Vorschau-Thumbnails nachträglich zeichnen (Canvas-Inhalt kann nicht per
+  // innerHTML gesetzt werden) — sucht pro Strecke Baukasten-/Foto-/Vektor-
+  // Layout in dieser Reihenfolge, analog zu renderActiveTrackPreview().
+  var thumbs = trackListEl.querySelectorAll('.rec-track-thumb');
+  thumbs.forEach(function(cv){
+    var tname = cv.getAttribute('data-track-name');
+    if(tname) _apexRenderTrackPreviewInto(cv, tname, 'cw');
+  });
 
   if(_recActiveTrack && trackNames.indexOf(_recActiveTrack) !== -1) {
     document.getElementById('recFilterSection').style.display = 'block';
@@ -12144,6 +14232,41 @@ function renderRecordsModal() {
 function selectRecTrack(name) {
   _recActiveTrack = name;
   renderRecordsModal();
+  recScrollToFilters();
+}
+
+// Scrollt den Aufzeichnungen-Dialog sanft so, dass die Filter-Sektion oben
+// im sichtbaren Bereich landet — genutzt sowohl automatisch nach Auswahl
+// einer Strecke als auch manuell über den "⬆ NACH OBEN"-Button.
+function recScrollToFilters() {
+  var filterEl = document.getElementById('recFilterSection');
+  var scrollContainer = filterEl ? filterEl.closest('.modal-body') : null;
+  if(filterEl && scrollContainer && filterEl.style.display !== 'none') {
+    var containerRect = scrollContainer.getBoundingClientRect();
+    var filterRect = filterEl.getBoundingClientRect();
+    var targetTop = scrollContainer.scrollTop + (filterRect.top - containerRect.top);
+    _apexSmoothScrollTo(scrollContainer, targetTop);
+  }
+}
+
+// Sanfte Scrollfahrt mit Anfahr-/Abbremsrampe (ease-in-out) statt eines
+// abrupten Sprungs — Dauer skaliert leicht mit der Distanz, bleibt aber in
+// vernünftigen Grenzen.
+function _apexSmoothScrollTo(container, targetTop) {
+  if(!container) return;
+  var startTop = container.scrollTop;
+  var delta = targetTop - startTop;
+  if(Math.abs(delta) < 1) return;
+  var duration = Math.min(900, Math.max(300, Math.abs(delta) * 0.6));
+  var startTime = null;
+  function easeInOutCubic(t){ return t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
+  function step(ts){
+    if(startTime===null) startTime = ts;
+    var t = Math.min(1, (ts-startTime)/duration);
+    container.scrollTop = startTop + delta*easeInOutCubic(t);
+    if(t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
 // Populate filter dropdowns based on records for selected track
@@ -12664,7 +14787,34 @@ document.addEventListener('keydown',e=>{
   if(_shortcutMatch(e,'saveFile')) { e.preventDefault(); apexSaveNow(); }
   if(_shortcutMatch(e,'loadFile')) { e.preventDefault(); loadAllData(); }
   if(_shortcutMatch(e,'showThreshBar')) { e.preventDefault(); tgl('showThreshBar'); }
+  if(_shortcutMatch(e,'fullscreen')) { e.preventDefault(); apexToggleModalFullscreen(); }
 });
+
+// Vollbild-Umschaltung für die zeichnerischen Tools (Foto-Nachzeichnen,
+// Vektor-Design, Carrera-Baukasten) — vergrößert das jeweils offene Modal
+// auf fast die ganze Fensterfläche und passt die Zeichenfläche danach an.
+// Nur eines der drei kann gleichzeitig offen sein, daher reicht ein
+// gemeinsamer Shortcut statt drei getrennten.
+function apexToggleModalFullscreen() {
+  var candidates = ['drawTrackModal','carreraBuildModal'];
+  var openBackdrop = null;
+  for(var i=0;i<candidates.length;i++){
+    var el = document.getElementById(candidates[i]);
+    if(el && el.classList.contains('open')) { openBackdrop = el; break; }
+  }
+  if(!openBackdrop) return;
+  openBackdrop.classList.toggle('fullscreen');
+  setTimeout(function(){
+    if(openBackdrop.id==='drawTrackModal') {
+      var vTab = document.getElementById('dtTab-vector');
+      var isVectorActive = vTab && vTab.style.color==='var(--accent)';
+      if(isVectorActive) { vtSetupCanvas(); vtInitEvents(); vtRender(); }
+      else if(_dt.img) { dtSetupCanvas(_dt.img); dtInitEvents(); dtRender(); }
+    } else if(openBackdrop.id==='carreraBuildModal') {
+      carreraRenderSchematic();
+    }
+  }, 60); // kurz warten, bis die CSS-Größenänderung im Layout angekommen ist
+}
 
 // ═══════════════════════════════════════════════════════
 // NEUE FEATURES V2.3.1
@@ -13854,7 +16004,7 @@ apexAutoSaveInit(); // AutoSave + Folder UI initialisieren
       <div class="mgrid">
         <div class="mitem"><label class="mlabel">MODELL</label><input class="minput" id="deCarModel" placeholder="z.B. Ferrari F40"></div>
         <div class="mitem"><label class="mlabel">KATEGORIE</label>
-          <select class="minput" id="deCarCategory">
+          <select class="minput" id="deCarCategory" onchange="deCarUpdatePhysicsVisibility()">
             <option value="Auto">Auto</option>
             <option value="Motorrad">Motorrad</option>
             <option value="Slotcar">Slotcar</option>
@@ -13864,6 +16014,19 @@ apexAutoSaveInit(); // AutoSave + Folder UI initialisieren
         <div class="mitem"><label class="mlabel">NUMMER</label><input class="minput" id="deCarNum" placeholder="z.B. 16"></div>
         <div class="mitem"><label class="mlabel">KLASSE</label><input class="minput" id="deCarClass" placeholder="z.B. GT3"></div>
         <div class="mitem"><label class="mlabel">FARBE</label><input class="minput" type="color" id="deCarColor" value="#ff3c00"></div>
+        <div id="deCarPhysicsGroup" style="display:contents;">
+          <div class="mitem"><label class="mlabel">LEISTUNG (kW)</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input class="minput" type="number" min="0" step="1" id="deCarPower" placeholder="z.B. 400" style="flex:1;" oninput="deCarUpdatePsHint()">
+              <span id="deCarPsHint" style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);white-space:nowrap;">— PS</span>
+            </div>
+          </div>
+          <div class="mitem"><label class="mlabel">GEWICHT (kg)</label><input class="minput" type="number" min="0" step="1" id="deCarWeight" placeholder="z.B. 1200"></div>
+          <div class="mitem"><label class="mlabel">V-MAX (km/h)</label><input class="minput" type="number" min="0" step="1" id="deCarTopSpeed" placeholder="z.B. 250"></div>
+        </div>
+        <div class="mitem full" id="deCarPhysicsHint" style="display:none;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);line-height:1.6;">
+          Für diese Kategorie gibt es keine sinnvollen Leistungs-/Gewichtsangaben — die Rundenzeit-Simulation nutzt Kategorie-Standardwerte und wird über "AUTO-KALIBRIEREN" (Vektor-Streckendesigner) anhand echter Rundenzeiten eingestellt.
+        </div>
         <div class="mitem full"><label class="mlabel">NOTIZEN</label><input class="minput" id="deCarNotes" placeholder="Optionale Notizen"></div>
       </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
