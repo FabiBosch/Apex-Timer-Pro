@@ -20,7 +20,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apex Timer Pro V1.2.0 (build 20260817-1600)</title>
+<title>Apex Timer Pro V1.3.0 (build 20260819-2000)</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap');
 :root{
@@ -379,6 +379,10 @@ canvas.hc{display:none;}
 .modal-backdrop.fullscreen .modal{width:98vw;max-width:98vw;height:96vh;max-height:96vh;}
 .modal-backdrop.fullscreen #carreraSchematicWrap{max-width:100%;}
 .modal.wide{width:920px;}
+/* Carrera-Baukasten braucht deutlich mehr Breite als andere "wide"-Modals
+   (Teile-Palette links + Baufenster rechts nebeneinander) — spezifischer
+   als .modal.wide, damit andere wide-Modals unangetastet bleiben. */
+#carreraBuildModal .modal.wide{width:1520px;max-width:97vw;}
 .modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);}
 .modal-hdr{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
 .modal-title{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;letter-spacing:3px;color:var(--accent);}
@@ -418,6 +422,15 @@ select.minput option{background:var(--bg2);}
 .data-table th.sort-desc::after{content:' ▼';color:var(--accent);}
 .data-table td{padding:6px 8px;border-bottom:1px solid rgba(30,45,61,.4);color:var(--text);}
 .data-table tr:hover td{background:rgba(0,229,255,.03);}
+/* Streckentabelle optisch wie die Zeilen der Aufzeichnungen-Streckenliste:
+   durchgehende Zeilen-Hintergrundfläche statt dünner Trennlinien, mehr
+   Abstand pro Zeile, abgerundete Ecken, Lücke zwischen den Zeilen statt
+   einer fortlaufenden Linie. Spalten/Sortier-Header bleiben erhalten. */
+#trackTable{border-collapse:separate;border-spacing:0 6px;}
+#trackTable tbody tr{background:var(--bg3);}
+#trackTable tbody td{border-bottom:none;padding:10px 12px;}
+#trackTable tbody td:first-child{border-top-left-radius:6px;border-bottom-left-radius:6px;}
+#trackTable tbody td:last-child{border-top-right-radius:6px;border-bottom-right-radius:6px;}
 .tbl-btn{padding:3px 8px;font-family:'Share Tech Mono',monospace;font-size:8px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text-dim);}
 .tbl-btn:hover{color:var(--accent);border-color:var(--accent);}
 .tbl-btn.del:hover{color:var(--red);border-color:var(--red);}
@@ -440,7 +453,10 @@ select.minput option{background:var(--bg2);}
 .rec-track-row{display:flex;align-items:stretch;}
 .drag-handle{cursor:grab;color:var(--text-dim);user-select:none;touch-action:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .rec-track-row .drag-handle{padding:0 8px;font-size:14px;background:var(--bg3);border:1px solid var(--border);border-right:none;}
-#trackTable td.drag-handle{padding:0 6px;font-size:13px;width:16px;}
+/* Überschreibt das display:flex von .drag-handle wieder auf table-cell —
+   sonst verhält sich die Zelle nicht mehr wie eine Tabellenzelle und die
+   Zeilenhöhen/Trennlinien der Tabelle geraten durcheinander. */
+#trackTable td.drag-handle{display:table-cell;padding:0 6px;font-size:13px;width:16px;text-align:center;vertical-align:middle;}
 .drag-reorder-active{opacity:.55;}
 tr.drag-reorder-active td{box-shadow:0 0 0 1px var(--accent) inset;}
 .rec-track-row.drag-reorder-active{box-shadow:0 0 0 2px var(--accent) inset;}
@@ -460,7 +476,7 @@ body.drag-reorder-noselect,body.drag-reorder-noselect *{user-select:none !import
 .rec-session-card.selected{background:rgba(0,229,255,.08);border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;}
 .rec-session-card .rsc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px;flex-wrap:wrap;}
 .rec-session-card .rsc-title{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;color:var(--accent);letter-spacing:1px;}
-.rec-session-card .rsc-date{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text-dim);white-space:nowrap;}
+.rec-session-card .rsc-date{font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--text-dim);white-space:nowrap;}
 .rec-session-card .rsc-meta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px;}
 .rsc-meta-item{display:flex;flex-direction:column;gap:1px;}
 .rsc-meta-item .rmi-lbl{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--text-dim);}
@@ -523,7 +539,7 @@ body.drag-reorder-noselect,body.drag-reorder-noselect *{user-select:none !import
 
 <!-- ═══════════════ HEADER ═══════════════ -->
 <header>
-  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.2.0</span></div>
+  <div class="logo">APEX TIMER <span>PRO</span> <span style="font-size:9px;opacity:.5;letter-spacing:1px">V1.3.0</span></div>
   <div class="hdr-center" style="display:flex;gap:8px;align-items:center;">
 
     <button class="app-mode-btn active" id="amStd" onclick="setAppMode('std')">STANDARD</button>
@@ -1617,13 +1633,16 @@ body.drag-reorder-noselect,body.drag-reorder-noselect *{user-select:none !import
       wird eine Abschlussschiene automatisch berechnet. Mit <b>💾 SPEICHERN</b> wird die Strecke gespeichert.
     </p>
 
-    <!-- Bestand-Tracker -->
+    <!-- Bestand-Tracker — standardmäßig eingeklappt (spart auf kleinen
+         Displays deutlich vertikalen Platz, da selten laufend gebraucht),
+         per Klick auf die Titelzeile auf-/zuklappbar. -->
     <div style="margin-bottom:10px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <div class="msec-title" style="margin-bottom:0;font-size:8px;">📦 SCHIENEN-BESTAND</div>
-        <button class="btn-search" style="font-size:7px;padding:3px 8px;color:var(--text-dim);" onclick="carreraClearInventory()">✕ ZURÜCKSETZEN</button>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;" onclick="carreraToggleInventoryTable()">
+        <div class="msec-title" id="carreraInvToggleLbl" style="margin-bottom:0;font-size:8px;">▸ 📦 SCHIENEN-BESTAND</div>
+        <button class="btn-search" style="font-size:7px;padding:3px 8px;color:var(--text-dim);" onclick="event.stopPropagation();carreraClearInventory()">✕ ZURÜCKSETZEN</button>
       </div>
-      <table style="width:100%;border-collapse:collapse;font-family:'Share Tech Mono',monospace;font-size:9px;">
+      <div id="carreraInventoryTableWrap" style="display:none;">
+      <table style="width:auto;max-width:620px;border-collapse:collapse;font-family:'Share Tech Mono',monospace;font-size:14px;">
         <thead>
           <tr style="color:var(--text-dim);border-bottom:1px solid var(--border);">
             <th style="text-align:left;padding:5px 8px;font-weight:normal;letter-spacing:1px;">SCHIENENTYP</th>
@@ -1633,105 +1652,111 @@ body.drag-reorder-noselect,body.drag-reorder-noselect *{user-select:none !import
           </tr>
         </thead>
         <tbody id="carreraInventoryTableBody">
-          <tr><td colspan="4" style="padding:5px 8px 2px;font-size:7px;letter-spacing:2px;color:var(--accent);background:rgba(0,229,255,.04);border-top:1px solid var(--border);">GERADEN</td></tr>
+          <tr><td colspan="4" style="padding:6px 8px 3px;font-size:11px;letter-spacing:2px;color:var(--accent);background:rgba(0,229,255,.04);border-top:1px solid var(--border);">GERADEN</td></tr>
           <tr class="inv-row" data-invkey="71510" style="border-bottom:1px solid rgba(255,255,255,.04);">
             <td style="padding:5px 8px;color:#00e5ff;">Gerade 215mm</td>
-            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71510" style="width:48px;text-align:center;font-family:'Orbitron',monospace;font-size:9px;" oninput="carreraOnInventoryInput(this)"></td>
+            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71510" style="width:52px;text-align:center;font-family:'Orbitron',monospace;font-size:13px;" oninput="carreraOnInventoryInput(this)"></td>
             <td class="inv-used" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
             <td class="inv-left" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
           </tr>
           <tr class="inv-row" data-invkey="71509" style="border-bottom:1px solid rgba(255,255,255,.04);">
             <td style="padding:5px 8px;color:#00b8d9;">Doppelgerade 430mm</td>
-            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71509" style="width:48px;text-align:center;font-family:'Orbitron',monospace;font-size:9px;" oninput="carreraOnInventoryInput(this)"></td>
+            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71509" style="width:52px;text-align:center;font-family:'Orbitron',monospace;font-size:13px;" oninput="carreraOnInventoryInput(this)"></td>
             <td class="inv-used" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
             <td class="inv-left" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
           </tr>
           <tr class="inv-row" data-invkey="71511" style="border-bottom:1px solid rgba(255,255,255,.04);">
             <td style="padding:5px 8px;color:#0077a8;">1/3 Gerade 71mm</td>
-            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71511" style="width:48px;text-align:center;font-family:'Orbitron',monospace;font-size:9px;" oninput="carreraOnInventoryInput(this)"></td>
+            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71511" style="width:52px;text-align:center;font-family:'Orbitron',monospace;font-size:13px;" oninput="carreraOnInventoryInput(this)"></td>
             <td class="inv-used" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
             <td class="inv-left" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
           </tr>
           <tr class="inv-row" data-invkey="71512" style="border-bottom:1px solid rgba(255,255,255,.04);">
             <td style="padding:5px 8px;color:#005f8a;">1/4 Gerade 54mm</td>
-            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71512" style="width:48px;text-align:center;font-family:'Orbitron',monospace;font-size:9px;" oninput="carreraOnInventoryInput(this)"></td>
+            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71512" style="width:52px;text-align:center;font-family:'Orbitron',monospace;font-size:13px;" oninput="carreraOnInventoryInput(this)"></td>
             <td class="inv-used" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
             <td class="inv-left" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
           </tr>
           <tr class="inv-row" data-invkey="71515" style="border-bottom:1px solid rgba(255,255,255,.04);">
             <td style="padding:5px 8px;color:#00cc44;">Anschlussstück 430mm</td>
-            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71515" style="width:48px;text-align:center;font-family:'Orbitron',monospace;font-size:9px;" oninput="carreraOnInventoryInput(this)"></td>
+            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71515" style="width:52px;text-align:center;font-family:'Orbitron',monospace;font-size:13px;" oninput="carreraOnInventoryInput(this)"></td>
             <td class="inv-used" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
             <td class="inv-left" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
           </tr>
           <tr class="inv-row" data-invkey="71516" style="border-bottom:1px solid rgba(255,255,255,.04);">
             <td style="padding:5px 8px;color:#3a7a9e;">Engstelle 430mm</td>
-            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71516" style="width:48px;text-align:center;font-family:'Orbitron',monospace;font-size:9px;" oninput="carreraOnInventoryInput(this)"></td>
+            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71516" style="width:52px;text-align:center;font-family:'Orbitron',monospace;font-size:13px;" oninput="carreraOnInventoryInput(this)"></td>
             <td class="inv-used" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
             <td class="inv-left" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
           </tr>
           <tr class="inv-row" data-invkey="71517" style="border-bottom:1px solid rgba(255,255,255,.04);">
             <td style="padding:5px 8px;color:#ffd600;">Spurwechsel 215mm</td>
-            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71517" style="width:48px;text-align:center;font-family:'Orbitron',monospace;font-size:9px;" oninput="carreraOnInventoryInput(this)"></td>
+            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71517" style="width:52px;text-align:center;font-family:'Orbitron',monospace;font-size:13px;" oninput="carreraOnInventoryInput(this)"></td>
             <td class="inv-used" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
             <td class="inv-left" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
           </tr>
-          <tr><td colspan="4" style="padding:5px 8px 2px;font-size:7px;letter-spacing:2px;color:var(--accent);background:rgba(0,229,255,.04);border-top:1px solid var(--border);">KURVEN (R + L zusammen)</td></tr>
+          <tr><td colspan="4" style="padding:6px 8px 3px;font-size:11px;letter-spacing:2px;color:var(--accent);background:rgba(0,229,255,.04);border-top:1px solid var(--border);">KURVEN (R + L zusammen)</td></tr>
           <tr class="inv-row" data-invkey="71501R" style="border-bottom:1px solid rgba(255,255,255,.04);">
             <td style="padding:5px 8px;color:#ff6b00;">Kurve 1 / 45°</td>
-            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71501R" style="width:48px;text-align:center;font-family:'Orbitron',monospace;font-size:9px;" oninput="carreraOnInventoryInput(this)"></td>
+            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71501R" style="width:52px;text-align:center;font-family:'Orbitron',monospace;font-size:13px;" oninput="carreraOnInventoryInput(this)"></td>
             <td class="inv-used" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
             <td class="inv-left" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
           </tr>
           <tr class="inv-row" data-invkey="71502R" style="border-bottom:1px solid rgba(255,255,255,.04);">
             <td style="padding:5px 8px;color:#e05500;">Kurve 2 / 45°</td>
-            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71502R" style="width:48px;text-align:center;font-family:'Orbitron',monospace;font-size:9px;" oninput="carreraOnInventoryInput(this)"></td>
+            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71502R" style="width:52px;text-align:center;font-family:'Orbitron',monospace;font-size:13px;" oninput="carreraOnInventoryInput(this)"></td>
             <td class="inv-used" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
             <td class="inv-left" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
           </tr>
           <tr class="inv-row" data-invkey="71505R" style="border-bottom:1px solid rgba(255,255,255,.04);">
             <td style="padding:5px 8px;color:#ff9500;">Kurve 1 / 90°</td>
-            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71505R" style="width:48px;text-align:center;font-family:'Orbitron',monospace;font-size:9px;" oninput="carreraOnInventoryInput(this)"></td>
+            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71505R" style="width:52px;text-align:center;font-family:'Orbitron',monospace;font-size:13px;" oninput="carreraOnInventoryInput(this)"></td>
             <td class="inv-used" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
             <td class="inv-left" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
           </tr>
           <tr class="inv-row" data-invkey="71555R" style="border-bottom:1px solid rgba(255,255,255,.04);">
             <td style="padding:5px 8px;color:#c84b00;">Steilkurve 1 / 45°</td>
-            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71555R" style="width:48px;text-align:center;font-family:'Orbitron',monospace;font-size:9px;" oninput="carreraOnInventoryInput(this)"></td>
+            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71555R" style="width:52px;text-align:center;font-family:'Orbitron',monospace;font-size:13px;" oninput="carreraOnInventoryInput(this)"></td>
             <td class="inv-used" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
             <td class="inv-left" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
           </tr>
           <tr class="inv-row" data-invkey="71655R" style="border-bottom:1px solid rgba(255,255,255,.04);">
             <td style="padding:5px 8px;color:#a83a00;">Steilkurve 2 / 45°</td>
-            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71655R" style="width:48px;text-align:center;font-family:'Orbitron',monospace;font-size:9px;" oninput="carreraOnInventoryInput(this)"></td>
+            <td style="padding:5px 8px;text-align:center;"><input type="number" min="0" max="99" value="0" class="inv-input" data-invkey="71655R" style="width:52px;text-align:center;font-family:'Orbitron',monospace;font-size:13px;" oninput="carreraOnInventoryInput(this)"></td>
             <td class="inv-used" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
             <td class="inv-left" style="padding:5px 8px;text-align:center;color:var(--text-dim);">—</td>
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
 
-    <div id="carreraBuildPartGrid" style="margin-bottom:10px;"></div>
+    <!-- Teile-Palette links; Bedienelemente (Zoom, Vor/Zurück, Rotieren, ...)
+         direkt über dem Baufenster, rechts neben der Palette — statt einer
+         eigenen Zeile über beiden Spalten. -->
+    <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+      <div id="carreraBuildPartGrid" style="flex:0 0 430px;max-width:430px;position:sticky;top:0;z-index:10001;background:var(--bg2);"></div>
 
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-      <button id="carreraUndoBtn" class="btn-cancel" onclick="carreraUndo()" disabled title="Zurück" style="border-color:rgba(180,180,255,.3);color:#aab0ff;opacity:.5;">↶</button>
-      <button id="carreraRedoBtn" class="btn-cancel" onclick="carreraRedo()" disabled title="Vorwärts" style="border-color:rgba(180,180,255,.3);color:#aab0ff;opacity:.5;">↷</button>
-      <button class="btn-cancel" onclick="carreraRotate(-1)" style="border-color:rgba(100,180,255,.3);color:#64b4ff;" title="30° gegen Uhrzeigersinn">↺ 30°</button>
-      <button class="btn-cancel" onclick="carreraRotate(1)"  style="border-color:rgba(100,180,255,.3);color:#64b4ff;" title="30° im Uhrzeigersinn">↻ 30°</button>
-      <button id="carreraDirBtn" class="btn-cancel" onclick="carreraToggleDirection()" style="border-color:rgba(255,214,0,.3);color:var(--text-dim);" title="Fahrtrichtung für Spurdarstellung umkehren">⇄ RICHTUNG UMKEHREN</button>
-      <button class="btn-cancel" onclick="carreraCloseTrack()" style="border-color:rgba(0,255,136,.3);color:var(--green);">⬡ STRECKE VERVOLLSTÄNDIGEN</button>
-      <button class="btn-cancel" onclick="carreraClearChain()" style="border-color:rgba(255,214,0,.3);color:var(--yellow);">↺ ALLES LEEREN</button>
-      <button class="btn-cancel" onclick="carreraSaveLayout()" style="border-color:rgba(0,229,255,.4);color:var(--accent);">💾 STRECKE SPEICHERN</button>
-    </div>
-
-    <div style="display:flex;gap:4px;align-items:center;margin-bottom:4px;">
-      <div style="font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--text-dim);">ANSICHT</div>
-      <button class="btn-cancel" onclick="carreraZoom(1.2)" style="font-size:8px;padding:3px 8px;">🔍 +</button>
-      <button class="btn-cancel" onclick="carreraZoom(0.833)" style="font-size:8px;padding:3px 8px;">🔍 −</button>
-      <button class="btn-cancel" onclick="carreraZoom(0,'reset')" style="font-size:8px;padding:3px 8px;color:var(--accent);border-color:rgba(0,229,255,.3);">⊙ RESET</button>
-    </div>
-    <div id="carreraSchematicWrap" style="position:relative;width:100%;max-width:660px;margin:0 auto;border:1px solid var(--border);background:#0a0e12;">
-      <canvas id="carreraSchematicCanvas" style="width:100%;display:block;"></canvas>
+      <div style="flex:1;min-width:280px;">
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;position:sticky;top:0;z-index:10001;background:var(--bg2);padding:4px 0;">
+          <button id="carreraUndoBtn" class="btn-cancel" onclick="carreraUndo()" disabled title="Zurück" style="font-size:18px;line-height:1;padding:4px 11px;border-color:rgba(180,180,255,.3);color:#aab0ff;opacity:.5;">↶</button>
+          <button id="carreraRedoBtn" class="btn-cancel" onclick="carreraRedo()" disabled title="Vorwärts" style="font-size:18px;line-height:1;padding:4px 11px;border-color:rgba(180,180,255,.3);color:#aab0ff;opacity:.5;">↷</button>
+          <button class="btn-cancel" onclick="carreraRotate(-1)" style="font-size:8px;padding:6px 9px;border-color:rgba(100,180,255,.3);color:#64b4ff;" title="30° gegen Uhrzeigersinn">↺ 30°</button>
+          <button class="btn-cancel" onclick="carreraRotate(1)"  style="font-size:8px;padding:6px 9px;border-color:rgba(100,180,255,.3);color:#64b4ff;" title="30° im Uhrzeigersinn">↻ 30°</button>
+          <button id="carreraDirBtn" class="btn-cancel" onclick="carreraToggleDirection()" style="font-size:8px;padding:6px 9px;border-color:rgba(255,214,0,.3);color:var(--text-dim);" title="Fahrtrichtung für Spurdarstellung umkehren">⇄ RICHTUNG</button>
+          <button class="btn-cancel" onclick="carreraCloseTrack()" style="font-size:8px;padding:6px 9px;border-color:rgba(0,255,136,.3);color:var(--green);">⬡ VERVOLLSTÄNDIGEN</button>
+          <button class="btn-cancel" onclick="carreraClearChain()" style="font-size:8px;padding:6px 9px;border-color:rgba(255,214,0,.3);color:var(--yellow);">↺ LEEREN</button>
+          <button class="btn-cancel" onclick="carreraSaveLayout()" style="font-size:8px;padding:6px 9px;border-color:rgba(0,229,255,.4);color:var(--accent);">💾 SPEICHERN</button>
+          <span style="width:1px;background:var(--border);align-self:stretch;margin:0 2px;"></span>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--text-dim);align-self:center;">ANSICHT</div>
+          <button class="btn-cancel" onclick="carreraZoom(1.2)" style="font-size:8px;padding:6px 9px;">🔍 +</button>
+          <button class="btn-cancel" onclick="carreraZoom(0.833)" style="font-size:8px;padding:6px 9px;">🔍 −</button>
+          <button class="btn-cancel" onclick="carreraZoom(0,'reset')" style="font-size:8px;padding:6px 9px;color:var(--accent);border-color:rgba(0,229,255,.3);">⊙ RESET</button>
+        </div>
+        <div id="carreraSchematicWrap" style="position:relative;width:100%;max-width:1000px;margin:0 auto;border:1px solid var(--border);background:#0a0e12;">
+          <canvas id="carreraSchematicCanvas" style="width:100%;display:block;"></canvas>
+        </div>
+      </div>
     </div>
 
     <div id="carreraSelectionBar" style="display:none;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;padding:8px 12px;background:rgba(255,214,0,.08);border:1px solid rgba(255,214,0,.35);flex-wrap:wrap;">
@@ -2908,6 +2933,38 @@ function togglePause(p) {
 }
 
 
+// Prüft vor dem eigentlichen Start, ob Strecke sowie Fahrer und Fahrzeug für
+// alle beteiligten Spieler gesetzt sind — verhindert das versehentliche
+// Starten ohne vollständige Auswahl. Die Platzhalter-Bezeichnungen "Fahrer
+// 1"/"Fahrer 2" (angezeigt, wenn db.assignments.pXDriver leer ist, siehe
+// _getPlayerLabelParts) zählen dabei NICHT als gültige Fahrerauswahl —
+// weder als leere Zuweisung noch als (unwahrscheinlicher, aber möglicher)
+// tatsächlicher Fahrername in der Fahrer-Datenbank.
+function _apexValidateSessionSetup(players) {
+  var missing = [];
+  var track = (document.getElementById('activeTrack')||{}).value || '';
+  if(!track) missing.push('Keine Strecke gewählt.');
+  for(var i=0;i<players.length;i++) {
+    var p = players[i];
+    // Bewusst direkt am <select>-Element gelesen statt an db.assignments:
+    // db.assignments.pXDriver/pXCar kann einen verwaisten Namen behalten
+    // (z.B. nach dem Löschen des zugewiesenen Fahrers/Fahrzeugs oder durch
+    // einen LAN-Sync), während das Dropdown dann bereits wieder auf
+    // "-- keine --" zurückfällt (kein Options-Match) — validiert werden
+    // muss, was der Nutzer aktuell tatsächlich sieht/ausgewählt hat.
+    var driverSel = document.getElementById(p===1 ? 'assignP1' : 'assignP2');
+    var carSel = document.getElementById(p===1 ? 'assignCar1' : 'assignCar2');
+    var driver = (driverSel ? driverSel.value : '') || '';
+    var car = (carSel ? carSel.value : '') || '';
+    var driverNorm = driver.trim().toLowerCase();
+    var suffix = players.length>1 ? ' (Fahrer '+p+')' : '';
+    if(!driver || driverNorm==='fahrer 1' || driverNorm==='fahrer 2') missing.push('Kein Fahrer gewählt'+suffix+'.');
+    if(!car) missing.push('Kein Fahrzeug gewählt'+suffix+'.');
+  }
+  if(missing.length) { apexAlert(missing.join('\n')); return false; }
+  return true;
+}
+
 function handleStart(p) {
   _ttsUnlock();
   if(ps[p].running) return;
@@ -2936,6 +2993,7 @@ function handleStart(p) {
     apexAlert('Bitte zuerst RESET drücken, um eine neue Session zu starten.');
     return;
   }
+  if(!_apexValidateSessionSetup(appMode==='vs' ? [1,2] : [p])) return;
   if(appMode==='vs') {
     if(sessMode==='race'||sessMode==='timed') startRaceSequence(1);
     else _startTrainingDelayed([1,2]);
@@ -3467,13 +3525,56 @@ function showPenaltyBanner(p,penMs) {
 // ═══════════════════════════════════════════════════════
 // HUD RENDER
 // ═══════════════════════════════════════════════════════
+// Gecachte Referenzen auf die einzelnen HUD-Wert-Elemente pro Spieler —
+// renderHud() lief bisher 60x/Sekunde (rAF-Loop tick()) und hat dabei JEDES
+// Mal die komplette innerHTML des HUD neu aufgebaut (DOM-Knoten verwerfen +
+// neu erzeugen + Reflow) — bei zwei Spielern im VS-Modus doppelt. Die
+// Struktur wird jetzt nur EINMAL gebaut (bzw. neu, wenn sie fehlt/wechselt);
+// jeder weitere Frame patcht nur noch die paar Textinhalte/Klassen der
+// bereits vorhandenen Knoten direkt — spart pro Frame einen kompletten
+// DOM-Rebuild+Reflow.
+var _hudEls = {1:null, 2:null};
+
+function _hudBuildStructure(p, hud) {
+  hud.innerHTML = `
+    <div class="hud-box hud-delay-cdown" style="display:none;border-color:rgba(255,255,255,.5);margin-right:6px;"><div class="hud-lbl">START IN</div><div class="hud-val md white" style="min-width:5ch;">--:--</div></div>
+    <div class="hud-status-light" id="hudLightL${p}" style="margin-right:6px;"></div>
+    <div class="hud-box"><div class="hud-lbl">RUNDE</div><div class="hud-val sm" id="hudRunde${p}">0</div></div>
+    <div class="hud-box"><div class="hud-lbl">RUNDENZEIT</div><div class="hud-val md" id="hudLapMs${p}">--:--</div></div>
+    <div class="hud-box"><div class="hud-lbl">BESTZEIT</div><div class="hud-val md green" id="hudBest${p}">--:--</div></div>
+    <div class="hud-box"><div class="hud-lbl">GESAMT</div><div class="hud-val lg white" id="hudTotal${p}">--:--</div></div>
+    <div class="hud-status-light" id="hudLightR${p}" style="margin-left:6px;"></div>
+    <div class="hud-box" id="hudPenBox${p}" style="display:none;"><div class="hud-lbl">STRAFE</div><div class="hud-val md red" id="hudPenVal${p}"></div></div>
+    <div class="hud-box" id="hudLeadBox${p}" style="display:none;border-color:var(--yellow);"><div class="hud-lbl">FÜHRUNG</div><div class="hud-val md yellow" id="hudLeadVal${p}"></div></div>`;
+  var els = {
+    hud: hud,
+    lightL: document.getElementById('hudLightL'+p),
+    lightR: document.getElementById('hudLightR'+p),
+    runde: document.getElementById('hudRunde'+p),
+    lapMs: document.getElementById('hudLapMs'+p),
+    best: document.getElementById('hudBest'+p),
+    total: document.getElementById('hudTotal'+p),
+    penBox: document.getElementById('hudPenBox'+p),
+    penVal: document.getElementById('hudPenVal'+p),
+    leadBox: document.getElementById('hudLeadBox'+p),
+    leadVal: document.getElementById('hudLeadVal'+p)
+  };
+  _hudEls[p] = els;
+  return els;
+}
+
 function renderHud(p) {
   const s=ps[p];
-  if(!cfg.showHud) { var _hudEl=document.getElementById('hud'+p); if(!_hudEl) return; _hudEl.innerHTML=''; return; }
-  const best = s.laps.length ? Math.min(...s.laps.map(l=>l.time)) : null;
-  const _pe=document.getElementById('precSel'); const prec=_pe?_pe.value:'thou';
+  var hud = document.getElementById('hud'+p);
+  if(!hud) return;
+  if(!cfg.showHud) {
+    if(hud.innerHTML !== '') { hud.innerHTML=''; _hudEls[p]=null; }
+    return;
+  }
+  var els = _hudEls[p];
+  if(!els || els.hud !== hud) els = _hudBuildStructure(p, hud);
 
-  // Compute total with penalty
+  const best = s.laps.length ? Math.min(...s.laps.map(l=>l.time)) : null;
   const totalWithPen = s.totalMs + s.penalty;
 
   const _hudRunning = s.running;
@@ -3481,18 +3582,20 @@ function renderHud(p) {
   const _hudHasLaps = s.laps.length > 0;
   const _hudWasActive = s.sessionActive || _hudHasLaps;
   // Light: green=running, yellow=paused, red=stopped-after-session, off=fresh
-  const _hudLightClass = _hudRunning ? 'green' : _hudPaused ? 'yellow' : (_hudWasActive ? 'red' : '');
-  let html=`
-    <div class="hud-box hud-delay-cdown" style="display:none;border-color:rgba(255,255,255,.5);margin-right:6px;"><div class="hud-lbl">START IN</div><div class="hud-val md white" style="min-width:5ch;">--:--</div></div>
-    <div class="hud-status-light ${_hudLightClass}" id="hudLightL${p}" style="margin-right:6px;"></div>
-    <div class="hud-box"><div class="hud-lbl">RUNDE</div><div class="hud-val sm">${s.skipFirstDone ? s.laps.length+1 : 0}</div></div>
-    <div class="hud-box"><div class="hud-lbl">RUNDENZEIT</div><div class="hud-val md">${fmt(s.lapMs)}</div></div>
-    <div class="hud-box"><div class="hud-lbl">BESTZEIT</div><div class="hud-val md green">${best!==null?fmt(best):'--:--'}</div></div>
-    <div class="hud-box"><div class="hud-lbl">GESAMT</div><div class="hud-val lg white">${fmt(totalWithPen)}</div></div>
-    <div class="hud-status-light ${_hudLightClass}" id="hudLightR${p}" style="margin-left:6px;"></div>`;
-  if(s.penalty>0) html+=`<div class="hud-box"><div class="hud-lbl">STRAFE</div><div class="hud-val md red">+${fmt(s.penalty)}</div></div>`;
+  const _hudLightClass = 'hud-status-light ' + (_hudRunning ? 'green' : _hudPaused ? 'yellow' : (_hudWasActive ? 'red' : ''));
+  els.lightL.className = _hudLightClass;
+  els.lightR.className = _hudLightClass;
+  els.runde.textContent = s.skipFirstDone ? s.laps.length+1 : 0;
+  els.lapMs.textContent = fmt(s.lapMs);
+  els.best.textContent = best!==null ? fmt(best) : '--:--';
+  els.total.textContent = fmt(totalWithPen);
+
+  if(s.penalty>0) { els.penBox.style.display=''; els.penVal.textContent = '+'+fmt(s.penalty); }
+  else { els.penBox.style.display='none'; }
+
   // VS mode: show leader
-  if(appMode==='vs' && sessMode==='race' && ps[1].running && ps[2].running) {
+  var showLeader = appMode==='vs' && sessMode==='race' && ps[1].running && ps[2].running;
+  if(showLeader) {
     const t1=ps[1].totalMs+ps[1].penalty, t2=ps[2].totalMs+ps[2].penalty;
     const l1=ps[1].laps.length, l2=ps[2].laps.length;
     // Leader = more laps completed; if equal, less total time
@@ -3502,9 +3605,11 @@ function renderHud(p) {
     else if(t1<t2) leaderTxt='⚑ P1 FÜHRT ('+fmt(t2-t1)+')';
     else if(t2<t1) leaderTxt='⚑ P2 FÜHRT ('+fmt(t1-t2)+')';
     else leaderTxt='GLEICHSTAND';
-    if(leaderTxt) html+=`<div class="hud-box" style="border-color:var(--yellow);"><div class="hud-lbl">FÜHRUNG</div><div class="hud-val md yellow">${leaderTxt}</div></div>`;
+    els.leadBox.style.display = leaderTxt ? '' : 'none';
+    els.leadVal.textContent = leaderTxt;
+  } else {
+    els.leadBox.style.display = 'none';
   }
-  var _hud2=document.getElementById('hud'+p); if(_hud2) _hud2.innerHTML=html;
   // Mirror HUD to cam2 overlay if active
   if (typeof apexCastBroadcast === 'function') apexCastBroadcast(false);
 }
@@ -4540,11 +4645,19 @@ function _sampleZone(vid, hcEl, camR, dzId, lineId, pk, sp) {
     }
   } catch(ce){}
 
+  // Ein einziger Pixel-Durchlauf statt vorher zwei getrennter (einmal für
+  // die Gesamt-Zone/Schwerpunkt, einmal nochmal komplett für die Links/
+  // Rechts-Aufteilung) — beide werteten denselben rohen Pixel-Diff aus,
+  // nur mit unterschiedlicher Schwelle (adaptiv vs. fest 20) und der
+  // Farb-Boost betraf nur die Gesamt-Auswertung. dd (roh, ungeboostet)
+  // wird jetzt einmal berechnet und für beide Zwecke weiterverwendet.
   var motPix=0, totalPix=cur.length/4, centX=0, centW=0;
+  var lm=0,rm=0,ln=0,rn=0;
   if(prev&&prev.length===cur.length){
     for(var i=0;i<cur.length;i+=4){
       var dr=Math.abs(cur[i]-prev[i]), dg=Math.abs(cur[i+1]-prev[i+1]), db2=Math.abs(cur[i+2]-prev[i+2]);
-      var d=(dr+dg+db2)/3;
+      var dd=(dr+dg+db2)/3;
+      var d=dd;
       // Color-boost: if car color is known, weight channels matching that color more
       if(carColorBoost){
         var cr=cur[i]/255, cg=cur[i+1]/255, cb2=cur[i+2]/255;
@@ -4552,11 +4665,12 @@ function _sampleZone(vid, hcEl, camR, dzId, lineId, pk, sp) {
         var colorMatch=1-((Math.abs(cr-ccr)+Math.abs(cg-ccg)+Math.abs(cb2-ccb))/3);
         if(colorMatch>0.5) d*=(1+colorMatch*0.5); // boost matching pixels
       }
+      var px=(i/4)%vW;
       if(d>pixDiffThresh){
         motPix++;
-        var px=(i/4)%vW;
         centX+=px; centW++;
       }
+      if(px<vW/2){ ln++; if(dd>20) lm++; } else { rn++; if(dd>20) rm++; }
     }
   }
   var motPct=totalPix>0?(motPix/totalPix)*100*4:0;
@@ -4568,17 +4682,8 @@ function _sampleZone(vid, hcEl, camR, dzId, lineId, pk, sp) {
   // Compute zone-screen coords for drawing
   var lx=zx+zw*0.5; // always center
   // lPct/rPct for guide line visuals: use left/right half motion
-  var lPct=0, rPct=0;
-  if(prev&&prev.length===cur.length){
-    var lm=0,rm=0,ln=0,rn=0;
-    for(var j=0;j<cur.length;j+=4){
-      var px2=(j/4)%vW;
-      var dd=(Math.abs(cur[j]-prev[j])+Math.abs(cur[j+1]-prev[j+1])+Math.abs(cur[j+2]-prev[j+2]))/3;
-      if(px2<vW/2){lm+=dd>20?1:0;ln++;}else{rm+=dd>20?1:0;rn++;}
-    }
-    lPct=ln>0?(lm/ln)*100*4:0;
-    rPct=rn>0?(rm/rn)*100*4:0;
-  }
+  var lPct=ln>0?(lm/ln)*100*4:0;
+  var rPct=rn>0?(rm/rn)*100*4:0;
 
   // Direction über die Reihenfolge der drei Messlinien (weiß-links / rot / weiß-rechts)
   var dirKey=pk==='2s'?'2s':'1';
@@ -5753,6 +5858,13 @@ function _updatePitBtnRequiredDisplay(p) {
 // bereits in diesem Fenster; missed (rot) = das Fenster ist bereits vorbei
 // (aktuelle Runde/Minute > Fensterende) und wurde nicht erfüllt; sonst
 // neutral/gelb (Fenster steht noch aus oder läuft gerade).
+// Gecachte Label-Elemente pro Spieler — lief bisher wie renderHud() bei
+// aktivem Boxenstoppfenster jeden Frame (tick()) mit komplettem
+// innerHTML-Neuaufbau. Die Label-<div>s werden jetzt nur neu gebaut, wenn
+// sich ihre ANZAHL ändert (z.B. pitStopRequiredCount geändert); sonst wird
+// pro Frame nur noch Klasse/Text der bereits vorhandenen Elemente gepatcht.
+var _pitWindowLabelEls = {1:null, 2:null};
+
 function _updatePitStopWindowLabels(p) {
   var wrap = document.getElementById('pitWindowLabels'+p);
   var btn = document.getElementById('pitBtn'+p);
@@ -5760,7 +5872,9 @@ function _updatePitStopWindowLabels(p) {
   var show = cfg.pitStopRequired && cfg.pitStopWindowEnabled && (sessMode==='race' || sessMode==='timed');
   var windows = show ? _pitStopWindowsForMode() : [];
   if(!show || !windows.length) {
-    wrap.style.display = 'none'; wrap.innerHTML='';
+    if(wrap.innerHTML !== '') wrap.innerHTML = '';
+    wrap.style.display = 'none';
+    _pitWindowLabelEls[p] = null;
     if(btn) btn.classList.remove('window-open');
     return;
   }
@@ -5769,7 +5883,15 @@ function _updatePitStopWindowLabels(p) {
   var progress = sessMode==='race' ? (s.laps?s.laps.length:0) : ((s.totalMs||0)/60000);
   var anyOpen = false;
   wrap.style.display = 'flex';
-  wrap.innerHTML = windows.map(function(w){
+
+  var labelEls = _pitWindowLabelEls[p];
+  if(!labelEls || labelEls.length !== windows.length || labelEls[0].parentNode !== wrap) {
+    wrap.innerHTML = windows.map(function(){ return '<div class="pit-window-label"></div>'; }).join('');
+    labelEls = Array.prototype.slice.call(wrap.querySelectorAll('.pit-window-label'));
+    _pitWindowLabelEls[p] = labelEls;
+  }
+
+  windows.forEach(function(w, i){
     var fulfilled = (s.pitStops||[]).some(function(stop){
       var v = stop[field];
       return v!=null && v>=w.start && v<=w.end;
@@ -5781,8 +5903,12 @@ function _updatePitStopWindowLabels(p) {
     var missed = !fulfilled && progress > w.end;
     var cls = fulfilled ? 'fulfilled' : (missed ? 'missed' : '');
     var lbl = sessMode==='race' ? (w.start+'-'+w.end) : (Math.round(w.start)+'-'+Math.round(w.end));
-    return '<div class="pit-window-label '+cls+'">Fenster '+lbl+'</div>';
-  }).join('');
+    var el = labelEls[i];
+    var newClassName = 'pit-window-label ' + cls;
+    if(el.className !== newClassName) el.className = newClassName;
+    var txt = 'Fenster ' + lbl;
+    if(el.textContent !== txt) el.textContent = txt;
+  });
   if(btn) btn.classList.toggle('window-open', anyOpen);
 }
 
@@ -6660,11 +6786,11 @@ function sbUpdateTrackInfo() {
   renderActiveTrackPreview();
 }
 
-function _carreraDrawPreview(cv, chain) {
+function _carreraDrawPreview(cv, chain, opts) {
   var W = cv.width, H = cv.height;
   var ctx = cv.getContext('2d');
   ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#0a0e12'; ctx.fillRect(0,0,W,H);
+  if(!opts || !opts.transparent) { ctx.fillStyle='#0a0e12'; ctx.fillRect(0,0,W,H); }
   if(!chain || !chain.length) return;
 
   var TRACK_W = 179, BORDER_W = 15;
@@ -6762,8 +6888,10 @@ function _carreraDrawPreview(cv, chain) {
     band(seg, 0, 1.5, '#1a1e24', null);
   });
 
-  // ── S/Z + Richtungspfeil ────────────────────────────────────────────
-  if(pts.length>=2) {
+  // ── S/Z + Richtungspfeil ──────────────────────────────────────────
+  // Im transparenten Icon-Modus (Palette-Buttons) unnötig — dort geht es
+  // nur um die reine Schienenform, kein Start/Ziel-Punkt einer echten Strecke.
+  if(pts.length>=2 && !(opts && opts.transparent)) {
     ctx.fillStyle='#00ff88'; ctx.beginPath(); ctx.arc(tx(pts[0].x),ty(pts[0].y),4,0,PI*2); ctx.fill();
     ctx.fillStyle='#fff'; ctx.font='bold 7px monospace'; ctx.fillText('S/Z',tx(pts[0].x)+6,ty(pts[0].y)+3);
     if(pts.length>2) {
@@ -8886,13 +9014,13 @@ function exportData(p) {
   var suggestedName=parts.join(' - ')+'.txt';
   // Filename dialog
   var NL='\n', SEP='='.repeat(54);
-  var txt=SEP+NL+'  Apex Timer Pro V1.2.0 - RUNDENZEITEN'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.3.0 - RUNDENZEITEN'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   STANDARD / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
   if(meta.name) txt+='  Session: '+meta.name+NL;
   if(meta.weather) txt+='  Wetter:  '+meta.weather+NL;
-  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.2.0'+NL+SEP+NL;
+  txt+=NL+lines.join(NL)+NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.3.0'+NL+SEP+NL;
   _exportPendingData={type:'single',txt:txt,suggestedName:suggestedName};
   _openExportModal(suggestedName);
 }
@@ -8917,7 +9045,7 @@ function exportVS() {
     else winner='GLEICHSTAND';
   }
   var NL='\n', SEP='='.repeat(colW*2+5);
-  var txt=SEP+NL+'  Apex Timer Pro V1.2.0 - VS ERGEBNISSE'+NL+SEP+NL;
+  var txt=SEP+NL+'  Apex Timer Pro V1.3.0 - VS ERGEBNISSE'+NL+SEP+NL;
   txt+='  Datum:   '+now.toLocaleDateString('de-DE')+' '+now.toLocaleTimeString('de-DE')+NL;
   txt+='  Modus:   VS / '+_sessModeLabel(true)+NL;
   if(trackName) txt+='  Strecke: '+trackName+NL;
@@ -8930,7 +9058,7 @@ function exportVS() {
     var c2=l2&&i2<l2.length?l2[i2]:'';
     txt+=c1+' | '+c2+NL;
   }
-  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.2.0'+NL+SEP+NL;
+  txt+=NL+SEP+NL+'  Erstellt mit Apex Timer Pro V1.3.0'+NL+SEP+NL;
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
   var _s1=ps[1],_s2=ps[2]; var _t1=_s1.totalMs+_s1.penalty,_t2=_s2.totalMs+_s2.penalty; var _l1=_s1.laps.length,_l2=_s2.laps.length;
@@ -8969,6 +9097,18 @@ function loadFromLS(){
     const raw=localStorage.getItem('apexdb');
     if(raw){ const d=JSON.parse(raw); Object.assign(db,d); }
   }catch(e){}
+  // Fahrer-/Fahrzeug-Zuweisung bewusst NICHT aus der letzten Nutzung
+  // übernehmen — anders als der restliche db-Zustand. Genau wie die
+  // Streckenauswahl (nie persistiert, reines DOM-Feld) muss sie bei jedem
+  // App-Start aktiv neu gewählt werden (siehe _apexValidateSessionSetup),
+  // sonst startet man unbemerkt mit dem Fahrer/Fahrzeug von der letzten
+  // Nutzung statt mit einer bewussten Auswahl für die aktuelle Session.
+  if(db.assignments) {
+    db.assignments.p1Driver = '';
+    db.assignments.p2Driver = '';
+    db.assignments.p1Car = '';
+    db.assignments.p2Car = '';
+  }
   _ensureShortcutDefaults();
   _pitStopSyncFromDb(); // gespeicherte Boxenstopp-Einstellungen zurück nach cfg übernehmen
 }
@@ -10016,7 +10156,11 @@ var carreraChain = []; // [{id, key, count, type, manual, connectorData?}]
 var carreraUndoStack = []; // Snapshots für Undo
 var carreraRedoStack = []; // Snapshots für Redo
 var carreraRotationDeg = 0; // Gesamtrotation der Schematik in Grad
-var carreraZoomFactor = 1;  // Zoom-Faktor für Schematik-Darstellung
+// Start-/Reset-Zoomstufe: Faktor 1 entspricht dem alten Standard, ^5 mit dem
+// Herauszoomen-Schritt (0.833, siehe carreraZoom) simuliert 5 Klicks auf
+// "🔍 −" — der Baukasten startet dadurch bereits weiter herausgezoomt.
+var CARRERA_DEFAULT_ZOOM = Math.pow(0.833, 5);
+var carreraZoomFactor = CARRERA_DEFAULT_ZOOM;  // Zoom-Faktor für Schematik-Darstellung
 var carreraDirectionReversed = false; // Fahrtrichtung umgekehrt
 
 // Hover-/Auswahl-Zustand für die Schienen-Interaktion auf dem Schematik-Canvas.
@@ -10074,7 +10218,7 @@ function carreraToggleDirection() {
 }
 
 function carreraZoom(factor, mode) {
-  if(mode === 'reset') carreraZoomFactor = 1;
+  if(mode === 'reset') carreraZoomFactor = CARRERA_DEFAULT_ZOOM;
   else carreraZoomFactor = Math.max(0.2, Math.min(8, carreraZoomFactor * factor));
   carreraRenderSchematic();
 }
@@ -10534,7 +10678,7 @@ function carreraClearChain() {
   apexConfirm('Alle Streckenteile aus der Kette entfernen?', function(){
     carreraPushUndo();
     carreraChain = [];
-    carreraZoomFactor = 1;
+    carreraZoomFactor = CARRERA_DEFAULT_ZOOM;
     carreraSetLinkedTrack(null); // Verknüpfung aufheben
     carreraDirectionReversed = false; carreraToggleDirection(); carreraToggleDirection();
     carreraRenderChain();
@@ -11552,7 +11696,10 @@ function carreraOnHoverMove(e) {
 
 // Hebt die zum aktuell gewählten Teil gehörende Zeile in der Kettenliste
 // hervor, damit ersichtlich ist, welcher Eintrag bei einer Aktion (z.B.
-// Löschen über den bestehenden Kettenlisten-Button) betroffen wäre.
+// Löschen über den bestehenden Kettenlisten-Button) betroffen wäre. Scrollt
+// NICHT dorthin (kein scrollIntoView) — das riss bei jedem hinzugefügten
+// Teil den ganzen Baukasten-Dialog nach unten zur Kettenliste, weg von der
+// Teile-Palette, die man gerade zum Weiterbauen braucht.
 function _carreraSyncSelectedChip() {
   var list = document.getElementById('carreraChainList');
   if(!list) return;
@@ -11560,7 +11707,6 @@ function _carreraSyncSelectedChip() {
   chips.forEach(function(chip){
     var isSel = carreraSelectedLinkId != null && chip.getAttribute('data-carrera-link-id') === carreraSelectedLinkId;
     chip.classList.toggle('carrera-chip-selected', isSel);
-    if(isSel && typeof chip.scrollIntoView === 'function') chip.scrollIntoView({block:'nearest'});
   });
 }
 
@@ -13960,6 +14106,17 @@ function carreraClearInventory() {
   });
 }
 
+// Klappt die Bestandstabelle auf/zu — standardmäßig eingeklappt (siehe HTML),
+// spart auf kleinen Displays vertikalen Platz für Palette/Baufenster.
+function carreraToggleInventoryTable() {
+  var wrap = document.getElementById('carreraInventoryTableWrap');
+  var lbl = document.getElementById('carreraInvToggleLbl');
+  if(!wrap) return;
+  var show = wrap.style.display === 'none';
+  wrap.style.display = show ? 'block' : 'none';
+  if(lbl) lbl.textContent = (show ? '▾' : '▸') + ' 📦 SCHIENEN-BESTAND';
+}
+
 // Stubs für Aufwärtskompatibilität
 function carreraToggleInventory() {}
 function carreraRenderInventoryGrid() { carreraLoadInventoryIntoTable(); }
@@ -13974,8 +14131,8 @@ function carreraRenderPartTapGrid() {
 
   var groups = [
     { label: 'GERADEN', keys: ['71510','71509','71511','71512','71515','71516','71517'] },
-    { label: 'RECHTSKURVEN →', keys: ['71501R','71502R','71505R','71555R','71655R'] },
     { label: 'LINKSKURVEN ←', keys: ['71501L','71502L','71505L','71555L','71655L'] },
+    { label: 'RECHTSKURVEN →', keys: ['71501R','71502R','71505R','71555R','71655R'] },
   ];
 
   groups.forEach(function(group){
@@ -13998,8 +14155,33 @@ function carreraRenderPartTapGrid() {
       var shortName = pd.name.replace('Kurve ','K').replace('Gerade','G').replace('Steilkurve','SK')
         .replace('Spurwechselstk','SW').replace('Doppelgerade','2×G')
         .replace('Anschlussstück','Anschl.').replace('Engstelle','Engs.');
-      btn.textContent = shortName;
-      btn.style.cssText = 'font-size:9px;padding:8px 10px;border-color:'+pd.color+'55;color:'+pd.color+';min-width:64px;min-height:36px;cursor:pointer;user-select:none;-webkit-user-select:none;active:opacity:.7;';
+      btn.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px;border:none;background:transparent;color:'+pd.color+';min-width:80px;cursor:pointer;user-select:none;-webkit-user-select:none;active:opacity:.7;';
+      // Echte Schienenform statt reinem Text — nutzt dieselbe Zeichenroutine
+      // wie die Strecken-Vorschauen (_carreraDrawPreview), hier auf eine
+      // Ein-Teil-"Kette" angewendet. Transparent (kein Hintergrund/Rahmen um
+      // das Icon) — nur die Schienenform selbst plus Kurzbezeichnung darunter.
+      var icon = document.createElement('canvas');
+      // Quadratisch statt Querformat: dadurch verzerrt/überläuft die
+      // 90°-Drehung der Kurvensymbole unten nicht den sichtbaren Bereich.
+      icon.width = 56; icon.height = 56;
+      icon.style.cssText = 'width:56px;height:56px;display:block;';
+      btn.appendChild(icon);
+      var lbl = document.createElement('span');
+      lbl.textContent = shortName;
+      lbl.style.cssText = 'white-space:nowrap;font-size:13px;font-weight:700;';
+      btn.appendChild(lbl);
+      var iconCtx = icon.getContext('2d');
+      // Kurvensymbole (beide Richtungen) um 90° nach links (gegen den
+      // Uhrzeigersinn) gedreht — reine Optik der Palette-Icons, betrifft
+      // nicht die tatsächliche Bau-Geometrie.
+      if(pd.type === 'curve') {
+        iconCtx.save();
+        iconCtx.translate(icon.width/2, icon.height/2);
+        iconCtx.rotate(-Math.PI/2);
+        iconCtx.translate(-icon.width/2, -icon.height/2);
+      }
+      _carreraDrawPreview(icon, [{key:key, count:1}], {transparent:true});
+      if(pd.type === 'curve') iconCtx.restore();
       btn.onclick = function(){
         carreraPushUndo();
         // Einheitliche Anbaupunkt-Ermittlung (angewählte Schiene, sonst
